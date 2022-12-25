@@ -13,6 +13,7 @@ class Club {
   String address;
   String? location;
   bool active;
+  bool  in_review;
   bool? hidden;
   String? phone;
   String? description;
@@ -34,6 +35,7 @@ class Club {
             : [],
         location = json['location'],
         active = json['active'] as bool,
+        in_review = json['in_review'] as bool,
         hidden = json['hidden'] as bool,
         phone = json['phone'],
         description = json['description'],

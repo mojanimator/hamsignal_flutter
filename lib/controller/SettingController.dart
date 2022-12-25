@@ -8,6 +8,7 @@ import 'package:dabel_sport/controller/PlayerController.dart';
 import 'package:dabel_sport/controller/ProductController.dart';
 import 'package:dabel_sport/controller/ShopController.dart';
 import 'package:dabel_sport/controller/UserController.dart';
+import 'package:dabel_sport/helper/IAPPurchase.dart';
 import 'package:dabel_sport/helper/helpers.dart';
 import 'package:dabel_sport/helper/styles.dart';
 import 'package:dabel_sport/helper/variables.dart';
@@ -45,8 +46,10 @@ class SettingController extends GetxController
   late List<dynamic> _sports;
   late List<dynamic> _shops;
   late List<dynamic> _days;
+  late List<dynamic> _years;
   late List<dynamic> _prices;
   late List<dynamic> _categories;
+  late Map<String, dynamic> _keys;
 
   List<dynamic> get categories => _categories;
 
@@ -90,6 +93,12 @@ class SettingController extends GetxController
     _days = value;
   }
 
+  List<dynamic> get years => _years;
+
+  set years(List<dynamic> value) {
+    _years = value;
+  }
+
   List<dynamic> get shops => _shops;
 
   set shops(List<dynamic> value) {
@@ -116,6 +125,12 @@ class SettingController extends GetxController
 
   set provinces(List<dynamic> value) {
     _provinces = value;
+  }
+
+  Map<String, dynamic> get keys => _keys;
+
+  set keys(Map<String, dynamic> value) {
+    _keys = value;
   }
 
   late List<dynamic> _counties;
@@ -193,12 +208,13 @@ class SettingController extends GetxController
       Variables.LINK_GET_SETTINGS,
       param: params,
     );
-    // print(parsedJson);
+
     if (parsedJson == null) {
       change(null, status: RxStatus.empty());
       return null;
     } else {
       data = parsedJson;
+
       provinces = _data['provinces'];
       counties = _data['counties'];
 
@@ -211,11 +227,13 @@ class SettingController extends GetxController
       chatScript = _data['chat_script'];
       limits = _data['limits'];
       categories = _data['categories'];
+      keys = _data['keys'];
+      years = _data['years'];
 
       appInfo =
           App.fromJson(_data['app_info'], await PackageInfo.fromPlatform());
-
       await userController.getUser();
+      Get.put(IAPPurchase(keys: keys, products: prices));
       change(_data, status: RxStatus.success());
       return _data;
     }
@@ -322,6 +340,8 @@ class SettingController extends GetxController
         Variables.LINK_GET_ACTIVATION_CODE,
         param: {'phone': phone},
         method: 'post');
+    // return true;
+    // print(parsedJson);
     if (parsedJson == null) {
       helper.showToast(msg: 'check_network'.tr, status: 'danger');
       return false;
@@ -374,30 +394,12 @@ class SettingController extends GetxController
     else {
       DateTime currentDate = DateTime.now();
       int milli = timestamp * 1000 - currentDate.millisecondsSinceEpoch;
+
       if (milli > 0)
-        return (milli % 1000 % 60 % 60 % 24).toStringAsFixed(0);
+        return ((((milli / 1000) / 60) / 60) / 24).toStringAsFixed(0);
       else
         return '0';
     }
-  }
-
-  Future<dynamic>? makePayment({required Map<String, dynamic> params}) async {
-    var parsedJson = await apiProvider.fetch(
-      Variables.LINK_MAKE_PAYMENT,
-      param: params,
-      ACCESS_TOKEN: userController.ACCESS_TOKEN,
-      method: 'post',
-    );
-
-    if (parsedJson != null && parsedJson['errors'] != null) {
-      helper.showToast(
-          msg: parsedJson['errors']?[parsedJson['errors'].keys.elementAt(0)]
-              ?[0],
-          status: 'danger');
-      return null;
-    }
-    // print(parsedJson);
-    return parsedJson;
   }
 
   Future<String?> pickAndCrop(
@@ -529,11 +531,12 @@ class SettingController extends GetxController
 
   void resolveDeepLink(Uri? deepLink) async {
     if (deepLink == null) return;
-    // print('resolving ${deepLink?.pathSegments}');
+
     List<String>? path = deepLink.pathSegments;
     if (path.length == 0) return;
-    if (path.length == 1)
-      switch (path[0]) {
+    if (path.length == 1) {
+      var model = path[0];
+      switch (model) {
         case 'blogs':
           Get.to(BlogsPage());
           break;
@@ -553,34 +556,40 @@ class SettingController extends GetxController
           Get.to(ProductsPage());
           break;
       }
-    else if (path.length >= 2)
-      switch (path[0]) {
+    } else if (path.length >= 2) {
+      var model = path[0];
+      var id = path[1];
+
+      if (path.length == 4 && path.contains('panel') && path.contains('edit')) {
+        model = path[1];
+        id = path[3];
+      }
+      switch (model) {
         case 'blog':
-          Blog? tmp = await Get.find<BlogController>().find({'id': path[1]});
+          Blog? tmp = await Get.find<BlogController>().find({'id': id});
           if (tmp != null) Get.to(BlogDetails(data: tmp));
           break;
         case 'player':
-          Player? tmp =
-              await Get.find<PlayerController>().find({'id': path[1]});
+          Player? tmp = await Get.find<PlayerController>().find({'id': id});
           if (tmp != null) Get.to(PlayerDetails(data: tmp));
           break;
         case 'coach':
-          Coach? tmp = await Get.find<CoachController>().find({'id': path[1]});
+          Coach? tmp = await Get.find<CoachController>().find({'id': id});
           if (tmp != null) Get.to(CoachDetails(data: tmp));
           break;
         case 'club':
-          Club? tmp = await Get.find<ClubController>().find({'id': path[1]});
+          Club? tmp = await Get.find<ClubController>().find({'id': id});
           if (tmp != null) Get.to(ClubDetails(data: tmp));
           break;
         case 'shop':
-          Shop? tmp = await Get.find<ShopController>().find({'id': path[1]});
+          Shop? tmp = await Get.find<ShopController>().find({'id': id});
           if (tmp != null) Get.to(ShopDetails(data: tmp));
           break;
         case 'product':
-          Product? tmp =
-              await Get.find<ProductController>().find({'id': path[1]});
+          Product? tmp = await Get.find<ProductController>().find({'id': id});
           if (tmp != null) Get.to(ProductDetails(data: tmp));
           break;
       }
+    }
   }
 }

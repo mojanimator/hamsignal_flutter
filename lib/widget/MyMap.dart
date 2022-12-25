@@ -71,8 +71,8 @@ class MyMap extends StatelessWidget {
                   center: point.value,
                   zoom: fullScreen ? 16 : 8.0,
                 ),
-                layers: [
-                  TileLayerOptions(
+                children: [
+                  TileLayer(
                     urlTemplate:
                         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                     subdomains: ['a', 'b', 'c'],
@@ -80,7 +80,7 @@ class MyMap extends StatelessWidget {
                     //   return Text("© OpenStreetMap contributors");
                     // },
                   ),
-                  MarkerLayerOptions(
+                  MarkerLayer(
                     markers: [
                       if (point.value != null)
                         Marker(
@@ -112,15 +112,15 @@ class MyMap extends StatelessWidget {
                                       ~InteractiveFlag.rotate,
                                   center: point.value,
                                   zoom: fullScreen ? 16 : 8.0,
-                                  plugins: [],
+                                  // plugins: [],
                                   onPositionChanged: (pos, bool) {
                                     center.value = pos.center;
                                     mapController?.move(
                                         pos.center!, fullScreen ? 16 : 10.0);
                                     // if (onChanged != null) onChanged!(pos.center as LatLng);
                                   }),
-                              layers: [
-                                TileLayerOptions(
+                              children: [
+                                TileLayer(
                                   urlTemplate:
                                       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                                   subdomains: ['a', 'b', 'c'],
@@ -128,7 +128,7 @@ class MyMap extends StatelessWidget {
                                   //   return Text("© OpenStreetMap contributors");
                                   // },
                                 ),
-                                MarkerLayerOptions(
+                                MarkerLayer(
                                   markers: [
                                     if (point.value != null)
                                       Marker(
@@ -144,7 +144,7 @@ class MyMap extends StatelessWidget {
                                   ],
                                 ),
                               ],
-                              nonRotatedLayers: [],
+                              // nonRotatedLayers: [],
                             )),
                         if (addingMarker.value && fullScreen)
                           Positioned(

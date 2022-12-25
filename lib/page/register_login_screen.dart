@@ -5,10 +5,12 @@ import 'package:dabel_sport/controller/SettingController.dart';
 import 'package:dabel_sport/controller/UserController.dart';
 import 'package:dabel_sport/helper/helpers.dart';
 import 'package:dabel_sport/helper/styles.dart';
+import 'package:dabel_sport/helper/variables.dart';
 import 'package:dabel_sport/widget/loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RegisterLoginScreen extends StatelessWidget {
   final bool isLoading;
@@ -48,346 +50,358 @@ class RegisterLoginScreen extends StatelessWidget {
 
     if (error != null)
       return Obx(
-            () =>
-            Material(
-              child: Container(
-                decoration:
+        () => Material(
+          child: Container(
+            decoration:
                 BoxDecoration(gradient: styleController.splashBackground),
-                // width: Get.width,
-                padding: EdgeInsets.all(styleController.cardMargin),
-                child: FadeTransition(
-                  opacity: animationController.showFieldController,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (show == 'PHONE')
-                        Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                styleController.cardBorderRadius * 2),
-                          ),
-                          child: Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: ListTile(
-                                leading: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '09',
-                                      style: styleController.textHeaderStyle
-                                          .copyWith(
+            // width: Get.width,
+            padding: EdgeInsets.all(styleController.cardMargin),
+            child: FadeTransition(
+              opacity: animationController.showFieldController,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (show == 'PHONE')
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            styleController.cardBorderRadius * 2),
+                      ),
+                      child: Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: ListTile(
+                            horizontalTitleGap: 2,
+                            // contentPadding: EdgeInsets.symmetric(
+                            //   horizontal: styleController.cardMargin / 4,
+                            //
+                            // ),
+                            leading: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '09',
+                                  style: styleController.textHeaderStyle
+                                      .copyWith(
                                           color: styleController.primaryColor
                                               .withOpacity(.8)),
-                                    ),
-                                    Padding(
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: styleController.cardMargin / 2),
+                                  child: VerticalDivider(),
+                                ),
+                              ],
+                            ),
+                            title: TextField(
+                              controller: textPhoneController,
+
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.search,
+                              decoration: InputDecoration(
+                                  hintText: 'phone'.tr,
+                                  border: InputBorder.none),
+                              onSubmitted: (str) async {
+                                sendActivationCode();
+                              },
+                              // onEditingComplete: () {
+                              //   controller.getData(param: {'page': 'clear'});
+                              // },
+                              onChanged: (str) {
+                                animationController
+                                    .toggleCloseSearchIcon(str.length);
+                                toggleEnableButton(str);
+                              },
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                FadeTransition(
+                                  opacity:
+                                      animationController.fadeShowController,
+                                  child: IconButton(
+                                    splashColor: styleController.secondaryColor,
+                                    icon: Icon(Icons.close),
+                                    onPressed: () {
+                                      textPhoneController.clear();
+
+                                      animationController
+                                          .toggleCloseSearchIcon(0);
+                                    },
+                                  ),
+                                ),
+                                TextButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.resolveWith(
+                                          (states) {
+                                            return states.contains(
+                                                    MaterialState.disabled)
+                                                ? styleController.primaryColor
+                                                    .withOpacity(.4)
+                                                : styleController.primaryColor;
+                                          },
+                                        ),
+                                        overlayColor:
+                                            MaterialStateProperty.resolveWith(
+                                          (states) {
+                                            return states.contains(
+                                                    MaterialState.pressed)
+                                                ? styleController.secondaryColor
+                                                : null;
+                                          },
+                                        ),
+                                        shape: MaterialStateProperty.all(
+                                            RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.horizontal(
+                                            right: Radius.circular(
+                                                styleController
+                                                    .cardBorderRadius),
+                                            left: Radius.circular(
+                                                styleController
+                                                        .cardBorderRadius /
+                                                    4),
+                                          ),
+                                        ))),
+                                    onPressed: enableButton.value
+                                        ? () {
+                                            sendActivationCode();
+                                          }
+                                        : null,
+                                    child: Padding(
                                       padding: EdgeInsets.symmetric(
-                                          vertical: styleController.cardMargin /
-                                              2),
-                                      child: VerticalDivider(),
-                                    ),
-                                  ],
-                                ),
-                                title: TextField(
-                                  controller: textPhoneController,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.search,
-                                  decoration: InputDecoration(
-                                      hintText: 'phone'.tr,
-                                      border: InputBorder.none),
-                                  onSubmitted: (str) async {
-                                    sendActivationCode();
-                                  },
-                                  // onEditingComplete: () {
-                                  //   controller.getData(param: {'page': 'clear'});
-                                  // },
-                                  onChanged: (str) {
-                                    animationController
-                                        .toggleCloseSearchIcon(str.length);
-                                    toggleEnableButton(str);
-                                  },
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    FadeTransition(
-                                      opacity:
-                                      animationController.fadeShowController,
-                                      child: IconButton(
-                                        splashColor: styleController
-                                            .secondaryColor,
-                                        icon: Icon(Icons.close),
-                                        onPressed: () {
-                                          textPhoneController.clear();
-
-                                          animationController
-                                              .toggleCloseSearchIcon(0);
-                                        },
-                                      ),
-                                    ),
-                                    TextButton(
-                                        style: ButtonStyle(
-                                            backgroundColor:
-                                            MaterialStateProperty.resolveWith(
-                                                  (states) {
-                                                return states.contains(
-                                                    MaterialState.disabled)
-                                                    ? styleController
-                                                    .primaryColor
-                                                    .withOpacity(.4)
-                                                    : styleController
-                                                    .primaryColor;
-                                              },
-                                            ),
-                                            overlayColor:
-                                            MaterialStateProperty.resolveWith(
-                                                  (states) {
-                                                return states.contains(
-                                                    MaterialState.pressed)
-                                                    ? styleController
-                                                    .secondaryColor
-                                                    : null;
-                                              },
-                                            ),
-                                            shape: MaterialStateProperty.all(
-                                                RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius
-                                                      .horizontal(
-                                                    right: Radius.circular(
-                                                        styleController
-                                                            .cardBorderRadius),
-                                                    left: Radius.circular(
-                                                        styleController
-                                                            .cardBorderRadius /
-                                                            4),
-                                                  ),
-                                                ))),
-                                        onPressed: enableButton.value
-                                            ? () {
-                                          sendActivationCode();
-                                        }
-                                            : null,
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal:
+                                          horizontal:
                                               styleController.cardMargin),
-                                          child: Text(
-                                            "${time.value != 60 ? '(${time
-                                                .value})' : ''} ${'receive_code'
-                                                .tr}",
-                                            style: styleController
-                                                .textMediumLightStyle,
-                                          ),
-                                        )),
-                                  ],
-                                )),
-                          ),
-                        ),
-                      if (show == 'PHONE')
-                        TextButton(
-                            style: ButtonStyle(
-                                shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(
-                                            styleController.cardBorderRadius),
+                                      child: Text(
+                                        "${time.value != 60 ? '(${time.value})' : ''} ${'receive_code'.tr}",
+                                        style: styleController
+                                            .textMediumLightStyle,
                                       ),
-                                    ))),
-                            onPressed: null,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: styleController.cardMargin),
-                              child: Text(
-                                '',
-                                style: styleController.textMediumLightStyle,
-                              ),
+                                    )),
+                              ],
                             )),
-                      if (show == 'VERIFY')
-                        Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                styleController.cardBorderRadius * 2),
+                      ),
+                    ),
+                  if (show == 'PHONE')
+                    TextButton(
+                        style: ButtonStyle(
+                            shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(styleController.cardBorderRadius),
                           ),
-                          child: Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: ListTile(
-                                leading: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.sms),
-                                    VerticalDivider(),
-                                  ],
-                                ),
-                                title: TextField(
-                                  controller: textVerifyController,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.search,
-                                  decoration: InputDecoration(
-                                      hintText: 'phone_verify'.tr,
-                                      border: InputBorder.none),
-                                  onSubmitted: (str) {},
-                                  // onEditingComplete: () {
-                                  //   controller.getData(param: {'page': 'clear'});
-                                  // },
-                                  onChanged: (str) {
-                                    if (str.length == 5) loginRegister();
-                                  },
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    FadeTransition(
-                                      opacity:
-                                      animationController.fadeShowController,
-                                      child: IconButton(
-                                        splashColor: styleController
-                                            .secondaryColor,
-                                        icon: Icon(Icons.close),
-                                        onPressed: () {
-                                          textVerifyController.clear();
-
-                                          animationController
-                                              .toggleCloseSearchIcon(0);
-                                        },
-                                      ),
-                                    ),
-                                    TextButton(
-                                        style: ButtonStyle(
-                                            backgroundColor:
-                                            MaterialStateProperty.resolveWith(
-                                                  (states) {
-                                                return states.contains(
-                                                    MaterialState.disabled)
-                                                    ? styleController
-                                                    .primaryColor
-                                                    .withOpacity(.4)
-                                                    : styleController
-                                                    .primaryColor;
-                                              },
-                                            ),
-                                            overlayColor:
-                                            MaterialStateProperty.resolveWith(
-                                                  (states) {
-                                                return states.contains(
-                                                    MaterialState.pressed)
-                                                    ? styleController
-                                                    .secondaryColor
-                                                    : null;
-                                              },
-                                            ),
-                                            shape: MaterialStateProperty.all(
-                                                RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius
-                                                      .horizontal(
-                                                    right: Radius.circular(
-                                                        styleController
-                                                            .cardBorderRadius),
-                                                  ),
-                                                ))),
-                                        onPressed: () {
-                                          loginRegister();
-                                        },
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal:
-                                              styleController.cardMargin),
-                                          child: Text(
-                                            'verify'.tr,
-                                            style: styleController
-                                                .textMediumLightStyle,
-                                          ),
-                                        )),
-                                  ],
-                                )),
+                        ))),
+                        onPressed: null,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: styleController.cardMargin),
+                          child: Text(
+                            '',
+                            style: styleController.textMediumLightStyle,
+                          ),
+                        )),
+                  if (show == 'PHONE')
+                    Container(
+                      margin: EdgeInsets.all(styleController.cardMargin),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () async {
+                            if (await canLaunchUrl(
+                                Uri.parse(Variables.LINK_POLICY)))
+                              launchUrl(Uri.parse(Variables.LINK_POLICY));
+                          },
+                          child: Text(
+                            'accept_policy'.tr,
+                            style: styleController.textMediumLightStyle.copyWith(
+                              color: Colors.white70,
+                              shadows: [
+                                Shadow(
+                                    color: Colors.black45, offset: Offset(0, 2)),
+                              ],
+                            ),
                           ),
                         ),
-                      if (show == 'VERIFY')
-                        Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                styleController.cardBorderRadius * 2),
-                          ),
-                          child: Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: ListTile(
-                                leading: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.group),
-                                    VerticalDivider(),
-                                  ],
+                      ),
+                    ),
+                  if (show == 'VERIFY')
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            styleController.cardBorderRadius * 2),
+                      ),
+                      child: Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: ListTile(
+                            leading: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.sms),
+                                VerticalDivider(),
+                              ],
+                            ),
+                            title: TextField(
+                              controller: textVerifyController,
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.search,
+                              decoration: InputDecoration(
+                                  hintText: 'phone_verify'.tr,
+                                  border: InputBorder.none),
+                              onSubmitted: (str) {},
+                              // onEditingComplete: () {
+                              //   controller.getData(param: {'page': 'clear'});
+                              // },
+                              onChanged: (str) {
+                                if (str.length == 5) loginRegister();
+                              },
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                FadeTransition(
+                                  opacity:
+                                      animationController.fadeShowController,
+                                  child: IconButton(
+                                    splashColor: styleController.secondaryColor,
+                                    icon: Icon(Icons.close),
+                                    onPressed: () {
+                                      textVerifyController.clear();
+
+                                      animationController
+                                          .toggleCloseSearchIcon(0);
+                                    },
+                                  ),
                                 ),
-                                title: TextField(
-                                  controller: textRefController,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.search,
-                                  decoration: InputDecoration(
-                                      hintText:
+                                TextButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.resolveWith(
+                                          (states) {
+                                            return states.contains(
+                                                    MaterialState.disabled)
+                                                ? styleController.primaryColor
+                                                    .withOpacity(.4)
+                                                : styleController.primaryColor;
+                                          },
+                                        ),
+                                        overlayColor:
+                                            MaterialStateProperty.resolveWith(
+                                          (states) {
+                                            return states.contains(
+                                                    MaterialState.pressed)
+                                                ? styleController.secondaryColor
+                                                : null;
+                                          },
+                                        ),
+                                        shape: MaterialStateProperty.all(
+                                            RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.horizontal(
+                                            right: Radius.circular(
+                                                styleController
+                                                    .cardBorderRadius),
+                                          ),
+                                        ))),
+                                    onPressed: () {
+                                      loginRegister();
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal:
+                                              styleController.cardMargin),
+                                      child: Text(
+                                        'verify'.tr,
+                                        style: styleController
+                                            .textMediumLightStyle,
+                                      ),
+                                    )),
+                              ],
+                            )),
+                      ),
+                    ),
+                  if (show == 'VERIFY')
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            styleController.cardBorderRadius * 2),
+                      ),
+                      child: Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: ListTile(
+                            leading: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.group),
+                                VerticalDivider(),
+                              ],
+                            ),
+                            title: TextField(
+                              controller: textRefController,
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.search,
+                              decoration: InputDecoration(
+                                  hintText:
                                       "${'ref_code'.tr} (${'optional'.tr})",
-                                      border: InputBorder.none),
-                                  onSubmitted: (str) {},
-                                  // onEditingComplete: () {
-                                  //   controller.getData(param: {'page': 'clear'});
-                                  // },
-                                  onChanged: (str) {},
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [],
-                                )),
-                          ),
-                        ),
-                      if (show == 'VERIFY')
-                        TextButton(
-                            style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty
-                                    .resolveWith(
-                                      (states) {
-                                    return states.contains(
-                                        MaterialState.disabled)
-                                        ? styleController.primaryColor
-                                        .withOpacity(.4)
-                                        : styleController.primaryColor;
-                                  },
-                                ),
-                                overlayColor: MaterialStateProperty.resolveWith(
-                                      (states) {
-                                    return states.contains(
-                                        MaterialState.pressed)
-                                        ? styleController.secondaryColor
-                                        : null;
-                                  },
-                                ),
-                                shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(
-                                            styleController.cardBorderRadius),
-                                      ),
-                                    ))),
-                            onPressed: () {
-                              show.value = 'PHONE';
-                              animationController.showField();
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: styleController.cardMargin),
-                              child: Text(
-                                'edit_phone'.tr,
-                                style: styleController.textMediumLightStyle,
-                              ),
+                                  border: InputBorder.none),
+                              onSubmitted: (str) {},
+                              // onEditingComplete: () {
+                              //   controller.getData(param: {'page': 'clear'});
+                              // },
+                              onChanged: (str) {},
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [],
                             )),
-                      if (show == 'LOADING') Loader(),
-                    ],
-                  ),
-                ),
+                      ),
+                    ),
+                  if (show == 'VERIFY')
+                    TextButton(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.resolveWith(
+                              (states) {
+                                return states.contains(MaterialState.disabled)
+                                    ? styleController.primaryColor
+                                        .withOpacity(.4)
+                                    : styleController.primaryColor;
+                              },
+                            ),
+                            overlayColor: MaterialStateProperty.resolveWith(
+                              (states) {
+                                return states.contains(MaterialState.pressed)
+                                    ? styleController.secondaryColor
+                                    : null;
+                              },
+                            ),
+                            shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(
+                                    styleController.cardBorderRadius),
+                              ),
+                            ))),
+                        onPressed: () {
+                          show.value = 'PHONE';
+                          animationController.showField();
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: styleController.cardMargin),
+                          child: Text(
+                            'edit_phone'.tr,
+                            style: styleController.textMediumLightStyle,
+                          ),
+                        )),
+                  if (show == 'LOADING') Loader(),
+                ],
               ),
             ),
+          ),
+        ),
       );
     return Center();
   }
@@ -408,6 +422,8 @@ class RegisterLoginScreen extends StatelessWidget {
     bool res = await settingController.sendActivationCode(
       phone: p,
     );
+    // print("sendActivationCode $p");
+    // print(res);
     if (res == true) {
       enableButton.value = false;
       startTimer();
@@ -436,6 +452,7 @@ class RegisterLoginScreen extends StatelessWidget {
     if (p.length == 10)
       p = "0$p";
     else if (p.length == 9) p = "09$p";
+    // print("loginRegister $p");
     await userController.loginOrRegister(
         phone: "$p",
         code: textVerifyController.text,

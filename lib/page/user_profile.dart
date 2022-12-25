@@ -9,7 +9,6 @@ import 'package:dabel_sport/page/blogs.dart';
 import 'package:dabel_sport/page/clubs.dart';
 import 'package:dabel_sport/page/coaches.dart';
 import 'package:dabel_sport/page/players.dart';
-import 'package:dabel_sport/page/products.dart';
 import 'package:dabel_sport/page/shops.dart';
 import 'package:dabel_sport/widget/mini_card.dart';
 import 'package:dabel_sport/widget/shakeanimation.dart';
@@ -56,9 +55,7 @@ class UserProfilePage extends StatelessWidget {
     //         transition: Transition.topLevel,
     //         duration: Duration(milliseconds: 400))));
 
-
     //         // showEditDialog({'username': user.username}));
-
   }
 
   @override

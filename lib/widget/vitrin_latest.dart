@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../helper/styles.dart';
+import '../helper/variables.dart';
 
 class VitrinLatest extends StatelessWidget {
   final LatestController controller;
@@ -214,7 +215,15 @@ class VitrinLatest extends StatelessWidget {
                                           placeholder: (context, url) =>
                                               CupertinoActivityIndicator(),
                                           errorWidget: (context, url, error) =>
-                                              Text(error.toString()),
+                                              ClipRRect(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(styleController
+                                                    .cardBorderRadius)),
+                                            child: Image.network(
+                                                Variables.NOIMAGE_LINK),
+                                          ),
+                                          // errorWidget: (context, url, error) =>
+                                          //     Text(error.toString()),
                                         ),
                                         elevation: 10,
                                         shadowColor: styleController
@@ -228,12 +237,24 @@ class VitrinLatest extends StatelessWidget {
                                       Positioned(
                                         child: Container(
                                             decoration: BoxDecoration(
-                                                gradient: LinearGradient(begin: Alignment.bottomCenter,end: Alignment.topCenter,colors: [
-                                                  colors[800]
-                                                      as Color,
-                                                  colors[800]?.withOpacity(.8) as Color,colors[800]?.withOpacity(.5) as Color,Colors.transparent]),
-
-                                                borderRadius: BorderRadius.vertical(bottom:Radius.circular( 4))),
+                                                gradient: LinearGradient(
+                                                    begin: Alignment
+                                                        .bottomCenter,
+                                                    end: Alignment.topCenter,
+                                                    colors: [
+                                                      colors[800] as Color,
+                                                      colors[800]
+                                                              ?.withOpacity(.8)
+                                                          as Color,
+                                                      colors[800]
+                                                              ?.withOpacity(.5)
+                                                          as Color,
+                                                      Colors.transparent
+                                                    ]),
+                                                borderRadius:
+                                                    BorderRadius.vertical(
+                                                        bottom: Radius.circular(
+                                                            4))),
                                             padding: EdgeInsets.symmetric(
                                                 horizontal:
                                                     styleController.cardMargin /
@@ -247,15 +268,14 @@ class VitrinLatest extends StatelessWidget {
                                               style: styleController
                                                   .textHeaderLightStyle,
                                             )),
-                                        bottom:  styleController
-                                            .cardBorderRadius /
+                                        bottom:
+                                            styleController.cardBorderRadius /
+                                                5,
+                                        left: styleController.cardBorderRadius /
                                             5,
-                                        left:  styleController
-                                            .cardBorderRadius /
-                                            5,
-                                        right:  styleController
-                                            .cardBorderRadius /
-                                            5,
+                                        right:
+                                            styleController.cardBorderRadius /
+                                                5,
                                       ),
                                     ],
                                   ),

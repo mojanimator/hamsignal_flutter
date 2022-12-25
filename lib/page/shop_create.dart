@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:dabel_sport/controller/AnimationController.dart';
 import 'package:dabel_sport/controller/SettingController.dart';
 import 'package:dabel_sport/controller/ShopController.dart';
+import 'package:dabel_sport/helper/IAPPurchase.dart';
 import 'package:dabel_sport/helper/helpers.dart';
 import 'package:dabel_sport/helper/styles.dart';
 import 'package:dabel_sport/widget/MyMap.dart';
@@ -16,7 +17,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
+
+import '../helper/variables.dart';
 
 class ShopCreate extends StatelessWidget {
   ShopController controller = Get.find<ShopController>();
@@ -40,6 +42,7 @@ class ShopCreate extends StatelessWidget {
     'logo': ''.obs,
     'address': ''.obs,
     'location': ''.obs,
+    'market': Variables.MARKET.obs,
   };
   late TextStyle titleStyle;
   final MyAnimationController animationController =
@@ -49,7 +52,7 @@ class ShopCreate extends StatelessWidget {
   final ImagePicker _picker = ImagePicker();
   Rx<CroppedFile?>? croppedLogo = Rx<CroppedFile?>(null);
   Rx<CroppedFile?>? croppedLicense = Rx<CroppedFile?>(null);
-
+  final IAPPurchase iAPPurchase = Get.find<IAPPurchase>();
   late Widget plusIcon;
   late Widget plusImage;
   late Widget plusLogo;
@@ -99,9 +102,8 @@ class ShopCreate extends StatelessWidget {
       size: styleController.imageHeight / 3,
     );
     initDiscounts = {
-      for (var item
-          in settingController.prices.where((e) => e['key'].contains('shop')))
-        item['key']: item['value']
+      for (var item in iAPPurchase.allProducts.where((e) => e.type == 'shop'))
+        item.id: item.price
     };
     discounts = RxMap(initDiscounts);
   }
@@ -156,16 +158,7 @@ class ShopCreate extends StatelessWidget {
                           uploadPercent.value = percent;
                         });
                     loading.value = false;
-                    if (res != null && res['url'] != null) {
-                      Uri url = Uri.parse(res['url']);
-                      //100% discount=>dont go to bank
-                      if (res['url'].contains('panel'))
-                        Get.back(result: 'done');
-                      else if (await canLaunchUrl(url)) {
-                        Get.back(result: 'done');
-                        launchUrl(url);
-                      }
-                    }
+                    iAPPurchase.purchase(params: res);
                   },
                   child: Text(
                     "${'pay'.tr} ${'and'.tr} ${'register'.tr}",
@@ -536,18 +529,14 @@ class ShopCreate extends StatelessWidget {
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.start,
                                                   children:
-                                                      settingController.prices
-                                                          .where((el) =>
-                                                              el['key']
-                                                                  .contains(
-                                                                      'shop'))
+                                                      iAPPurchase.allProducts
+                                                          .where((el) => el.id
+                                                              .contains('shop'))
                                                           .map((e) => InkWell(
-                                                                onTap: () => data[
-                                                                        'renew-month']
-                                                                    .value = e[
-                                                                        'key']
-                                                                    .split(
-                                                                        '_')[1],
+                                                                onTap: () =>
+                                                                    data['renew-month']
+                                                                            .value =
+                                                                        e.month,
                                                                 child: Row(
                                                                   mainAxisAlignment:
                                                                       MainAxisAlignment
@@ -563,7 +552,7 @@ class ShopCreate extends StatelessWidget {
                                                                           fillColor:
                                                                               MaterialStateProperty.all(colors[500]),
                                                                           value:
-                                                                              e['key'].split('_')[1],
+                                                                              e.month,
                                                                           groupValue:
                                                                               data['renew-month'].value,
                                                                           onChanged:
@@ -575,30 +564,30 @@ class ShopCreate extends StatelessWidget {
                                                                               Colors.green,
                                                                         ),
                                                                         Text(
-                                                                            e['name'],
+                                                                            e.name,
                                                                             style: TextStyle(color: colors[500])),
                                                                       ],
                                                                     ),
                                                                     Text(
-                                                                      "${e['value']}"
+                                                                      "${e.price}"
                                                                           .asPrice(),
                                                                       style: TextStyle(
                                                                           fontWeight: FontWeight
                                                                               .bold,
                                                                           color: colors[
                                                                               500],
-                                                                          decoration: int.parse(discounts.value[e['key']]) < int.parse(e['value'])
+                                                                          decoration: int.parse(discounts.value[e.id]) < int.parse(e.price)
                                                                               ? TextDecoration.lineThrough
                                                                               : TextDecoration.none),
                                                                     ),
                                                                     Visibility(
-                                                                      visible: int.parse(discounts.value[e[
-                                                                              'key']]) <
+                                                                      visible: int.parse(discounts.value[e
+                                                                              .id]) <
                                                                           int.parse(
-                                                                              e['value']),
+                                                                              e.price),
                                                                       child:
                                                                           Text(
-                                                                        "${discounts.value[e['key']]}"
+                                                                        "${discounts.value[e.id]}"
                                                                             .asPrice(),
                                                                         style: TextStyle(
                                                                             fontWeight:
@@ -730,6 +719,7 @@ class ShopCreate extends StatelessWidget {
                                                                       data['renew-month']
                                                                           .value,
                                                                 });
+
                                                             if (res != null) {
                                                               for (var item
                                                                   in res.keys)
@@ -965,7 +955,7 @@ class ShopCreate extends StatelessWidget {
                                 ),
                               ))),
                           onPressed: () => controller.sendActivationCode(
-                              phone: params['phone']),
+                              phone: tcs['phone'].text),
                           child: Text(
                             'receive_code'.tr,
                             style: styleController.textMediumLightStyle,

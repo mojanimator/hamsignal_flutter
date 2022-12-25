@@ -1,10 +1,14 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dabel_sport/controller/APIProvider.dart';
 import 'package:dabel_sport/controller/PlayerController.dart';
 import 'package:dabel_sport/controller/SettingController.dart';
+import 'package:dabel_sport/controller/UserController.dart';
 import 'package:dabel_sport/helper/helpers.dart';
 import 'package:dabel_sport/helper/styles.dart';
 import 'package:dabel_sport/helper/variables.dart';
@@ -14,6 +18,7 @@ import 'package:dabel_sport/widget/shakeanimation.dart';
 import 'package:dabel_sport/widget/subscribe_dialog.dart';
 import 'package:dabel_sport/widget/videoplayer.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shamsi_date/shamsi_date.dart';
@@ -203,7 +208,7 @@ class PlayerDetails extends StatelessWidget {
                                                                             ratio:
                                                                                 settingController.cropRatio['profile'],
                                                                             colors: colors);
-                                                                        CachedNetworkImage.evictFromCache(controller.getProfileLink(data
+                                                                      await  CachedNetworkImage.evictFromCache(controller.getProfileLink(data
                                                                             .value
                                                                             .docLinks));
                                                                         if (img !=
@@ -366,6 +371,8 @@ class PlayerDetails extends StatelessWidget {
                                                   onTap: () => edit({
                                                     'id': data.value.id,
                                                     'active': data.value.active
+                                                        ? 0
+                                                        : 1
                                                   }),
                                                   child: Container(
                                                     padding: EdgeInsets.symmetric(
@@ -386,7 +393,7 @@ class PlayerDetails extends StatelessWidget {
                                                             ? colors[900]
                                                             : colors[50]),
                                                     child: Text(
-                                                      " ${data.value.active ? 'active'.tr : 'inactive'.tr}",
+                                                      " ${data.value.in_review ? 'review'.tr : data.value.active ? 'active'.tr : 'inactive'.tr}",
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: styleController
@@ -419,13 +426,17 @@ class PlayerDetails extends StatelessWidget {
                                                       onPressed: (params) =>
                                                           () async {},
                                                     )).then((result) {
-                                                      if (result == 'done') {
+                                                      if (result != null &&
+                                                          result['msg'] !=
+                                                              null &&
+                                                          result['status'] !=
+                                                              null) {
                                                         settingController.helper
                                                             .showToast(
-                                                                msg:
-                                                                    'با موفقیت انجام شد!',
-                                                                status:
-                                                                    'success');
+                                                                msg: result[
+                                                                    'msg'],
+                                                                status: result[
+                                                                    'status']);
                                                       }
                                                       refresh();
                                                     });
@@ -478,7 +489,7 @@ class PlayerDetails extends StatelessWidget {
                                           top: Radius.circular(styleController
                                               .cardBorderRadius)),
                                       child: ChewiePlayer(
-                                          mode: 'create',
+                                          mode: 'edit',
                                           onLoaded: (path) async {
                                             File f = File(path);
                                             if (!f.existsSync()) return;
@@ -498,6 +509,7 @@ class PlayerDetails extends StatelessWidget {
                                               });
                                             }
                                           },
+                                          onRefresh: () => refresh(),
                                           src: controller.getVideoLink(
                                               data.value.docLinks),
                                           placeHolder:
@@ -724,15 +736,44 @@ class PlayerDetails extends StatelessWidget {
                       ]),
                 ),
 
-                Visibility(
-                    visible: loading.value,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        value: uploadPercent.value % 100,
-                        color: colors[800],
-                        backgroundColor: Colors.white,
-                      ),
-                    ))
+                Positioned.fill(
+                  child: Visibility(
+                      visible: loading.value,
+                      child: Container(
+                        color: Colors.black54,
+                        child: Center(
+                          child: Card(
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    styleController.cardMargin)),
+                            child: Padding(
+                              padding:
+                                  EdgeInsets.all(styleController.cardMargin),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    value: uploadPercent.value,
+                                    color: colors[800],
+                                    backgroundColor: Colors.white,
+                                  ),
+                                  // SizedBox(
+                                  //   height: styleController.cardMargin,
+                                  // ),
+                                  // Text(
+                                  //   'uploading'.tr + '...',
+                                  //   style: styleController.textMediumStyle,
+                                  // ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      )),
+                )
               ],
             ),
           ),
@@ -741,22 +782,56 @@ class PlayerDetails extends StatelessWidget {
     );
   }
 
-  edit(Map<String, dynamic> params) async {
+  Future edit(Map<String, dynamic> params) async {
     loading.value = true;
-    var res = await controller.edit(
-        params: {'id': data.value.id, ...params},
-        onProgress: (percent) {
-          uploadPercent.value = percent;
-        });
 
-    if (res != null) {
-      if (!params.keys.contains('is_man') && !params.keys.contains('video'))
-        Get.back();
-      settingController.helper.showToast(
-          msg: res['msg'] ?? 'edited_successfully'.tr, status: 'success');
-      refresh();
-    }
-    loading.value = false;
+    ReceivePort receivePort = ReceivePort();
+
+    final isolate = await Isolate.spawn<Map<String, dynamic>>(editThread, {
+      'port': receivePort.sendPort,
+      "data": {'id': data.value.id, ...params},
+      'ACCESS_TOKEN': Get.find<UserController>().ACCESS_TOKEN,
+      'url': Variables.LINK_EDIT_PLAYERS,
+      // "controller": controller,
+      // 'loading': loading
+    });
+    receivePort.listen((dynamic thread) {
+      // print("${thread['end']} ${thread['progress']} ${thread['msg']} ");
+
+      if (thread['progress'] != null) uploadPercent.value = thread['progress'];
+      if (thread['end']) {
+        isolate.kill(priority: Isolate.immediate);
+        if (thread != null) {
+          if (!params.keys.contains('active') &&
+              !params.keys.contains('is_man') &&
+              !params.keys.contains('video')) Get.back();
+          settingController.helper.showToast(
+              msg: thread['msg'] ?? 'edited_successfully'.tr,
+              status: thread['status'] ?? 'success');
+          refresh();
+        }
+        loading.value = false;
+      }
+    });
+
+    // final res = await receivePort.first;
+
+    // var res = await controller.edit(
+    //     params: {'id': data.value.id, ...params},
+    //     onProgress: (percent) {
+    //       uploadPercent.value = percent;
+    //       // print(percent);
+    //       // print(percent.runtimeType);
+    //     });
+
+    // if (res != null) {
+    //   if (!params.keys.contains('is_man') && !params.keys.contains('video'))
+    //     Get.back();
+    //   settingController.helper.showToast(
+    //       msg: res['msg'] ?? 'edited_successfully'.tr, status: 'success');
+    //   refresh();
+    // }
+    // loading.value = false;
   }
 
   bool isEditable() {
@@ -1116,4 +1191,42 @@ class PlayerDetails extends StatelessWidget {
           submitData);
     }
   }
+}
+
+FutureOr<dynamic> editThread(params) async {
+  SendPort port = params['port'];
+
+  double p = 0.0;
+  double pLast = 0.0;
+  ApiProvider apiProvider = ApiProvider();
+
+  var parsedJson = await apiProvider.fetch(params['url'],
+      param: params['data'],
+      ACCESS_TOKEN: params['ACCESS_TOKEN'],
+      method: 'post', onProgress: (percent) {
+    p = (percent / 100).toPrecision(1);
+    if ((p == 0.1 || p == 0.3 || p == 0.5 || p == 0.7 || p == 0.9 || p == 1) &&
+        p > pLast) {
+      pLast = p;
+      // print(p);
+      port.send({'progress': p, "end": false});
+    }
+  });
+  // print(parsedJson);
+  String? msg = '';
+  var status = 'danger';
+  if (parsedJson != null && parsedJson['errors'] != null) {
+    status = 'danger';
+    if (parsedJson['errors'] is List<dynamic>)
+      msg = parsedJson['errors']?.join("\n").toString();
+    else
+      msg = parsedJson['errors'][parsedJson['errors'].keys.elementAt(0)]
+          .join("\n");
+  } else if (parsedJson != null && parsedJson['msg'] != null) {
+    msg = parsedJson['msg'] ?? '';
+    status = parsedJson['status'] ?? status;
+  }
+  port.send({'progress': p, "end": true, 'msg': msg, 'status': status});
+
+  return parsedJson;
 }

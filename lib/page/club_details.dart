@@ -24,7 +24,7 @@ class ClubDetails extends StatelessWidget {
 
   ClubController controller = Get.find<ClubController>();
   MapController mapController = MapController();
-late  MaterialColor colors;
+  late MaterialColor colors;
   late TextStyle titleStyle;
 
   final SettingController settingController = Get.find<SettingController>();
@@ -36,7 +36,8 @@ late  MaterialColor colors;
 
   ClubDetails({required data, MaterialColor? colors, int this.index = -1}) {
     this.colors = colors ?? styleController.cardCoachColors;
-    titleStyle = styleController.textMediumStyle.copyWith(color: this.colors[900]);
+    titleStyle =
+        styleController.textMediumStyle.copyWith(color: this.colors[900]);
     this.data = Rx<Club>(data);
   }
 
@@ -201,7 +202,7 @@ late  MaterialColor colors;
                                                                             ratio:
                                                                                 settingController.cropRatio['profile'],
                                                                             colors: colors);
-                                                                        CachedNetworkImage.evictFromCache(
+                                                                        await CachedNetworkImage.evictFromCache(
                                                                             "${controller.getProfileLink(data.value.docLinks, editable: isEditable())}");
                                                                         if (img !=
                                                                             null)
@@ -381,6 +382,8 @@ late  MaterialColor colors;
                                                   onTap: () => edit({
                                                     'id': data.value.id,
                                                     'active': data.value.active
+                                                        ? 0
+                                                        : 1
                                                   }),
                                                   child: Container(
                                                     padding: EdgeInsets.symmetric(
@@ -401,7 +404,7 @@ late  MaterialColor colors;
                                                             ? colors[900]
                                                             : colors[50]),
                                                     child: Text(
-                                                      " ${data.value.active ? 'active'.tr : 'inactive'.tr}",
+                                                      " ${data.value.in_review ? 'review'.tr : data.value.active ? 'active'.tr : 'inactive'.tr}",
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: styleController
@@ -434,13 +437,17 @@ late  MaterialColor colors;
                                                       onPressed: (params) =>
                                                           () async {},
                                                     )).then((result) {
-                                                      if (result == 'done') {
+                                                      if (result != null &&
+                                                          result['msg'] !=
+                                                              null &&
+                                                          result['status'] !=
+                                                              null) {
                                                         settingController.helper
                                                             .showToast(
-                                                                msg:
-                                                                    'با موفقیت انجام شد!',
-                                                                status:
-                                                                    'success');
+                                                                msg: result[
+                                                                    'msg'],
+                                                                status: result[
+                                                                    'status']);
                                                       }
                                                       refresh();
                                                     });
@@ -524,8 +531,9 @@ late  MaterialColor colors;
                                                   .toList();
 
                                               if (index + 1 <= docs.length)
-                                                CachedNetworkImage.evictFromCache(
-                                                    "${Variables.LINK_STORAGE}/${data.value.docLinks[index]['type_id']}/${data.value.docLinks[index]['id']}.jpg");
+                                                await CachedNetworkImage
+                                                    .evictFromCache(
+                                                        "${Variables.LINK_STORAGE}/${data.value.docLinks[index]['type_id']}/${data.value.docLinks[index]['id']}.jpg");
 
                                               edit({
                                                 'img': img,
@@ -737,11 +745,23 @@ late  MaterialColor colors;
 
                 Visibility(
                     visible: loading.value,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        value: uploadPercent.value % 100,
-                        color: colors[800],
-                        backgroundColor: Colors.white,
+                    child: Container(
+                      color: Colors.black54,
+                      child: Center(
+                        child: Card(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  styleController.cardMargin)),
+                          child: Padding(
+                            padding: EdgeInsets.all(styleController.cardMargin),
+                            child: CircularProgressIndicator(
+                              value: uploadPercent.value / 100,
+                              color: colors[800],
+                              backgroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
                     ))
               ],
@@ -761,7 +781,8 @@ late  MaterialColor colors;
         });
 
     if (res != null) {
-      if (!params.keys.contains('times')) Get.back();
+      if (!params.keys.contains('active') && !params.keys.contains('times'))
+        Get.back();
       settingController.helper.showToast(
           msg: res['msg'] ?? 'edited_successfully'.tr, status: 'success');
       refresh();
@@ -951,7 +972,7 @@ late  MaterialColor colors;
     }
 
     Map<String, dynamic> tmpParams =
-        params.map((key, value) => MapEntry(key, RxString(value??'')));
+        params.map((key, value) => MapEntry(key, RxString(value ?? '')));
 
     if (dropdowns.keys.length > 0) {
       Function submitData = () async {

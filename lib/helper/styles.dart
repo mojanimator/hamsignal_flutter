@@ -48,6 +48,10 @@ class Style {
         )));
   }
 
+  void setSize(width) {
+    isBigSize = width != null && width > 420;
+  }
+
   Color get primaryColor => const Color(0xFF343265);
 
   Color get secondaryColor => const Color(0xFF18ffff);
@@ -73,7 +77,7 @@ class Style {
 
   double get tabHeight => isBigSize ? 48.0 : 48.0;
 
-  double get cardMargin => isBigSize ? 32.0 : 16.0;
+  double get cardMargin => isBigSize ? 16.0 : 12.0;
 
   get cardColor => Colors.white.withOpacity(1);
 
@@ -85,9 +89,9 @@ class Style {
 
   get cardVitrinHeight => 200.0;
 
-  get imageHeight => 120.0;
+  get imageHeight => isBigSize ? 120.0 : 98.0;
 
-  double get gridHeight => 150;
+  double get gridHeight => isBigSize ? 150.0 : 120.0;
 
   TextStyle get textBigLightStyle => TextStyle(
       color: primaryMaterial[50], fontSize: 20, fontWeight: FontWeight.bold);
@@ -165,7 +169,6 @@ class Style {
   MaterialColor get cardBlogColors => Colors.purple;
 
   MaterialColor get cardTournamentColors => Colors.orange;
-
 
   int get gridLength => 1;
 }

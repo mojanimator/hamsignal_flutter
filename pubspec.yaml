@@ -1,5 +1,5 @@
 name: dabel_sport
-description: Application For 2sport.ir
+description: اپلیکیشن دبل اسپورت
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -15,10 +15,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.0+9
 
 environment:
-  sdk: ">=2.16.1 <=3.0.0"
+  sdk: ">=2.12.0 <=3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -29,31 +29,34 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  get: ^4.6.3
+  get: ^4.6.5
   get_storage: ^2.0.3
-  animations: ^2.0.2
+  animations: ^2.0.7
   shamsi_date: ^1.0.1
-  card_swiper: ^2.0.3
-  cached_network_image: ^3.2.0
+  card_swiper: ^2.0.4
+  cached_network_image: ^3.2.3
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-  convex_bottom_bar: ^3.0.0
-  chewie: ^1.3.3
-  url_launcher: ^6.1.0
-  flutter_map: ^0.14.0
-  share_plus: ^4.0.4
-  path_provider: ^2.0.9
-  image_picker: ^0.8.5+3
-  image_cropper: ^2.0.3
+  cupertino_icons: ^1.0.5
+  convex_bottom_bar: ^3.1.0+1
+  chewie: ^1.3.6
+  url_launcher: ^6.1.7
+  flutter_map: ^3.0.0
+  share_plus: ^6.3.0
+  path_provider: ^2.0.11
+  image_picker: ^0.8.6
+  image_cropper: ^3.0.1
   uni_links: ^0.5.1
-  package_info_plus: ^1.4.2
-
+  package_info_plus: ^3.0.2
+  device_info_plus: ^8.0.0
+  pushe_flutter: ^2.6.1
+  in_app_purchase: ^3.0.8
+  flutter_poolakey: ^2.0.1
 #  intl: ^0.17.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: "^0.9.2"
+  flutter_launcher_icons: "^0.11.0"
 
 flutter_icons:
   android: "launcher_icon"

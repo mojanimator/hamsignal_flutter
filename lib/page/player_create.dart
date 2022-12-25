@@ -1,13 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:dabel_sport/controller/APIProvider.dart';
 import 'package:dabel_sport/controller/AnimationController.dart';
 import 'package:dabel_sport/controller/PlayerController.dart';
 import 'package:dabel_sport/controller/SettingController.dart';
+import 'package:dabel_sport/controller/UserController.dart';
+import 'package:dabel_sport/helper/IAPPurchase.dart';
 import 'package:dabel_sport/helper/helpers.dart';
 import 'package:dabel_sport/helper/styles.dart';
+import 'package:dabel_sport/helper/variables.dart';
 import 'package:dabel_sport/widget/mini_card.dart';
 import 'package:dabel_sport/widget/shakeanimation.dart';
 import 'package:dabel_sport/widget/videoplayer.dart';
@@ -16,10 +22,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class PlayerCreate extends StatelessWidget {
- late PlayerController controller ;
+  late PlayerController controller;
+
   Map<String, dynamic> data = {
     'name': ''.obs,
     'family': ''.obs,
@@ -43,6 +49,7 @@ class PlayerCreate extends StatelessWidget {
     'coupon': ''.obs,
     'video': Rx<Uint8List>(Uint8List.fromList([])),
     'img': ''.obs,
+    'market': Variables.MARKET.obs,
   };
   late TextStyle titleStyle;
   final SettingController settingController = Get.find<SettingController>();
@@ -52,7 +59,7 @@ class PlayerCreate extends StatelessWidget {
   late MaterialColor colors;
   final ImagePicker _picker = ImagePicker();
   Rx<CroppedFile?>? croppedImage = Rx<CroppedFile?>(null);
-
+  final IAPPurchase iAPPurchase = Get.find<IAPPurchase>();
   late Widget plusIcon;
   late Widget plusImage;
 
@@ -79,9 +86,8 @@ class PlayerCreate extends StatelessWidget {
       size: styleController.imageHeight / 3,
     );
     initDiscounts = {
-      for (var item in settingController.prices
-          .where((e) => e['key'].contains('player_')))
-        item['key']: item['value']
+      for (var item in iAPPurchase.allProducts.where((e) => e.type == 'player'))
+        item.id: item.price
     };
     discounts = RxMap(initDiscounts);
   }
@@ -135,24 +141,41 @@ class PlayerCreate extends StatelessWidget {
                         tcs.forEach((key, value) {
                           data[key].value = value.text;
                         });
-                        var res = await controller.create(
-                            params: data.map(
-                                (key, value) => MapEntry(key, value.value)),
-                            onProgress: (percent) {
-                              // print("percent ${percent.toStringAsFixed(0)}");
-                              uploadPercent.value = percent;
-                            });
-                        if (res != null && res['url'] != null) {
-                          Uri url = Uri.parse(res['url']);
-                          //100% discount=>dont go to bank
-                          if (res['url'].contains('panel'))
-                            Get.back(result: 'done');
-                          else if (await canLaunchUrl(url)) {
-                            Get.back(result: 'done');
-                            launchUrl(url);
+                        ReceivePort receivePort = ReceivePort();
+
+                        final isolate =
+                            await Isolate.spawn<Map<String, dynamic>>(
+                                createThread, {
+                          'port': receivePort.sendPort,
+                          "data": data
+                              .map((key, value) => MapEntry(key, value.value)),
+                          'ACCESS_TOKEN':
+                              Get.find<UserController>().ACCESS_TOKEN,
+                          'url': Variables.LINK_CREATE_PLAYER,
+                          // "controller": controller,
+                          // 'loading': loading
+                        });
+                        receivePort.listen((dynamic thread) {
+                          // print(thread);
+                          if (thread['progress'] != null)
+                            uploadPercent.value = thread['progress'];
+                          if (thread['end']) {
+                            loading.value = false;
+                            if (thread['status'] != 'success')
+                              controller.helper.showToast(
+                                  msg: thread['msg'], status: thread['status']);
+                            else
+                              iAPPurchase.purchase(params: thread['res']);
                           }
-                        }
-                        loading.value = false;
+                        });
+
+                        // var res = await controller.create(
+                        //     params: data.map(
+                        //         (key, value) => MapEntry(key, value.value)),
+                        //     onProgress: (percent) {
+                        //       // print("percent ${percent.toStringAsFixed(0)}");
+                        //       uploadPercent.value = percent;
+                        //     });
                       },
                       child: Text(
                         "${'pay'.tr} ${'and'.tr} ${'register'.tr}",
@@ -339,8 +362,9 @@ class PlayerCreate extends StatelessWidget {
                                       mode: 'create',
                                       src: null,
                                       onLoaded: (path) async {
-                                        data['video'].value =
-                                            await File(path).readAsBytes();
+                                        if (File(path).existsSync())
+                                          data['video'].value =
+                                              await File(path).readAsBytes();
                                       },
                                       placeHolder:
                                           "${data['name']} ${data['family']}",
@@ -458,8 +482,9 @@ class PlayerCreate extends StatelessWidget {
                                                 {'id': "$e", 'name': "$e"}),
                                             'm': 1.to(12).map((e) =>
                                                 {'id': "$e", 'name': "$e"}),
-                                            'y': 1300.to(1450).map((e) =>
-                                                {'id': "$e", 'name': "$e"}),
+                                            'y': settingController.years.map(
+                                                (e) =>
+                                                    {'id': "$e", 'name': "$e"}),
                                           })),
                                       MiniCard(
                                         colors:
@@ -519,16 +544,14 @@ class PlayerCreate extends StatelessWidget {
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
                                                 children:
-                                                    settingController.prices
-                                                        .where((el) => el['key']
+                                                    iAPPurchase.allProducts
+                                                        .where((el) => el.id
                                                             .contains('player'))
                                                         .map((e) => InkWell(
-                                                              onTap: () => data[
-                                                                      'renew-month']
-                                                                  .value = e[
-                                                                      'key']
-                                                                  .split(
-                                                                      '_')[1],
+                                                              onTap: () =>
+                                                                  data['renew-month']
+                                                                          .value =
+                                                                      e.month,
                                                               child: Row(
                                                                 mainAxisAlignment:
                                                                     MainAxisAlignment
@@ -543,8 +566,8 @@ class PlayerCreate extends StatelessWidget {
                                                                           String>(
                                                                         fillColor:
                                                                             MaterialStateProperty.all(colors[500]),
-                                                                        value: e['key']
-                                                                            .split('_')[1],
+                                                                        value: e
+                                                                            .month,
                                                                         groupValue:
                                                                             data['renew-month'].value,
                                                                         onChanged:
@@ -555,13 +578,13 @@ class PlayerCreate extends StatelessWidget {
                                                                         activeColor:
                                                                             Colors.green,
                                                                       ),
-                                                                      Text(e['name'],
+                                                                      Text(e.name,
                                                                           style:
                                                                               TextStyle(color: colors[500])),
                                                                     ],
                                                                   ),
                                                                   Text(
-                                                                    "${e['value']}"
+                                                                    "${e.price}"
                                                                         .asPrice(),
                                                                     style: TextStyle(
                                                                         fontWeight:
@@ -569,18 +592,18 @@ class PlayerCreate extends StatelessWidget {
                                                                                 .bold,
                                                                         color: colors[
                                                                             500],
-                                                                        decoration: int.parse(discounts.value[e['key']]) <
-                                                                                int.parse(e['value'])
+                                                                        decoration: int.parse(discounts.value[e.id]) <
+                                                                                int.parse(e.price)
                                                                             ? TextDecoration.lineThrough
                                                                             : TextDecoration.none),
                                                                   ),
                                                                   Visibility(
-                                                                    visible: int.parse(discounts.value[e[
-                                                                            'key']]) <
+                                                                    visible: int.parse(discounts.value[e
+                                                                            .id]) <
                                                                         int.parse(
-                                                                            e['value']),
+                                                                            e.price),
                                                                     child: Text(
-                                                                      "${discounts.value[e['key']]}"
+                                                                      "${discounts.value[e.id]}"
                                                                           .asPrice(),
                                                                       style: TextStyle(
                                                                           fontWeight: FontWeight
@@ -945,7 +968,7 @@ class PlayerCreate extends StatelessWidget {
                                 ),
                               ))),
                           onPressed: () => controller.sendActivationCode(
-                              phone: params['phone']),
+                              phone: tcs['phone'].text),
                           child: Text(
                             'receive_code'.tr,
                             style: styleController.textMediumLightStyle,
@@ -1031,4 +1054,78 @@ class PlayerCreate extends StatelessWidget {
     else
       return AssetImage('assets/images/icon-dark.jpg');
   }
+}
+
+FutureOr<dynamic> createThread(params) async {
+  SendPort port = params['port'];
+
+  double p = 0.0;
+  double pLast = 0.0;
+  ApiProvider apiProvider = ApiProvider();
+
+  Map<String, dynamic> tmp = {
+    'upload_pending': true,
+    ...params['data'],
+  };
+  tmp.removeWhere((key, value) => key == 'video');
+
+  port.send({'progress': 0.1, "end": false});
+
+  var parsedJson = await apiProvider.fetch(
+    params['url'],
+    param: tmp,
+    ACCESS_TOKEN: params['ACCESS_TOKEN'],
+    method: 'post',
+  );
+  // print(parsedJson);
+
+  // send video after verifying other inputs
+  if (parsedJson != null && parsedJson['resume'] == true) {
+    if (params['data']['video'] == null || params['data']['video'].length == 0)
+      params['data'].removeWhere((key, value) => key == "video");
+    else
+      params['data']['video'] =
+          MultipartFile(params['data']['video'], filename: 'upload.jpg');
+    parsedJson = await apiProvider.fetch(params['url'],
+        param: {...params['data']},
+        ACCESS_TOKEN: params['ACCESS_TOKEN'],
+        method: 'upload', onProgress: (percent) {
+      p = (percent / 100).toPrecision(1);
+      if ((p == 0.1 ||
+              p == 0.3 ||
+              p == 0.5 ||
+              p == 0.7 ||
+              p == 0.9 ||
+              p == 1) &&
+          p > pLast) {
+        pLast = p;
+        // print(p);
+        port.send({'progress': p, "end": false});
+      }
+    });
+  }
+  // print(params);
+  // print(parsedJson);
+
+  String? msg = '';
+  var status = 'danger';
+
+  if (parsedJson != null && parsedJson['errors'] != null) {
+    status = 'danger';
+    if (parsedJson['errors'] is List<dynamic>)
+      msg = parsedJson['errors']?.join("\n").toString();
+    else
+      msg = parsedJson['errors'][parsedJson['errors'].keys.elementAt(0)]
+          .join("\n");
+  }
+  if (parsedJson != null && parsedJson['errors'] == null) status = 'success';
+  port.send({
+    'res': parsedJson,
+    'progress': p,
+    "end": true,
+    'msg': msg,
+    'status': status
+  });
+
+  return parsedJson;
 }

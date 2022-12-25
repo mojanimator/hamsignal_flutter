@@ -4,6 +4,7 @@ import 'package:dabel_sport/controller/SettingController.dart';
 import 'package:dabel_sport/helper/helpers.dart';
 import 'package:dabel_sport/helper/styles.dart';
 import 'package:dabel_sport/page/player_create.dart';
+import 'package:dabel_sport/page/player_details.dart';
 import 'package:dabel_sport/widget/filter_players.dart';
 import 'package:dabel_sport/widget/grid_player.dart';
 import 'package:dabel_sport/widget/search_section.dart';
@@ -41,17 +42,13 @@ class PlayersPage extends StatelessWidget {
 
     controller.filterController.change(true, status: RxStatus.success());
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      // Future.delayed(Duration(seconds: 2), () {
-      //   Get.to(
-      //       PlayerDetails(
-      //           data: controller.data[0],
-      //
-      //           colors: colors),
-      //       transition: Transition.circularReveal,
-      //       duration: Duration(milliseconds: 400));
-      // });
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   Future.delayed(Duration(seconds: 2), () {
+    //     Get.to(PlayerDetails(data: controller.data[0], colors: colors),
+    //         transition: Transition.circularReveal,
+    //         duration: Duration(milliseconds: 400));
+    //   });
+    // });
   }
 
   @override
@@ -147,13 +144,17 @@ class PlayersPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Get.to(PlayerCreate())?.then((result) {
-            if (result == 'done') {
-              // settingController.currentPageIndex = 4;
-              settingController.refresh();
-              Get.find<Helper>().showToast(
-                  msg:
-                  'registered_successfully'.tr,
-                  status: 'success');
+            if (result != null &&
+                result['msg'] !=
+                    null &&
+                result['status'] !=
+                    null) {
+              settingController.helper
+                  .showToast(
+                  msg: result[
+                  'msg'],
+                  status: result[
+                  'status']);
             }
           });
         },

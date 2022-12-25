@@ -33,6 +33,7 @@ class CoachFilterSection extends StatelessWidget {
             physics: AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
+                SizedBox(height: styleController.cardMargin*2,),
                 Center(
                   child: MyDropdownButton(
                       styleController: styleController,

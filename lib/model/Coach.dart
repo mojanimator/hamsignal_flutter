@@ -13,6 +13,7 @@ class Coach {
   String? age;
   bool? is_man;
   bool active;
+  bool in_review;
   bool? hidden;
   String? phone;
   String? description;
@@ -31,6 +32,7 @@ class Coach {
         family = json['family'],
         is_man = json['is_man'] as bool,
         active = json['active'] as bool,
+        in_review = json['in_review'] as bool,
         hidden = json['hidden'] as bool,
         phone = json['phone'],
         description = json['description'],
@@ -40,7 +42,7 @@ class Coach {
         expires_at = json['expires_at'] ?? -1;
 
   static getAge(int? timestamp) {
-    if (timestamp==null) return '0';
+    if (timestamp == null) return '0';
     DateTime currentDate = DateTime.now();
     DateTime birthDate = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     int age = currentDate.year - birthDate.year;

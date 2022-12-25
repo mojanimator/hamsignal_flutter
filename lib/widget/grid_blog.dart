@@ -232,38 +232,41 @@ class GridBlog extends StatelessWidget {
                                             ),
                                             width: double.infinity,
                                             child: IntrinsicHeight(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Column(
-                                                    children: [
-                                                      Text(
-                                                        settingController
-                                                            .category(data.value
-                                                                .category_id),
-                                                        style: styleController
-                                                            .textSmallStyle
-                                                            .copyWith(
-                                                                color: colors[
-                                                                    200]),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  VerticalDivider(),
-                                                  Column(
-                                                    children: [
-                                                      Text(
-                                                        "${data.value.published_at}",
-                                                        style: styleController
-                                                            .textSmallStyle
-                                                            .copyWith(
-                                                                color: colors[
-                                                                    200]),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
+                                              child: SingleChildScrollView(
+                                                scrollDirection: Axis.horizontal,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Column(
+                                                      children: [
+                                                        Text(
+                                                          settingController
+                                                              .category(data.value
+                                                                  .category_id),
+                                                          style: styleController
+                                                              .textSmallStyle
+                                                              .copyWith(
+                                                                  color: colors[
+                                                                      200]),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    VerticalDivider(),
+                                                    Column(
+                                                      children: [
+                                                        Text(
+                                                          "${data.value.published_at}",
+                                                          style: styleController
+                                                              .textSmallStyle
+                                                              .copyWith(
+                                                                  color: colors[
+                                                                      200]),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),

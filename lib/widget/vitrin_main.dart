@@ -3,7 +3,6 @@ import 'package:dabel_sport/helper/styles.dart';
 import 'package:dabel_sport/page/blogs.dart';
 import 'package:dabel_sport/page/clubs.dart';
 import 'package:dabel_sport/page/coaches.dart';
-import 'package:dabel_sport/page/conductor_page.dart';
 import 'package:dabel_sport/page/players.dart';
 import 'package:dabel_sport/page/shops.dart';
 import 'package:dabel_sport/page/tournaments.dart';
@@ -27,10 +26,11 @@ class MainVitrin extends StatelessWidget {
     styleController = Get.find<Style>();
     settingController = Get.find<SettingController>();
     this.colors = colors ?? styleController.primaryMaterial;
+
     // WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
     //   Future.delayed(
     //       Duration(seconds: 1),
-    //       () => Get.to(ConductorPage(),
+    //       () => Get.to(PlayerCreate(),
     //           transition: Transition.circularReveal,
     //           duration: Duration(milliseconds: 500)));
     //   //   var data=await LatestController().find({'id':'20','type':'cl'});
@@ -54,162 +54,168 @@ class MainVitrin extends StatelessWidget {
           child: Column(
             children: [
               IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'assets/images/player.png',
-                            color: styleController.primaryColor,
-                            height: styleController.iconHeight,
-                          ),
-                          Text('player'.tr),
-                        ],
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                child: FittedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/player.png',
+                              color: styleController.primaryColor,
+                              height: styleController.iconHeight,
+                            ),
+                            Text('player'.tr),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        ),
+                        onPressed: () {
+                          Get.to(PlayersPage(),
+                              transition: Transition.topLevel,
+                              duration: Duration(milliseconds: 400));
+                        },
                       ),
-                      onPressed: () {
-                        Get.to(PlayersPage(),
-                            transition: Transition.topLevel,
-                            duration: Duration(milliseconds: 400));
-                      },
-                    ),
-                    const VerticalDivider(
-                      endIndent: 15,
-                      indent: 15,
-                    ),
-                    TextButton(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'assets/images/coach.png',
-                            color: styleController.primaryColor,
-                            height: styleController.iconHeight,
-                          ),
-                          Text('coach'.tr),
-                        ],
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      const VerticalDivider(
+                        endIndent: 15,
+                        indent: 15,
                       ),
-                      onPressed: () {
-                        Get.to(CoachesPage(),
-                            transition: Transition.topLevel,
-                            duration: Duration(milliseconds: 400));
-                      },
-                    ),
-                    const VerticalDivider(
-                      endIndent: 15,
-                      indent: 15,
-                    ),
-                    TextButton(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'assets/images/club.png',
-                            color: styleController.primaryColor,
-                            height: styleController.iconHeight,
-                          ),
-                          Text('club'.tr),
-                        ],
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      TextButton(
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/coach.png',
+                              color: styleController.primaryColor,
+                              height: styleController.iconHeight,
+                            ),
+                            Text('coach'.tr),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        ),
+                        onPressed: () {
+                          Get.to(CoachesPage(),
+                              transition: Transition.topLevel,
+                              duration: Duration(milliseconds: 400));
+                        },
                       ),
-                      onPressed: () {
-                        Get.to(ClubsPage(),
-                            transition: Transition.topLevel,
-                            duration: Duration(milliseconds: 400));
-                      },
-                    ),
-                    const VerticalDivider(
-                      endIndent: 15,
-                      indent: 15,
-                    ),
-                    TextButton(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'assets/images/shop.png',
-                            color: styleController.primaryColor,
-                            height: styleController.iconHeight,
-                          ),
-                          Text('shop'.tr),
-                        ],
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      const VerticalDivider(
+                        endIndent: 15,
+                        indent: 15,
                       ),
-                      onPressed: () {
-                        Get.to(ShopsPage(),
-                            transition: Transition.topLevel,
-                            duration: Duration(milliseconds: 400));
-                      },
-                    ),
-                  ],
+                      TextButton(
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/club.png',
+                              color: styleController.primaryColor,
+                              height: styleController.iconHeight,
+                            ),
+                            Text('club'.tr),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        ),
+                        onPressed: () {
+                          Get.to(ClubsPage(),
+                              transition: Transition.topLevel,
+                              duration: Duration(milliseconds: 400));
+                        },
+                      ),
+                      const VerticalDivider(
+                        endIndent: 15,
+                        indent: 15,
+                      ),
+                      TextButton(
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/shop.png',
+                              color: styleController.primaryColor,
+                              height: styleController.iconHeight,
+                            ),
+                            Text('shop'.tr),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        ),
+                        onPressed: () {
+                          Get.to(ShopsPage(),
+                              transition: Transition.topLevel,
+                              duration: Duration(milliseconds: 400));
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'assets/images/blog.png',
-                            color: styleController.primaryColor,
-                            height: styleController.iconHeight,
-                          ),
-                          Text('blogs'.tr),
-                        ],
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                child: FittedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/blog.png',
+                              color: styleController.primaryColor,
+                              height: styleController.iconHeight,
+                            ),
+                            Text('blogs'.tr),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        ),
+                        onPressed: () {
+                          Get.to(BlogsPage());
+                        },
                       ),
-                      onPressed: () {Get.to(BlogsPage());},
-                    ),
-                    const VerticalDivider(
-                      endIndent: 15,
-                      indent: 15,
-                    ),
-                    TextButton(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'assets/images/conductor.png',
-                            color: styleController.primaryColor,
-                            height: styleController.iconHeight,
-                          ),
-                          Text('conductor'.tr),
-                        ],
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      const VerticalDivider(
+                        endIndent: 15,
+                        indent: 15,
                       ),
-                      onPressed: () {
-                        settingController.currentPageIndex = 1;
-                      },
-                    ),
-                    const VerticalDivider(
-                      endIndent: 15,
-                      indent: 15,
-                    ),
-                    TextButton(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'assets/images/table.png',
-                            color: styleController.primaryColor,
-                            height: styleController.iconHeight,
-                          ),
-                          Text('tables'.tr),
-                        ],
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      TextButton(
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/conductor.png',
+                              color: styleController.primaryColor,
+                              height: styleController.iconHeight,
+                            ),
+                            Text('conductor'.tr),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        ),
+                        onPressed: () {
+                          settingController.currentPageIndex = 1;
+                        },
                       ),
-                      onPressed: () {
-                        Get.to(TournamentsPage());
-                      },
-                    ),
-                  ],
+                      const VerticalDivider(
+                        endIndent: 15,
+                        indent: 15,
+                      ),
+                      TextButton(
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/table.png',
+                              color: styleController.primaryColor,
+                              height: styleController.iconHeight,
+                            ),
+                            Text('tables'.tr),
+                          ],
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        ),
+                        onPressed: () {
+                          Get.to(TournamentsPage());
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

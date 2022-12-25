@@ -377,7 +377,7 @@ class BlogDetails extends StatelessWidget {
                     child: Center(
                       child: CircularProgressIndicator(
                         value: uploadPercent.value != 0
-                            ? uploadPercent.value % 100
+                            ? uploadPercent.value  / 100
                             : null,
                         color: Colors.white,
                         backgroundColor: colors[700],

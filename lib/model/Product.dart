@@ -1,4 +1,3 @@
-import 'package:dabel_sport/helper/helpers.dart';
 import 'package:dabel_sport/helper/variables.dart';
 
 class Product {
@@ -15,6 +14,7 @@ class Product {
   String salePercent;
   String props;
   bool active;
+  bool in_review;
   List<dynamic> docLinks;
   String updated_at;
 
@@ -30,10 +30,11 @@ class Product {
         sold = json['sold'] ?? '',
         count = json['count'] ?? '',
         tags = json['tags'] ?? '',
+        in_review = json['in_review'] as bool,
         active = json['active'] as bool,
         props = json['props'] ?? '',
         docLinks = (json['docs'] ?? []) as List<dynamic>,
-        updated_at = Helper.toShamsi(json['created_at'])
+        updated_at = json['created_at']
   // published_at_date = Helper.toShamsi(json['published_at'])
   ;
 }

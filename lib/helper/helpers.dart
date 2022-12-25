@@ -1,19 +1,29 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dabel_sport/controller/APIProvider.dart';
 import 'package:dabel_sport/helper/styles.dart';
+import 'package:dabel_sport/helper/variables.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 import 'package:share_plus/share_plus.dart';
 
 class Helper {
   late final Style styleController;
+  static late ApiProvider apiProvider;
+
+  static PackageInfo? packageInfo;
+
+  static AndroidDeviceInfo? androidInfo;
 
   Helper() {
     styleController = Get.find<Style>();
+    apiProvider = ApiProvider();
   }
 
   showToast({required String msg, String status = 'info'}) {
@@ -59,7 +69,6 @@ class Helper {
   }
 
   static String toShamsi(date) {
-
     if (date != null) {
       JalaliFormatter f =
           Jalali.fromDateTime(DateTime.fromMillisecondsSinceEpoch(date * 1000))
@@ -96,6 +105,21 @@ class Helper {
     );
     temp.delete();
   }
+
+  static sendError(Map<String, String> params) async {
+    androidInfo ??= await DeviceInfoPlugin().androidInfo;
+    var release = androidInfo?.version.release;
+    var sdkInt = androidInfo?.version.sdkInt;
+    var manufacturer = androidInfo?.manufacturer;
+    var model = androidInfo?.model;
+    packageInfo ??= await PackageInfo.fromPlatform();
+    String? buildNumber = packageInfo?.buildNumber;
+
+    params['message'] =
+        "${Variables.LABEL} ❎ version:$buildNumber\n$model\n$release\n$sdkInt\n$manufacturer\n${params['message']}";
+
+    apiProvider.fetch(Variables.LINK_SEND_ERROR, param: params, method: 'post');
+  }
 }
 
 String e2f(String s) {
@@ -108,12 +132,32 @@ String e2f(String s) {
   return s;
 }
 
+String f2e(String s) {
+  var persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  var enNumbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."];
+
+  for (var i = 0; i < 10; i++) {
+    s = s.replaceAll(RegExp(persianNumbers[i]), enNumbers[i]);
+  }
+  return s;
+}
+
 extension RangeExtension on int {
   List<int> to(int max, {int step = 1}) =>
       [for (int i = this; i <= max; i += step) i];
 }
 
 extension PriceViewExtension on String {
-  String asPrice() => this.replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+  String asPrice() =>
+      this.replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) {
+        return '${m[1]},';
+      });
+}
+
+extension ToEngExtension on String {
+  String toEng() => f2e(this);
+}
+
+extension ToFaExtension on String {
+  String toFa() => e2f(this);
 }

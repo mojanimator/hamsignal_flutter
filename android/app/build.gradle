@@ -1,9 +1,10 @@
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 
-def keystorePropertiesFile = rootProject.file("key.properties")
 def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader('UTF-8') { reader ->
@@ -31,24 +32,31 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-//    compileSdkVersion flutter.compileSdkVersion
-    compileSdkVersion 32
+//    compileSdkVersion flutter.compileSdkVersion.toInteger()
+//    targetSdkVersion flutter.targetSdkVersion.toInteger()
+//    ndkVersion flutter.ndkVersion.toInteger()
+//
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
     }
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.dabel.dabel_sport"
-        minSdkVersion 20
-//        minSdkVersion flutter.minSdkVersion
-//        targetSdkVersion flutter.targetSdkVersion
-        targetSdkVersion 32
+        minSdkVersion localProperties.getProperty('flutter.minSdkVersion').toInteger()
+        targetSdkVersion localProperties.getProperty('flutter.targetSdkVersion').toInteger()
+        compileSdkVersion localProperties.getProperty('flutter.compileSdkVersion').toInteger()
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        multiDexEnabled true
     }
     signingConfigs {
         release {
@@ -58,20 +66,28 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-
-
     buildTypes {
         release {
-//            shrinkResources true
-//            minifyEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'),
-//                    'proguard-rules.pro'
+            shrinkResources false
+            minifyEnabled true
+//            useProguard true
+            multiDexEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard-rules.pro'
             signingConfig signingConfigs.release
 //            signingConfig signingConfigs.debug
+        }
+        debug {
+            multiDexEnabled true
+            signingConfig signingConfigs.debug
         }
     }
 }
 
 flutter {
     source '../..'
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }

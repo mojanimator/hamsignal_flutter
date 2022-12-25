@@ -29,7 +29,7 @@ class Latest {
 
 String getDocLink(type, allDocs) {
   for (Map<String, dynamic> doc in allDocs) {
-    if (doc['docable_type'] == type) {
+    if (doc['docable_type'] == type && doc['type_id'] != '5') {
       return "${Variables.LINK_STORAGE}/${doc['type_id']}/${doc['id']}.jpg";
     }
   }

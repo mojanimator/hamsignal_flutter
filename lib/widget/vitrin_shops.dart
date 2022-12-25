@@ -22,7 +22,7 @@ class VitrinShops extends StatelessWidget {
   late double swiperFraction;
   late MaterialColor colors;
   final _key = GlobalKey();
-
+  dynamic d;
   var _dividerWidth = 0.0.obs;
   final SettingController settingController = Get.find<SettingController>();
   final Style styleController = Get.find<Style>();
@@ -36,17 +36,27 @@ class VitrinShops extends StatelessWidget {
         );
     this.swiperFraction = swiperFraction ?? 1;
     this.colors = colors ?? styleController.primaryMaterial;
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        _dividerWidth.value = (_key.currentContext?.size?.width ?? 0) / 2);
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    // _dividerWidth.value = (_key.currentContext?.size?.width ?? 0) / 2;
+    // print(_key.currentState?.context.findRenderObject());
+    // print(d);
+    //   print(_);
+    // });
+  }
+
+  Future<void> executeAfterBuild(BuildContext context) async {
+    // if (context.size?.width != null)
+    // _dividerWidth.value = context.size!.width/3 ;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Future(() => executeAfterBuild(context));
     return controller.obx((data) {
-      if (data != null)
+      if (data != null) {
         return ShakeWidget(
-          key: _key,
           child: Card(
+            key: _key,
             shape: RoundedRectangleBorder(
               borderRadius:
                   BorderRadius.circular(styleController.cardBorderRadius),
@@ -296,7 +306,7 @@ class VitrinShops extends StatelessWidget {
                 ]),
           ),
         );
-      else
+      } else
         return Center();
     }, onLoading: Loader(), onEmpty: Center());
   }

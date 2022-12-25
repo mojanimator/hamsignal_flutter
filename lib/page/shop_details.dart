@@ -25,7 +25,7 @@ class ShopDetails extends StatelessWidget {
 
   ShopController controller = Get.find<ShopController>();
   MapController mapController = MapController();
- late MaterialColor colors;
+  late MaterialColor colors;
   late TextStyle titleStyle;
 
   final SettingController settingController = Get.find<SettingController>();
@@ -39,7 +39,8 @@ class ShopDetails extends StatelessWidget {
 
   ShopDetails({required data, MaterialColor? colors, int this.index = -1}) {
     this.colors = colors ?? styleController.cardCoachColors;
-    titleStyle = styleController.textMediumStyle.copyWith(color: this.colors[900]);
+    titleStyle =
+        styleController.textMediumStyle.copyWith(color: this.colors[900]);
     this.data = Rx<Shop>(data);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       productController.getData(param: {
@@ -221,7 +222,7 @@ class ShopDetails extends StatelessWidget {
                                                                           String?
                                                                               img =
                                                                               await settingController.pickAndCrop(ratio: settingController.cropRatio['logo'], colors: colors);
-                                                                          CachedNetworkImage.evictFromCache(
+                                                                          await CachedNetworkImage.evictFromCache(
                                                                               "${controller.getProfileLink(data.value.docLinks)}");
                                                                           if (img !=
                                                                               null)
@@ -455,7 +456,7 @@ class ShopDetails extends StatelessWidget {
                                                                             String?
                                                                                 img =
                                                                                 await settingController.pickAndCrop(ratio: settingController.cropRatio['license'], colors: colors);
-                                                                            CachedNetworkImage.evictFromCache("${controller.getProfileLink(data.value.docLinks, type: 'license')}");
+                                                                            await CachedNetworkImage.evictFromCache("${controller.getProfileLink(data.value.docLinks, type: 'license')}");
                                                                             if (img !=
                                                                                 null)
                                                                               edit({
@@ -651,6 +652,8 @@ class ShopDetails extends StatelessWidget {
                                                       'id': data.value.id,
                                                       'active':
                                                           data.value.active
+                                                              ? 0
+                                                              : 1
                                                     }),
                                                     child: Container(
                                                       padding: EdgeInsets.symmetric(
@@ -672,7 +675,7 @@ class ShopDetails extends StatelessWidget {
                                                                   ? colors[900]
                                                                   : colors[50]),
                                                       child: Text(
-                                                        " ${data.value.active ? 'active'.tr : 'inactive'.tr}",
+                                                        " ${data.value.in_review ? 'review'.tr : data.value.active ? 'active'.tr : 'inactive'.tr}",
                                                         textAlign:
                                                             TextAlign.center,
                                                         style: styleController
@@ -709,14 +712,18 @@ class ShopDetails extends StatelessWidget {
                                                         onPressed: (params) =>
                                                             () async {},
                                                       )).then((result) {
-                                                        if (result == 'done') {
+                                                        if (result != null &&
+                                                            result['msg'] !=
+                                                                null &&
+                                                            result['status'] !=
+                                                                null) {
                                                           settingController
                                                               .helper
                                                               .showToast(
-                                                                  msg:
-                                                                      'با موفقیت انجام شد!',
-                                                                  status:
-                                                                      'success');
+                                                                  msg: result[
+                                                                      'msg'],
+                                                                  status: result[
+                                                                      'status']);
                                                         }
                                                         refresh();
                                                       });
@@ -1014,7 +1021,7 @@ class ShopDetails extends StatelessWidget {
                     visible: loading.value,
                     child: Center(
                       child: CircularProgressIndicator(
-                        value: uploadPercent.value % 100,
+                        value: uploadPercent.value / 100,
                         color: colors[800],
                         backgroundColor: Colors.white,
                       ),
@@ -1036,7 +1043,8 @@ class ShopDetails extends StatelessWidget {
         });
 
     if (res != null) {
-      if (!params.keys.contains('times')) Get.back();
+      if (!params.keys.contains('active') && !params.keys.contains('times'))
+        Get.back();
       settingController.helper.showToast(
           msg: res['msg'] ?? 'edited_successfully'.tr, status: 'success');
       refresh();

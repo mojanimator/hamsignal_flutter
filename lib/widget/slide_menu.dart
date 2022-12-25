@@ -21,7 +21,7 @@ class ShrinkSlideRotateSideMenuState extends SideMenuState {
             // top: statusBarHeight + (widget.closeIcon.size ?? 25.0) * 2,
             bottom: statusBarHeight + (widget.closeIcon.size ?? 25.0) * 2,
             // bottom: 0.0,
-            width: min(size.width * 0.70, widget.maxMenuWidth),
+            width: size.width * 0.60,
             right: widget._inverse == 1 ? null : 0,
             child: ClipRRect(
                 borderRadius: _getBorderRadius()
@@ -67,13 +67,9 @@ class ShrinkSlideRotateSideMenuState extends SideMenuState {
       return Matrix4.identity()
         ..rotateZ(widget.degToRad(2.0 * widget._inverse))
         ..invertRotation()
-        ..translate(
-            max(size.width/2, widget.maxMenuWidth) *
-                widget._inverse *
-                (widget.inverse ? 0.1 : 0.1),
-            (size.height * .1))
-        ..scale(
-            widget.maxMenuWidth / (size.width != 0 ? size.width : 0.8), 0.8);
+        ..translate(min(size.width / 3, widget.maxMenuWidth) * widget._inverse,
+            size.height * .1)
+        ..scale(.8, .8);
     }
     return Matrix4.identity();
   }

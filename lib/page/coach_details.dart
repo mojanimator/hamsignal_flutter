@@ -21,7 +21,7 @@ class CoachDetails extends StatelessWidget {
 
   CoachController controller = Get.find<CoachController>();
 
- late MaterialColor colors;
+  late MaterialColor colors;
   late TextStyle titleStyle;
 
   final SettingController settingController = Get.find<SettingController>();
@@ -33,7 +33,8 @@ class CoachDetails extends StatelessWidget {
 
   CoachDetails({required data, MaterialColor? colors, int this.index = -1}) {
     this.colors = colors ?? styleController.cardCoachColors;
-    titleStyle = styleController.textMediumStyle.copyWith(color: this.colors[900]);
+    titleStyle =
+        styleController.textMediumStyle.copyWith(color: this.colors[900]);
     this.data = Rx<Coach>(data);
     bornAt = Rx<JalaliFormatter>(Jalali.fromDateTime(
             DateTime.fromMillisecondsSinceEpoch(data.born_at * 1000))
@@ -199,11 +200,11 @@ class CoachDetails extends StatelessWidget {
                                                                             ratio:
                                                                                 settingController.cropRatio['profile'],
                                                                             colors: colors);
-                                                                        CachedNetworkImage.evictFromCache(controller.getProfileLink(data
+
+                                                                        await CachedNetworkImage.evictFromCache(controller.getProfileLink(data
                                                                             .value
                                                                             .docLinks));
-                                                                        var t =
-                                                                            settingController.getDocType('club');
+
                                                                         data.value
                                                                             .docLinks
                                                                             ?.sort((a, b) =>
@@ -368,6 +369,8 @@ class CoachDetails extends StatelessWidget {
                                                   onTap: () => edit({
                                                     'id': data.value.id,
                                                     'active': data.value.active
+                                                        ? 0
+                                                        : 1
                                                   }),
                                                   child: Container(
                                                     padding: EdgeInsets.symmetric(
@@ -388,7 +391,7 @@ class CoachDetails extends StatelessWidget {
                                                             ? colors[900]
                                                             : colors[50]),
                                                     child: Text(
-                                                      " ${data.value.active ? 'active'.tr : 'inactive'.tr}",
+                                                      " ${data.value.in_review ? 'review'.tr : data.value.active ? 'active'.tr : 'inactive'.tr}",
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: styleController
@@ -421,13 +424,17 @@ class CoachDetails extends StatelessWidget {
                                                       onPressed: (params) =>
                                                           () async {},
                                                     )).then((result) {
-                                                      if (result == 'done') {
+                                                      if (result != null &&
+                                                          result['msg'] !=
+                                                              null &&
+                                                          result['status'] !=
+                                                              null) {
                                                         settingController.helper
                                                             .showToast(
-                                                                msg:
-                                                                    'با موفقیت انجام شد!',
-                                                                status:
-                                                                    'success');
+                                                                msg: result[
+                                                                    'msg'],
+                                                                status: result[
+                                                                    'status']);
                                                       }
                                                       refresh();
                                                     });
@@ -673,11 +680,23 @@ class CoachDetails extends StatelessWidget {
 
                 Visibility(
                     visible: loading.value,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        value: uploadPercent.value % 100,
-                        color: colors[800],
-                        backgroundColor: Colors.white,
+                    child: Container(
+                      color: Colors.black54,
+                      child: Center(
+                        child: Card(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  styleController.cardMargin)),
+                          child: Padding(
+                            padding: EdgeInsets.all(styleController.cardMargin),
+                            child: CircularProgressIndicator(
+                              // value: uploadPercent.value / 100,
+                              color: colors[800],
+                              backgroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
                     ))
               ],
@@ -695,10 +714,11 @@ class CoachDetails extends StatelessWidget {
         onProgress: (percent) {
           uploadPercent.value = percent;
         });
-
+    // print(params);
     if (res != null) {
-      if (!params.keys.contains('is_man') && !params.keys.contains('video'))
-        Get.back();
+      if (!params.keys.contains('active') &&
+          !params.keys.contains('is_man') &&
+          !params.keys.contains('video')) Get.back();
       settingController.helper.showToast(
           msg: res['msg'] ?? 'edited_successfully'.tr, status: 'success');
       refresh();
@@ -891,7 +911,7 @@ class CoachDetails extends StatelessWidget {
     }
 
     Map<String, dynamic> tmpParams =
-        params.map((key, value) => MapEntry(key, RxString(value??'')));
+        params.map((key, value) => MapEntry(key, RxString(value ?? '')));
 
     if (dropdowns.keys.length > 0) {
       Function submitData = () async {

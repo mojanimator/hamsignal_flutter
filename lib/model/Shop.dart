@@ -13,12 +13,14 @@ class Shop {
   String address;
   String? location;
   bool active;
+  bool  in_review;
   bool? hidden;
   String? phone;
   String? description;
   List<dynamic> groups;
   List<dynamic> docLinks;
   int expires_at;
+
   Shop.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         user_id = json['user_id'],
@@ -33,11 +35,13 @@ class Shop {
             : [],
         location = json['location'],
         active = json['active'] as bool,
+        in_review = json['in_review'] as bool,
         hidden = json['hidden'] as bool,
         phone = json['phone'],
         description = json['description'],
         docLinks = (json['docs'] ?? []) as List<dynamic>,
-  expires_at = json['expires_at'] ?? -1;
+        expires_at = json['expires_at'] ?? -1;
+
   static get(json) {
     return (json ?? []) as List<dynamic>;
   }

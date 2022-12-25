@@ -244,6 +244,9 @@ class ConductorPage extends StatelessWidget {
       child: Column(
         children: [
           Divider(),
+          if(e.title=='...')
+    Text('conductor_not_exists'.tr,style: styleController.textMediumStyle,),
+    if(e.title!='...')
           IntrinsicHeight(
             child: Column(
               children: [

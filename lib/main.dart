@@ -72,8 +72,12 @@ Future<void> initUniLinks() async {
 void main() async {
   await GetStorage.init();
   await initUniLinks();
-
-  runApp(MyApp());
+  runZonedGuarded<Future<Null>>(() async {
+    runApp(MyApp());
+  }, (error, stackTrace) async {
+    // print(error);
+    Helper.sendError({'message': "$error \n $stackTrace"});
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -83,6 +87,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      styleController.setSize(context.size?.width);
+    });
     // GetStorage box = GetStorage();
     // final translate = Get.put(MyTranslations());
     // Get.updateLocale(const Locale('fa', 'IR'));
@@ -347,16 +354,30 @@ class MainPage extends StatelessWidget {
                       ),
                     )),
                     // coaches vitrin
-                    Expanded(
-                        child: VitrinCoaches(
-                      coachController,
-                      colors: styleController.cardCoachColors,
-                      margin: EdgeInsets.only(
-                          left: styleController.cardMargin,
-                          right: styleController.cardMargin / 4),
-                    )),
+                    if (styleController.isBigSize)
+                      Expanded(
+                          child: VitrinCoaches(
+                        coachController,
+                        colors: styleController.cardCoachColors,
+                        margin: EdgeInsets.only(
+                            left: styleController.cardMargin,
+                            right: styleController.cardMargin / 4),
+                      )),
                   ],
                 ),
+                if (!styleController.isBigSize)
+                  Row(
+                    children: [
+                      Expanded(
+                          child: VitrinCoaches(
+                        coachController,
+                        colors: styleController.cardCoachColors,
+                        margin: EdgeInsets.only(
+                            left: styleController.cardMargin,
+                            right: styleController.cardMargin / 4),
+                      )),
+                    ],
+                  ),
                 Row(
                   children: [
                     //players vitrin
@@ -371,16 +392,34 @@ class MainPage extends StatelessWidget {
                         bottom: styleController.cardMargin / 4,
                       ),
                     )),
-                    // coaches vitrin
-                    Expanded(
-                        child: VitrinShops(
-                      shopController,
-                      colors: styleController.cardShopColors,
-                      margin: EdgeInsets.only(
-                          left: styleController.cardMargin,
-                          right: styleController.cardMargin / 4),
-                    )),
+                    if (styleController.isBigSize)
+                      // coaches vitrin
+                      Expanded(
+                          child: VitrinShops(
+                        shopController,
+                        colors: styleController.cardShopColors,
+                        margin: EdgeInsets.only(
+                            left: styleController.cardMargin,
+                            right: styleController.cardMargin / 4),
+                      )),
                   ],
+                ),
+                if (!styleController.isBigSize)
+                  // coaches vitrin
+                  Row(
+                    children: [
+                      Expanded(
+                          child: VitrinShops(
+                        shopController,
+                        colors: styleController.cardShopColors,
+                        margin: EdgeInsets.only(
+                            left: styleController.cardMargin,
+                            right: styleController.cardMargin / 4),
+                      )),
+                    ],
+                  ),
+                SizedBox(
+                  height: styleController.cardMargin * 2,
                 )
               ],
             ),
@@ -392,8 +431,8 @@ class MainPage extends StatelessWidget {
   }
 
   Future<void> refreshAll() {
-    // settingController.getData();
-    blogController.getData();
+    settingController.refresh();
+    // blogController.getData();
     latestController.getData(param: {'page': 'clear'});
     playerController.getData(param: {'page': 'clear'});
     coachController.getData(param: {'page': 'clear'});

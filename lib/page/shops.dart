@@ -156,12 +156,18 @@ class ShopsPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Get.to(ShopCreate())?.then((result) {
-            if (result == 'done') {
-              // settingController.currentPageIndex = 4;
+            if (result != null &&
+                result['msg'] !=
+                    null &&
+                result['status'] !=
+                    null) {
               settingController.refresh();
-              Get.find<Helper>().showToast(
-                  msg: 'registered_successfully'.tr,
-                  status: 'success');
+              settingController.helper
+                  .showToast(
+                  msg: result[
+                  'msg'],
+                  status: result[
+                  'status']);
             }
           });
         },

@@ -51,23 +51,23 @@ class LatestController extends GetxController with StateMixin<List<Latest>> {
   }
 
   Future<List<Latest>?> getData({Map<String, dynamic>? param}) async {
-
     update();
     if (param != null && param['page'] == 'clear') {
-
       _data.clear();
       change(_data, status: RxStatus.loading());
+      param['page'] = 1;
     }
     change([], status: RxStatus.loading());
 
     final parsedJson =
-        await apiProvider.fetch(Variables.LINK_GET_LATEST, param:param );
+        await apiProvider.fetch(Variables.LINK_GET_LATEST, param: param);
     // print(parsedJson["data"][1]);
     if (parsedJson == null || parsedJson['data'].length == 0) {
       change(null, status: RxStatus.empty());
       return null;
     } else {
       total = parsedJson["total"];
+
       if (param != null && param['page'] > 1)
         _data.addAll(parsedJson["data"]
             .map<Latest>((el) => Latest.fromJson(el))
@@ -91,13 +91,12 @@ class LatestController extends GetxController with StateMixin<List<Latest>> {
   }
 
   Future<dynamic> find(Map<String, dynamic> params) async {
-
     var t = params['type'];
     var parsedJson;
     switch (t) {
       case 'pl':
         parsedJson =
-            await apiProvider.fetch(Variables.LINK_GET_PLAYERS, param:  params);
+            await apiProvider.fetch(Variables.LINK_GET_PLAYERS, param: params);
         if (parsedJson != null && parsedJson['data'].length > 0)
           return Player.fromJson(parsedJson['data'][0]);
         else
@@ -105,28 +104,31 @@ class LatestController extends GetxController with StateMixin<List<Latest>> {
 
       case 'co':
         parsedJson =
-            await apiProvider.fetch(Variables.LINK_GET_COACHES, param:  params);
+            await apiProvider.fetch(Variables.LINK_GET_COACHES, param: params);
         if (parsedJson != null && parsedJson['data'].length > 0)
           return Coach.fromJson(parsedJson['data'][0]);
         else
           return null;
 
       case 'cl':
-        parsedJson = await apiProvider.fetch(Variables.LINK_GET_CLUBS, param:  params);
+        parsedJson =
+            await apiProvider.fetch(Variables.LINK_GET_CLUBS, param: params);
         if (parsedJson != null && parsedJson['data'].length > 0)
           return Club.fromJson(parsedJson['data'][0]);
         else
           return null;
 
       case 'sh':
-        parsedJson = await apiProvider.fetch(Variables.LINK_GET_SHOPS, param:  params);
+        parsedJson =
+            await apiProvider.fetch(Variables.LINK_GET_SHOPS, param: params);
         if (parsedJson != null && parsedJson['data'].length > 0)
           return Shop.fromJson(parsedJson['data'][0]);
         else
           return null;
 
       case 'pr':
-        parsedJson = await apiProvider.fetch(Variables.LINK_GET_PRODUCTS, param:  params);
+        parsedJson =
+            await apiProvider.fetch(Variables.LINK_GET_PRODUCTS, param: params);
         if (parsedJson != null && parsedJson['data'].length > 0)
           return Product.fromJson(parsedJson['data'][0]);
         else

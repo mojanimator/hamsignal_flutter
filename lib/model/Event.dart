@@ -16,7 +16,7 @@ class Event {
   final int? timestamp;
 
   Event.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
+      : id = json['id']??-1,
         sport_id = json['sport_id'] ?? '',
         title = json['title'] ?? '',
         team1 = json['team1'] ?? '',
@@ -29,6 +29,6 @@ class Event {
         time = Helper.toShamsi(
           json['time'],
         ),
-        timestamp = json['time'] ?? '',
+        timestamp = json['time'] ?? DateTime.now().millisecondsSinceEpoch~/1000,
         details = json['details'] ?? '';
 }

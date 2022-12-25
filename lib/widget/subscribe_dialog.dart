@@ -1,11 +1,12 @@
 import 'package:dabel_sport/controller/SettingController.dart';
+import 'package:dabel_sport/helper/IAPPurchase.dart';
 import 'package:dabel_sport/helper/helpers.dart';
 import 'package:dabel_sport/helper/styles.dart';
+import 'package:dabel_sport/helper/variables.dart';
 import 'package:dabel_sport/widget/mini_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SubscribeDialog extends StatelessWidget {
   RxBool couponLoading = RxBool(false);
@@ -19,6 +20,7 @@ class SubscribeDialog extends StatelessWidget {
   RxBool loading = RxBool(false);
   String type;
   Function(Map<String, dynamic> params) onPressed;
+  final IAPPurchase iAPPurchase = Get.find<IAPPurchase>();
 
   String id;
 
@@ -30,9 +32,9 @@ class SubscribeDialog extends StatelessWidget {
       required Function(Map<String, dynamic> params) this.onPressed})
       : super(key: key) {
     initDiscounts = {
-      for (var item in settingController.prices
-          .where((e) => e['key'].contains('${type}')))
-        item['key']: item['value']
+      for (var item
+          in iAPPurchase.allProducts.where((e) => e.type == '${type}'))
+        item.id: item.price
     };
     discounts = RxMap(initDiscounts);
   }
@@ -40,7 +42,7 @@ class SubscribeDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Center(
-      child: MiniCard(
+          child: MiniCard(
             title: "subscribe_type".tr,
             colors: colors,
             desc1: "",
@@ -52,48 +54,50 @@ class SubscribeDialog extends StatelessWidget {
                 children: [
                   Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: settingController.prices
-                          .where((el) => el['key'].contains('$type'))
+                      children: iAPPurchase.allProducts
+                          .where((el) => el.type == type)
                           .map((e) => InkWell(
-                                onTap: () =>
-                                    renewMonth.value = e['key'].split('_')[1],
+                                onTap: () => renewMonth.value = e.month,
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
                                         Radio<String>(
                                           fillColor: MaterialStateProperty.all(
                                               colors[500]),
-                                          value: e['key'].split('_')[1],
+                                          value: e.month,
                                           groupValue: renewMonth.value,
                                           onChanged: (value) {
                                             renewMonth.value = "$value";
                                           },
                                           activeColor: Colors.green,
                                         ),
-                                        Text(e['name'],
-                                            style: TextStyle(color: colors[500])),
+                                        Text(e.name,
+                                            style:
+                                                TextStyle(color: colors[500])),
                                       ],
                                     ),
                                     Text(
-                                      "${e['value']}".asPrice(),
+                                      "${e.price}".asPrice(),
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: colors[500],
                                           decoration:
-                                              int.parse(discounts.value[e['key']]) <
-                                                      int.parse(e['value'])
+                                              int.parse(discounts.value[e.id]) <
+                                                      int.parse(e.price)
                                                   ? TextDecoration.lineThrough
                                                   : TextDecoration.none),
                                     ),
                                     Visibility(
                                       visible:
-                                          int.parse(discounts.value[e['key']]) <
-                                              int.parse(e['value']),
+                                          int.parse(discounts.value[e.id]) <
+                                              int.parse(e.price),
                                       child: Text(
-                                        "${discounts.value[e['key']]}".asPrice(),
+                                        "${discounts.value[e.id]}".asPrice(),
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: colors[500]),
@@ -117,7 +121,8 @@ class SubscribeDialog extends StatelessWidget {
                                 color: Colors.white,
                                 //background color of dropdown button
                                 border: Border.all(
-                                    color: styleController.primaryColor, width: 1),
+                                    color: styleController.primaryColor,
+                                    width: 1),
                                 //border of dropdown button
                                 borderRadius: BorderRadius.horizontal(
                                   right: Radius.circular(
@@ -146,11 +151,14 @@ class SubscribeDialog extends StatelessWidget {
                           flex: 2,
                           child: TextButton(
                               style: ButtonStyle(
-                                  padding: MaterialStateProperty.all(EdgeInsets.all(
-                                      styleController.cardMargin / 1)),
-                                  overlayColor: MaterialStateProperty.resolveWith(
+                                  padding: MaterialStateProperty.all(
+                                      EdgeInsets.all(
+                                          styleController.cardMargin / 1)),
+                                  overlayColor:
+                                      MaterialStateProperty.resolveWith(
                                     (states) {
-                                      return states.contains(MaterialState.pressed)
+                                      return states
+                                              .contains(MaterialState.pressed)
                                           ? styleController.secondaryColor
                                           : null;
                                     },
@@ -167,8 +175,9 @@ class SubscribeDialog extends StatelessWidget {
                                   ))),
                               onPressed: () async {
                                 couponLoading.value = true;
-                                Map<String, dynamic>? res = await settingController
-                                    .calculateCoupon(params: {
+                                Map<String, dynamic>? res =
+                                    await settingController
+                                        .calculateCoupon(params: {
                                   'type': type,
                                   'coupon': coupon.value,
                                   'renew-month': renewMonth.value,
@@ -203,11 +212,14 @@ class SubscribeDialog extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: styleController.cardMargin,
+                  Padding(
+                    padding: EdgeInsets.all(styleController.cardMargin / 2),
+                    child: Visibility(
+                        visible: loading.value,
+                        child: LinearProgressIndicator(
+                          color: colors[500],
+                        )),
                   ),
-                  Visibility(
-                      visible: loading.value, child: CircularProgressIndicator()),
                   Row(
                     children: [
                       Expanded(
@@ -217,7 +229,8 @@ class SubscribeDialog extends StatelessWidget {
                                     EdgeInsets.all(styleController.cardMargin)),
                                 overlayColor: MaterialStateProperty.resolveWith(
                                   (states) {
-                                    return states.contains(MaterialState.pressed)
+                                    return states
+                                            .contains(MaterialState.pressed)
                                         ? styleController.secondaryColor
                                         : null;
                                   },
@@ -238,18 +251,24 @@ class SubscribeDialog extends StatelessWidget {
                                 'coupon': coupon.value,
                                 'type': type,
                                 'id': id,
+                                'market': Variables.MARKET,
+                                // 'price': iAPPurchase.allProducts
+                                //     .firstWhereOrNull((el) {
+                                //   return el.month == renewMonth.value &&
+                                //       el.type == type && Variables.MARKET!='bank';
+                                // })?.price,
                               };
-                              var res = await settingController.makePayment(
-                                  params: params);
-                              if (res != null && res['url'] != null) {
-                                Uri url = Uri.parse(res['url']);
-                                //100% discount=>dont go to bank
-                                if (res['url'].contains('panel'))
-                                  Get.back(result: 'done');
-                                else if (await canLaunchUrl(url)) {
-                                  launchUrl(url);
-                                }
-                              }
+                              var res = await iAPPurchase.purchase(
+                                  params: params, mode: 'edit');
+                              // if (res != null && res['url'] != null) {
+                              //   Uri url = Uri.parse(res['url']);
+                              //   //100% discount=>dont go to bank
+                              //   if (res['url'].contains('panel'))
+                              //     Get.back(result: 'done');
+                              //   else if (await canLaunchUrl(url)) {
+                              //     launchUrl(url);
+                              //   }
+                              // }
 
                               loading.value = false;
                             },
@@ -273,7 +292,8 @@ class SubscribeDialog extends StatelessWidget {
                                     EdgeInsets.all(styleController.cardMargin)),
                                 overlayColor: MaterialStateProperty.resolveWith(
                                   (states) {
-                                    return states.contains(MaterialState.pressed)
+                                    return states
+                                            .contains(MaterialState.pressed)
                                         ? styleController.secondaryColor
                                         : null;
                                   },
@@ -302,6 +322,6 @@ class SubscribeDialog extends StatelessWidget {
               ),
             ),
           ),
-    ));
+        ));
   }
 }

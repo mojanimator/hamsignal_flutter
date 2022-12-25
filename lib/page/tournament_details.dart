@@ -297,23 +297,23 @@ class TournamentDetails extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                Container(
-                                  child: Padding(
-                                      padding: EdgeInsets.all(
-                                          styleController.cardMargin / 4),
-                                      child: Column(
-                                        children: [
-                                          MiniCard(
-                                            colors: colors,
-                                            title: 'sport'.tr,
-                                            desc1: settingController
-                                                .sport(data.value.sport_id),
-                                            desc2: null,
-                                            styleController: styleController,
-                                          ),
-                                        ],
-                                      )),
-                                ),
+                                // Container(
+                                //   child: Padding(
+                                //       padding: EdgeInsets.all(
+                                //           styleController.cardMargin / 4),
+                                //       child: Column(
+                                //         children: [
+                                //           MiniCard(
+                                //             colors: colors,
+                                //             title: 'sport'.tr,
+                                //             desc1: settingController
+                                //                 .sport(data.value.sport_id),
+                                //             desc2: null,
+                                //             styleController: styleController,
+                                //           ),
+                                //         ],
+                                //       )),
+                                // ),
                                 Container(
                                   child: Padding(
                                       padding: EdgeInsets.all(

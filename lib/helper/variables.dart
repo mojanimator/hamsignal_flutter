@@ -4,6 +4,7 @@ class Variables {
   static String DOMAIN = "http://2sport.ir";
 
   static String NOIMAGE_LINK = "${DOMAIN}/img/noimage.png";
+  static String LINK_POLICY = "${DOMAIN}/policy";
   static String APIDOMAIN = "${DOMAIN}/api";
   static String LINK_GET_SETTINGS = "${APIDOMAIN}/settings";
   static String LINK_STORAGE = "${DOMAIN}/storage";
@@ -34,6 +35,7 @@ class Variables {
   static String LINK_REMOVE_PRODUCT = "${APIDOMAIN}/product/remove";
 
   static String LINK_GET_ACTIVATION_CODE = "${APIDOMAIN}/getactivationcode";
+  static String LINK_SEND_ERROR = "${APIDOMAIN}/error";
   static String LINK_LOGIN = "${APIDOMAIN}/login";
   static String LINK_REGISTER_USER = "${APIDOMAIN}/register";
   static String LINK_LOGOUT = "${APIDOMAIN}/logout";
@@ -48,6 +50,8 @@ class Variables {
   static String LINK_CREATE_SHOP = "${APIDOMAIN}/shop/create";
   static String LINK_CREATE_PRODUCT = "${APIDOMAIN}/product/create";
   static String LINK_MAKE_PAYMENT = "${APIDOMAIN}/payment/create";
+  static String LINK_CONFIRM_PAYMENT = "${APIDOMAIN}/payment";
 
-  static var LABEL = 'دبل اسپورت';
+  static String LABEL = 'دبل اسپورت';
+  static String MARKET = 'bazaar'; //bank,myket,bazar
 }

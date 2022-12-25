@@ -186,7 +186,7 @@ class PlayerController extends GetxController with StateMixin<List<Player>> {
   Future<dynamic>? create(
       {required Map<String, dynamic> params,
       Function(double percent)? onProgress}) async {
-    var tmp = {...params, 'video_pending': true};
+    var tmp = {...params, 'upload_pending': true};
     tmp.removeWhere((key, value) => key == 'video');
     // print(tmp);
     //first not send video for verifying other inputs
@@ -220,15 +220,29 @@ class PlayerController extends GetxController with StateMixin<List<Player>> {
     return parsedJson;
   }
 
-  Future<dynamic> edit({required Map<String, dynamic> params, Function(double percent)? onProgress}) async {
-    var parsedJson = await apiProvider.fetch(
-      Variables.LINK_EDIT_PLAYERS,
-      param: params,
-      ACCESS_TOKEN: userController.ACCESS_TOKEN,
-      method: 'post',
-        onProgress: (percent) =>
-        onProgress != null ? onProgress(percent) : null
-    );
+  Future<dynamic> edit(
+      {required Map<String, dynamic> params,
+      Function(double percent)? onProgress}) async {
+    double p = 0.0;
+    double pLast = 0.0;
+    var parsedJson = await apiProvider.fetch(Variables.LINK_EDIT_PLAYERS,
+        param: params,
+        ACCESS_TOKEN: userController.ACCESS_TOKEN,
+        method: 'post', onProgress: (percent) {
+      if (onProgress == null) return null;
+      p = (percent / 100).toPrecision(1);
+      if ((p == 0.1 ||
+              p == 0.3 ||
+              p == 0.5 ||
+              p == 0.7 ||
+              p == 0.9 ||
+              p == 1) &&
+          p > pLast) {
+        pLast = p;
+        // print(p);
+        return onProgress(p);
+      }
+    });
 
     if (parsedJson != null && parsedJson['errors'] != null) {
       var msg;

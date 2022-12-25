@@ -46,6 +46,7 @@ class UserController extends GetxController with StateMixin<User> {
 
   UserController() {
     _ACCESS_TOKEN = ReadWriteValue('ACCESS_TOKEN', '', () => box);
+    // _ACCESS_TOKEN.val = '';
     apiProvider = Get.find<ApiProvider>();
     helper = Get.find<Helper>();
   }

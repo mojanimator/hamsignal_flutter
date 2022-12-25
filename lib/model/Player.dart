@@ -14,6 +14,7 @@ class Player {
   String? age;
   bool? is_man;
   bool active;
+  bool in_review;
   bool? hidden;
   String? phone;
   String? description;
@@ -34,6 +35,7 @@ class Player {
         weight = json['weight'] ?? '',
         is_man = json['is_man'] as bool,
         active = json['active'] as bool,
+        in_review = json['in_review'] as bool,
         hidden = json['hidden'] as bool,
         phone = json['phone'],
         description = json['description'],
@@ -54,6 +56,7 @@ class Player {
         height = '',
         weight = '',
         is_man = null,
+        in_review = false,
         active = false,
         hidden = false,
         phone = '',
@@ -64,7 +67,7 @@ class Player {
         expires_at = -1;
 
   static getAge(int? timestamp) {
-    if (timestamp==null) return '0';
+    if (timestamp == null) return '0';
     DateTime currentDate = DateTime.now();
     DateTime birthDate = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     int age = currentDate.year - birthDate.year;

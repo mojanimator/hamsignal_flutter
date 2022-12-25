@@ -166,6 +166,8 @@ class ProductDetails extends StatelessWidget {
                                                   onTap: () => edit({
                                                     'id': data.value.id,
                                                     'active': data.value.active
+                                                        ? 0
+                                                        : 1
                                                   }),
                                                   child: Container(
                                                     padding: EdgeInsets.symmetric(
@@ -186,7 +188,7 @@ class ProductDetails extends StatelessWidget {
                                                             ? colors[900]
                                                             : colors[50]),
                                                     child: Text(
-                                                      " ${data.value.active ? 'active'.tr : 'inactive'.tr}",
+                                                      " ${data.value.in_review ? 'review'.tr : data.value.active ? 'active'.tr : 'inactive'.tr}",
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: styleController
@@ -350,7 +352,7 @@ class ProductDetails extends StatelessWidget {
                                                   .toList();
 
                                               if (index + 1 <= docs.length)
-                                                CachedNetworkImage.evictFromCache(
+                                            await    CachedNetworkImage.evictFromCache(
                                                     "${Variables.LINK_STORAGE}/${data.value.docLinks[index]['type_id']}/${data.value.docLinks[index]['id']}.jpg");
 
                                               edit({
@@ -395,14 +397,31 @@ class ProductDetails extends StatelessWidget {
 
                                                   if (shop != null)
                                                     Get.to(
-                                                        ShopDetails(
-                                                            data: shop,
-                                                            colors: styleController
-                                                                .cardShopColors),
-                                                        transition:
-                                                            Transition.topLevel,
-                                                        duration: Duration(
-                                                            milliseconds: 400));
+                                                            ShopDetails(
+                                                                data: shop,
+                                                                colors: styleController
+                                                                    .cardShopColors),
+                                                            transition:
+                                                                Transition
+                                                                    .topLevel,
+                                                            duration: Duration(
+                                                                milliseconds:
+                                                                    400))
+                                                        ?.then((result) {
+                                                      if (result != null &&
+                                                          result['msg'] !=
+                                                              null &&
+                                                          result['status'] !=
+                                                              null) {
+                                                        refresh();
+                                                        settingController.helper
+                                                            .showToast(
+                                                                msg: result[
+                                                                    'msg'],
+                                                                status: result[
+                                                                    'status']);
+                                                      }
+                                                    });
                                                 },
                                                 child: MiniCard(
                                                   colors: colors,
@@ -559,7 +578,7 @@ class ProductDetails extends StatelessWidget {
                     visible: loading.value,
                     child: Center(
                       child: CircularProgressIndicator(
-                        value: uploadPercent.value % 100,
+                        value: uploadPercent.value / 100,
                         color: colors[800],
                         backgroundColor: Colors.white,
                       ),
@@ -581,7 +600,7 @@ class ProductDetails extends StatelessWidget {
         });
 
     if (res != null) {
-      Get.back();
+      if (!params.keys.contains('active')) Get.back();
       settingController.helper.showToast(
           msg: res['msg'] ?? 'edited_successfully'.tr, status: 'success');
       refresh();

@@ -16,6 +16,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../helper/variables.dart';
+
 class ProductCreate extends StatelessWidget {
   ProductController controller = Get.find<ProductController>();
   final SettingController settingController = Get.find<SettingController>();
@@ -31,6 +33,7 @@ class ProductCreate extends StatelessWidget {
     'price': ''.obs,
     'discount_price': ''.obs,
     'tags': ''.obs,
+    'market': Variables.MARKET.obs,
   };
   late TextStyle titleStyle;
   final MyAnimationController animationController =
