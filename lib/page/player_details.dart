@@ -208,9 +208,10 @@ class PlayerDetails extends StatelessWidget {
                                                                             ratio:
                                                                                 settingController.cropRatio['profile'],
                                                                             colors: colors);
-                                                                      await  CachedNetworkImage.evictFromCache(controller.getProfileLink(data
-                                                                            .value
-                                                                            .docLinks));
+                                                                        settingController.clearImageCache(
+                                                                            url:
+                                                                                controller.getProfileLink(data.value.docLinks));
+
                                                                         if (img !=
                                                                             null)
                                                                           edit({
@@ -846,6 +847,8 @@ class PlayerDetails extends StatelessWidget {
     Player? res = await controller.find({'id': data.value.id, 'panel': '1'});
 
     if (res != null) {
+      settingController.clearImageCache(
+          url: controller.getProfileLink(data.value.docLinks));
       this.data.value = res;
       if (data.value.born_at != null)
         bornAt.value = Jalali.fromDateTime(

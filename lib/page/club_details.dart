@@ -202,8 +202,9 @@ class ClubDetails extends StatelessWidget {
                                                                             ratio:
                                                                                 settingController.cropRatio['profile'],
                                                                             colors: colors);
-                                                                        await CachedNetworkImage.evictFromCache(
-                                                                            "${controller.getProfileLink(data.value.docLinks, editable: isEditable())}");
+                                                                        settingController.clearImageCache(
+                                                                            url:
+                                                                                "${controller.getProfileLink(data.value.docLinks, editable: isEditable())}");
                                                                         if (img !=
                                                                             null)
                                                                           edit({
@@ -531,8 +532,8 @@ class ClubDetails extends StatelessWidget {
                                                   .toList();
 
                                               if (index + 1 <= docs.length)
-                                                await CachedNetworkImage
-                                                    .evictFromCache(
+                                                settingController.clearImageCache(
+                                                    url:
                                                         "${Variables.LINK_STORAGE}/${data.value.docLinks[index]['type_id']}/${data.value.docLinks[index]['id']}.jpg");
 
                                               edit({
@@ -802,6 +803,9 @@ class ClubDetails extends StatelessWidget {
     Club? res = await controller.find({'id': data.value.id, 'panel': '1'});
 
     if (res != null) {
+      settingController.clearImageCache(
+          url:
+          "${controller.getProfileLink(data.value.docLinks, editable: isEditable())}");
       this.data.value = res;
 
       if (index != -1) controller.data[index] = data.value;

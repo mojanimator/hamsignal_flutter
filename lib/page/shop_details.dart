@@ -222,8 +222,8 @@ class ShopDetails extends StatelessWidget {
                                                                           String?
                                                                               img =
                                                                               await settingController.pickAndCrop(ratio: settingController.cropRatio['logo'], colors: colors);
-                                                                          await CachedNetworkImage.evictFromCache(
-                                                                              "${controller.getProfileLink(data.value.docLinks)}");
+                                                                          settingController.clearImageCache(
+                                                                              url: "${controller.getProfileLink(data.value.docLinks)}");
                                                                           if (img !=
                                                                               null)
                                                                             edit({
@@ -456,7 +456,7 @@ class ShopDetails extends StatelessWidget {
                                                                             String?
                                                                                 img =
                                                                                 await settingController.pickAndCrop(ratio: settingController.cropRatio['license'], colors: colors);
-                                                                            await CachedNetworkImage.evictFromCache("${controller.getProfileLink(data.value.docLinks, type: 'license')}");
+                                                                            settingController.clearImageCache(url: "${controller.getProfileLink(data.value.docLinks, type: 'license')}");
                                                                             if (img !=
                                                                                 null)
                                                                               edit({
@@ -1064,6 +1064,9 @@ class ShopDetails extends StatelessWidget {
     Shop? res = await controller.find({'id': data.value.id, 'panel': '1'});
 
     if (res != null) {
+      settingController.clearImageCache(
+          url:
+              "${controller.getProfileLink(data.value.docLinks, type: 'license')}");
       this.data.value = res;
       productController.getData(param: {
         'page': 'clear',

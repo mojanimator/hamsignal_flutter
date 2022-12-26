@@ -34,20 +34,30 @@ class ApiProvider extends GetConnect {
             'Authorization': ACCESS_TOKEN != null ? 'Bearer $ACCESS_TOKEN' : ''
           }
         },
+      ).timeout(
+        Duration(seconds: 60),
+        onTimeout: () {
+          print("timeout get");
+          return Future.value(null);
+        },
       );
     else
       response = await post(url, FormData(params),
-          headers: {
-            // "Content-Type": "application/json",
-            "Accept": "application/json",
-            ...headers,
-            ...{
-              'Authorization':
-                  ACCESS_TOKEN != null ? 'Bearer $ACCESS_TOKEN' : ''
-            }
-          },
-          uploadProgress: (percent) =>
-              onProgress != null ? onProgress(percent) : null);
+              headers: {
+                // "Content-Type": "application/json",
+                "Accept": "application/json",
+                ...headers,
+                ...{
+                  'Authorization':
+                      ACCESS_TOKEN != null ? 'Bearer $ACCESS_TOKEN' : ''
+                }
+              },
+              uploadProgress: (percent) =>
+                  onProgress != null ? onProgress(percent) : null)
+          .timeout(Duration(seconds: 60), onTimeout: () {
+        print("timeout post");
+        return Future.value(null);
+      });
 
     // if (url.contains('setting')) print(response.bodyString);
     // if (url.contains('login')) print(response.bodyString);

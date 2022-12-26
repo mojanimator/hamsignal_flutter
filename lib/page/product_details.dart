@@ -352,8 +352,9 @@ class ProductDetails extends StatelessWidget {
                                                   .toList();
 
                                               if (index + 1 <= docs.length)
-                                            await    CachedNetworkImage.evictFromCache(
-                                                    "${Variables.LINK_STORAGE}/${data.value.docLinks[index]['type_id']}/${data.value.docLinks[index]['id']}.jpg");
+                                                settingController.clearImageCache(
+                                                    url:"${Variables.LINK_STORAGE}/${data.value.docLinks[index]['type_id']}/${data.value.docLinks[index]['id']}.jpg");
+
 
                                               edit({
                                                 'img': img,

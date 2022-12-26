@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dabel_sport/controller/APIProvider.dart';
 import 'package:dabel_sport/controller/BlogController.dart';
 import 'package:dabel_sport/controller/CoachController.dart';
@@ -591,5 +592,12 @@ class SettingController extends GetxController
           break;
       }
     }
+  }
+
+  Future<dynamic> clearImageCache({required String url}) async {
+    // apiProvider.fetch(url,
+    //     method: 'get',
+    //     headers: {'Pragma': 'no-cache', 'Cache-Control': 'no-cache, no-store'});
+    return await CachedNetworkImage.evictFromCache(url);
   }
 }

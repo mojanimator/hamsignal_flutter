@@ -201,17 +201,16 @@ class CoachDetails extends StatelessWidget {
                                                                                 settingController.cropRatio['profile'],
                                                                             colors: colors);
 
-                                                                        await CachedNetworkImage.evictFromCache(controller.getProfileLink(data
-                                                                            .value
-                                                                            .docLinks));
-
                                                                         data.value
                                                                             .docLinks
                                                                             ?.sort((a, b) =>
                                                                                 b['type_id'].compareTo(a['type_id']));
+                                                                        settingController.clearImageCache(
+                                                                            url: controller.getProfileLink(data.value.docLinks));
+
                                                                         if (img !=
                                                                             null)
-                                                                          edit({
+                                                                          await edit({
                                                                             'img':
                                                                                 img,
                                                                             'cmnd':
@@ -738,6 +737,9 @@ class CoachDetails extends StatelessWidget {
     Coach? res = await controller.find({'id': data.value.id, 'panel': '1'});
 
     if (res != null) {
+        settingController.clearImageCache(
+          url: controller.getProfileLink(data.value.docLinks));
+
       this.data.value = res;
       if (data.value.born_at != null)
         bornAt.value = Jalali.fromDateTime(
