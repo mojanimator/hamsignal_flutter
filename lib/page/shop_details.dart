@@ -11,6 +11,7 @@ import 'package:dabel_sport/model/Shop.dart';
 import 'package:dabel_sport/page/product_create.dart';
 import 'package:dabel_sport/widget/MyMap.dart';
 import 'package:dabel_sport/widget/mini_card.dart';
+import 'package:dabel_sport/widget/report_dialog.dart';
 import 'package:dabel_sport/widget/shakeanimation.dart';
 import 'package:dabel_sport/widget/subscribe_dialog.dart';
 import 'package:dabel_sport/widget/vitrin_products.dart';
@@ -34,8 +35,10 @@ class ShopDetails extends StatelessWidget {
 
   RxDouble uploadPercent = RxDouble(0.0);
   RxBool loading = RxBool(false);
-
+  RxString profileUrl = RxString('');
+  RxString licenceUrl = RxString('');
   final ProductController productController = ProductController();
+  Rx<Map<String, String>> cacheHeaders = Rx<Map<String, String>>({});
 
   ShopDetails({required data, MaterialColor? colors, int this.index = -1}) {
     this.colors = colors ?? styleController.cardCoachColors;
@@ -58,6 +61,9 @@ class ShopDetails extends StatelessWidget {
       //   }
       // });
     });
+    profileUrl.value = controller.getProfileLink(this.data.value.docLinks);
+    licenceUrl.value =
+        controller.getProfileLink(this.data.value.docLinks, type: 'license');
   }
 
   @override
@@ -80,6 +86,7 @@ class ShopDetails extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       CachedNetworkImage(
+                        httpHeaders: cacheHeaders.value,
                         height: Get.height / 3 +
                             styleController.cardBorderRadius * 2,
                         imageBuilder: (context, imageProvider) => Container(
@@ -100,8 +107,7 @@ class ShopDetails extends StatelessWidget {
                             ),
                           ),
                         ),
-                        imageUrl:
-                            "${controller.getProfileLink(data.value.docLinks)}",
+                        imageUrl: profileUrl.value,
                       ),
                       Expanded(
                         flex: 2,
@@ -165,10 +171,14 @@ class ShopDetails extends StatelessWidget {
                                                                   InteractiveViewer(
                                                                 child:
                                                                     CachedNetworkImage(
+                                                                  httpHeaders:
+                                                                      cacheHeaders
+                                                                          .value,
                                                                   fit: BoxFit
                                                                       .contain,
                                                                   imageUrl:
-                                                                      "${controller.getProfileLink(data.value.docLinks)}",
+                                                                      profileUrl
+                                                                          .value,
                                                                   useOldImageOnUrlChange:
                                                                       true,
                                                                 ),
@@ -225,8 +235,9 @@ class ShopDetails extends StatelessWidget {
                                                                           settingController.clearImageCache(
                                                                               url: "${controller.getProfileLink(data.value.docLinks)}");
                                                                           if (img !=
-                                                                              null)
-                                                                            edit({
+                                                                              null) {
+                                                                            Get.back();
+                                                                            await edit({
                                                                               'img': img,
                                                                               'cmnd': 'upload-img',
                                                                               'replace': true,
@@ -234,6 +245,13 @@ class ShopDetails extends StatelessWidget {
                                                                               'id': settingController.getDocId(data.value.docLinks, 'logo'),
                                                                               'data_id': "${data.value.id}"
                                                                             });
+                                                                            cacheHeaders.value =
+                                                                                {
+                                                                              'Cache-Control': 'max-age=0, no-cache, no-store'
+                                                                            };
+                                                                            profileUrl.value =
+                                                                                controller.getProfileLink(this.data.value.docLinks);
+                                                                          }
                                                                         },
                                                                         style: ButtonStyle(
                                                                             shape: MaterialStateProperty.all(
@@ -267,12 +285,13 @@ class ShopDetails extends StatelessWidget {
                                               child: Stack(
                                                 children: [
                                                   CachedNetworkImage(
+                                                    httpHeaders:
+                                                        cacheHeaders.value,
                                                     height: styleController
                                                         .imageHeight,
                                                     width: styleController
                                                         .imageHeight,
-                                                    imageUrl:
-                                                        "${controller.getProfileLink(data.value.docLinks)}",
+                                                    imageUrl: profileUrl.value,
                                                     imageBuilder: (context,
                                                             imageProvider) =>
                                                         Container(
@@ -399,10 +418,14 @@ class ShopDetails extends StatelessWidget {
                                                                     InteractiveViewer(
                                                                   child:
                                                                       CachedNetworkImage(
+                                                                    httpHeaders:
+                                                                        cacheHeaders
+                                                                            .value,
                                                                     fit: BoxFit
                                                                         .contain,
                                                                     imageUrl:
-                                                                        "${controller.getProfileLink(data.value.docLinks, type: 'license')}",
+                                                                        licenceUrl
+                                                                            .value,
                                                                     useOldImageOnUrlChange:
                                                                         true,
                                                                   ),
@@ -456,10 +479,11 @@ class ShopDetails extends StatelessWidget {
                                                                             String?
                                                                                 img =
                                                                                 await settingController.pickAndCrop(ratio: settingController.cropRatio['license'], colors: colors);
-                                                                            settingController.clearImageCache(url: "${controller.getProfileLink(data.value.docLinks, type: 'license')}");
+
                                                                             if (img !=
-                                                                                null)
-                                                                              edit({
+                                                                                null) {
+                                                                              Get.back();
+                                                                              await edit({
                                                                                 'img': img,
                                                                                 'cmnd': 'upload-img',
                                                                                 'replace': true,
@@ -467,6 +491,12 @@ class ShopDetails extends StatelessWidget {
                                                                                 'id': settingController.getDocId(data.value.docLinks, 'license'),
                                                                                 'data_id': "${data.value.id}"
                                                                               });
+                                                                              cacheHeaders.value = {
+                                                                                'Cache-Control': 'max-age=0, no-cache, no-store'
+                                                                              };
+                                                                              licenceUrl.value = controller.getProfileLink(this.data.value.docLinks, type: 'license');
+                                                                              settingController.clearImageCache(url: licenceUrl.value);
+                                                                            }
                                                                           },
                                                                           style: ButtonStyle(
                                                                               shape: MaterialStateProperty.all(
@@ -500,12 +530,14 @@ class ShopDetails extends StatelessWidget {
                                                 child: Stack(
                                                   children: [
                                                     CachedNetworkImage(
+                                                      httpHeaders:
+                                                          cacheHeaders.value,
                                                       height: styleController
                                                           .imageHeight,
                                                       width: styleController
                                                           .imageHeight,
                                                       imageUrl:
-                                                          "${controller.getProfileLink(data.value.docLinks, type: 'license')}",
+                                                          licenceUrl.value,
                                                       imageBuilder: (context,
                                                               imageProvider) =>
                                                           Container(
@@ -1005,6 +1037,11 @@ class ShopDetails extends StatelessWidget {
                                                       }),
                                                   styleController:
                                                       styleController),
+                                              ReportDialog(
+                                                colors: colors,
+                                                text:
+                                                "${Variables.DOMAIN}/shop/${data.value.id}",
+                                              )
                                             ],
                                           ),
                                         ],
@@ -1043,8 +1080,9 @@ class ShopDetails extends StatelessWidget {
         });
 
     if (res != null) {
-      if (!params.keys.contains('active') && !params.keys.contains('times'))
-        Get.back();
+      if (!params.keys.contains('img') &&
+          !params.keys.contains('active') &&
+          !params.keys.contains('times')) Get.back();
       settingController.helper.showToast(
           msg: res['msg'] ?? 'edited_successfully'.tr, status: 'success');
       refresh();
@@ -1064,14 +1102,18 @@ class ShopDetails extends StatelessWidget {
     Shop? res = await controller.find({'id': data.value.id, 'panel': '1'});
 
     if (res != null) {
-      settingController.clearImageCache(
-          url:
-              "${controller.getProfileLink(data.value.docLinks, type: 'license')}");
       this.data.value = res;
+      // cacheHeaders.value = {'Cache-Control': 'max-age=0, no-cache, no-store'};
+      // profileUrl.value = controller.getProfileLink(this.data.value.docLinks);
+      // licenceUrl.value =
+      //     controller.getProfileLink(this.data.value.docLinks, type: 'license');
+
+      // settingController.clearImageCache(url: licenceUrl.value);
+      // settingController.clearImageCache(url: profileUrl.value);
       productController.getData(param: {
         'page': 'clear',
         'shop': this.data.value.id,
-        ...isEditable() ? {'panel': '1'} : {}
+        ...(isEditable() ? {'panel': '1'} : {})
       });
       if (index != -1) controller.data[index] = data.value;
     }

@@ -12,6 +12,7 @@ import 'package:dabel_sport/model/Shop.dart';
 import 'package:dabel_sport/page/shop_details.dart';
 import 'package:dabel_sport/widget/MyGallery.dart';
 import 'package:dabel_sport/widget/mini_card.dart';
+import 'package:dabel_sport/widget/report_dialog.dart';
 import 'package:dabel_sport/widget/shakeanimation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class ProductDetails extends StatelessWidget {
 
   RxDouble uploadPercent = RxDouble(0.0);
   RxBool loading = RxBool(false);
+  Rx<Map<String, String>> cacheHeaders = Rx<Map<String, String>>({});
 
   ProductDetails({required data, MaterialColor? colors, int this.index = -1}) {
     this.colors = colors ?? styleController.cardCoachColors;
@@ -61,6 +63,7 @@ class ProductDetails extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       CachedNetworkImage(
+                        httpHeaders: cacheHeaders.value,
                         height: Get.height / 3 +
                             styleController.cardBorderRadius * 2,
                         imageBuilder: (context, imageProvider) => Container(
@@ -351,25 +354,31 @@ class ProductDetails extends StatelessWidget {
                                                               'product'))
                                                   .toList();
 
-                                              if (index + 1 <= docs.length)
+                                              if (index + 1 <= docs.length) {
+                                                Get.back();
+                                                edit({
+                                                  'img': img,
+                                                  'cmnd': file == null
+                                                      ? 'delete-img'
+                                                      : 'upload-img',
+                                                  'replace':
+                                                      index + 1 <= docs.length,
+                                                  'type': settingController
+                                                      .getDocType('product'),
+                                                  'id': index + 1 <= docs.length
+                                                      ? docs[index]['id']
+                                                      : null,
+                                                  'data_id': "${data.value.id}"
+                                                });
+
                                                 settingController.clearImageCache(
-                                                    url:"${Variables.LINK_STORAGE}/${data.value.docLinks[index]['type_id']}/${data.value.docLinks[index]['id']}.jpg");
-
-
-                                              edit({
-                                                'img': img,
-                                                'cmnd': file == null
-                                                    ? 'delete-img'
-                                                    : 'upload-img',
-                                                'replace':
-                                                    index + 1 <= docs.length,
-                                                'type': settingController
-                                                    .getDocType('product'),
-                                                'id': index + 1 <= docs.length
-                                                    ? docs[index]['id']
-                                                    : null,
-                                                'data_id': "${data.value.id}"
-                                              });
+                                                    url:
+                                                        "${Variables.LINK_STORAGE}/${data.value.docLinks[index]['type_id']}/${data.value.docLinks[index]['id']}.jpg");
+                                                cacheHeaders.value = {
+                                                  'Cache-Control':
+                                                      'max-age=0, no-cache, no-store'
+                                                };
+                                              }
                                             },
                                           ),
                                           Column(
@@ -563,6 +572,11 @@ class ProductDetails extends StatelessWidget {
                                                       }),
                                                   styleController:
                                                       styleController),
+                                              ReportDialog(
+                                                colors: colors,
+                                                text:
+                                                    "${Variables.DOMAIN}/product/${data.value.id}",
+                                              )
                                             ],
                                           ),
                                         ],
@@ -601,7 +615,8 @@ class ProductDetails extends StatelessWidget {
         });
 
     if (res != null) {
-      if (!params.keys.contains('active')) Get.back();
+      if (!params.keys.contains('img') && !params.keys.contains('active'))
+        Get.back();
       settingController.helper.showToast(
           msg: res['msg'] ?? 'edited_successfully'.tr, status: 'success');
       refresh();

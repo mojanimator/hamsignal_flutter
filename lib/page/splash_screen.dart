@@ -51,11 +51,13 @@ class SplashScreen extends StatelessWidget {
               Text(
                 'check_network'.tr,
                 style: styleController.textHeaderLightStyle,
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: styleController.cardMargin),
               TextButton(
                   onPressed: settingController.getData,
-                  style: styleController.buttonStyle(styleController.primaryColor),
+                  style:
+                      styleController.buttonStyle(styleController.primaryColor),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       vertical: styleController.cardMargin / 2,

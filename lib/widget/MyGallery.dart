@@ -19,7 +19,7 @@ class MyGallery extends StatelessWidget {
   bool autoplay = false;
   bool fullScreen = false;
   MaterialColor colors;
-  int  current=0;
+  int current = 0;
   int limit;
 
   double? ratio = 1.0;
@@ -30,6 +30,7 @@ class MyGallery extends StatelessWidget {
   SwiperController swiperController = SwiperController();
   final ImagePicker _picker = ImagePicker();
   Function(dynamic index, File? file)? onChanged;
+  Rx<Map<String, String>> cacheHeaders = Rx<Map<String, String>>({});
 
   MyGallery({
     Key? key,
@@ -39,7 +40,7 @@ class MyGallery extends StatelessWidget {
     required this.fullScreen,
     required this.colors,
     required this.infoText,
-    this.current=0,
+    this.current = 0,
     this.ratio,
     required this.styleController,
     String this.mode = 'view',
@@ -211,6 +212,9 @@ class MyGallery extends StatelessWidget {
                                                                   .runtimeType ==
                                                               String
                                                           ? CachedNetworkImage(
+                                                              httpHeaders:
+                                                                  cacheHeaders
+                                                                      .value,
                                                               imageUrl:
                                                                   items[index]
                                                                       .value,
@@ -402,11 +406,18 @@ class MyGallery extends StatelessWidget {
                                                                               .value =
                                                                           File(cp
                                                                               .path);
+                                                                      cacheHeaders
+                                                                          .value = {
+                                                                        'Cache-Control':
+                                                                            'max-age=0, no-cache, no-store'
+                                                                      };
                                                                       if (onChanged !=
-                                                                          null)
+                                                                          null) {
+
                                                                         onChanged!(
                                                                             index,
                                                                             items[index].value);
+                                                                      }
                                                                     }
                                                                   }
                                                                 },
@@ -454,9 +465,10 @@ class MyGallery extends StatelessWidget {
                                                                     () async {
                                                                   Get.dialog(
                                                                       Center(
-                                                                        child: Material(
-                                                                          color: Colors
-                                                                              .transparent,
+                                                                        child:
+                                                                            Material(
+                                                                          color:
+                                                                              Colors.transparent,
                                                                           child:
                                                                               Card(
                                                                             child:
@@ -488,9 +500,13 @@ class MyGallery extends StatelessWidget {
                                                                                               ))),
                                                                                           onPressed: () async {
                                                                                             items[index].value = '';
-
-                                                                                            onChanged != null ? onChanged!(index, null) : null;
-                                                                                            Get.back();
+                                                                                            cacheHeaders.value = {
+                                                                                              'Cache-Control': 'max-age=0, no-cache, no-store'
+                                                                                            };
+                                                                                            if(onChanged != null) {
+                                                                                              Get.back();
+                                                                                              onChanged!(index, null);
+                                                                                            }
                                                                                           },
                                                                                           child: Icon(Icons.check, color: Colors.white),
                                                                                         ),
@@ -668,6 +684,7 @@ class MyGallery extends StatelessWidget {
                                       child: items[index].value.runtimeType ==
                                               String
                                           ? CachedNetworkImage(
+                                              httpHeaders: cacheHeaders.value,
                                               imageUrl: items[index].value,
                                               imageBuilder:
                                                   (context, imageProvider) {

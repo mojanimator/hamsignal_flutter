@@ -8,6 +8,7 @@ import 'package:dabel_sport/helper/styles.dart';
 import 'package:dabel_sport/helper/variables.dart';
 import 'package:dabel_sport/model/Coach.dart';
 import 'package:dabel_sport/widget/mini_card.dart';
+import 'package:dabel_sport/widget/report_dialog.dart';
 import 'package:dabel_sport/widget/shakeanimation.dart';
 import 'package:dabel_sport/widget/subscribe_dialog.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,15 +31,20 @@ class CoachDetails extends StatelessWidget {
   late Rx<JalaliFormatter> bornAt;
   RxDouble uploadPercent = RxDouble(0.0);
   RxBool loading = RxBool(false);
+  RxString profileUrl = RxString('');
+  Rx<Map<String, String>> cacheHeaders = Rx<Map<String, String>>({});
 
   CoachDetails({required data, MaterialColor? colors, int this.index = -1}) {
     this.colors = colors ?? styleController.cardCoachColors;
     titleStyle =
         styleController.textMediumStyle.copyWith(color: this.colors[900]);
     this.data = Rx<Coach>(data);
+
     bornAt = Rx<JalaliFormatter>(Jalali.fromDateTime(
             DateTime.fromMillisecondsSinceEpoch(data.born_at * 1000))
         .formatter);
+
+    profileUrl.value = controller.getProfileLink(this.data.value.docLinks);
   }
 
   @override
@@ -61,6 +67,7 @@ class CoachDetails extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       CachedNetworkImage(
+                        httpHeaders: cacheHeaders.value,
                         height: Get.height / 3 +
                             styleController.cardBorderRadius * 2,
                         imageBuilder: (context, imageProvider) => Container(
@@ -81,8 +88,7 @@ class CoachDetails extends StatelessWidget {
                             ),
                           ),
                         ),
-                        imageUrl:
-                            "${controller.getProfileLink(data.value.docLinks)}",
+                        imageUrl: profileUrl.value,
                       ),
                       Expanded(
                         flex: 2,
@@ -143,8 +149,12 @@ class CoachDetails extends StatelessWidget {
                                                                 InteractiveViewer(
                                                               child:
                                                                   CachedNetworkImage(
+                                                                httpHeaders:
+                                                                    cacheHeaders
+                                                                        .value,
                                                                 imageUrl:
-                                                                    "${controller.getProfileLink(data.value.docLinks)}",
+                                                                    profileUrl
+                                                                        .value,
                                                                 useOldImageOnUrlChange:
                                                                     true,
                                                               ),
@@ -205,11 +215,10 @@ class CoachDetails extends StatelessWidget {
                                                                             .docLinks
                                                                             ?.sort((a, b) =>
                                                                                 b['type_id'].compareTo(a['type_id']));
-                                                                        settingController.clearImageCache(
-                                                                            url: controller.getProfileLink(data.value.docLinks));
 
                                                                         if (img !=
-                                                                            null)
+                                                                            null) {
+                                                                          Get.back();
                                                                           await edit({
                                                                             'img':
                                                                                 img,
@@ -222,6 +231,14 @@ class CoachDetails extends StatelessWidget {
                                                                             'data_id':
                                                                                 "${data.value.id}"
                                                                           });
+                                                                          cacheHeaders.value =
+                                                                              {
+                                                                            'Cache-Control':
+                                                                                'max-age=0, no-cache, no-store'
+                                                                          };
+                                                                          settingController.clearImageCache(
+                                                                              url: controller.getProfileLink(data.value.docLinks));
+                                                                        }
                                                                       },
                                                                       style: ButtonStyle(
                                                                           shape: MaterialStateProperty.all(
@@ -255,12 +272,12 @@ class CoachDetails extends StatelessWidget {
                                         child: ShakeWidget(
                                           child: Card(
                                             child: CachedNetworkImage(
+                                              httpHeaders: cacheHeaders.value,
                                               height:
                                                   styleController.imageHeight,
                                               width:
                                                   styleController.imageHeight,
-                                              imageUrl:
-                                                  "${controller.getProfileLink(data.value.docLinks)}",
+                                              imageUrl: profileUrl.value,
                                               imageBuilder:
                                                   (context, imageProvider) =>
                                                       Container(
@@ -667,6 +684,11 @@ class CoachDetails extends StatelessWidget {
                                                         data.value.description,
                                                   }),
                                               styleController: styleController),
+                                          ReportDialog(
+                                            colors: colors,
+                                            text:
+                                                "${Variables.DOMAIN}/coach/${data.value.id}",
+                                          )
                                         ],
                                       )),
                                 ),
@@ -715,7 +737,8 @@ class CoachDetails extends StatelessWidget {
         });
     // print(params);
     if (res != null) {
-      if (!params.keys.contains('active') &&
+      if (!params.keys.contains('img') &&
+          !params.keys.contains('active') &&
           !params.keys.contains('is_man') &&
           !params.keys.contains('video')) Get.back();
       settingController.helper.showToast(
@@ -737,10 +760,11 @@ class CoachDetails extends StatelessWidget {
     Coach? res = await controller.find({'id': data.value.id, 'panel': '1'});
 
     if (res != null) {
-        settingController.clearImageCache(
-          url: controller.getProfileLink(data.value.docLinks));
-
       this.data.value = res;
+      // cacheHeaders.value = {'Cache-Control': 'max-age=0, no-cache, no-store'};
+      // settingController.clearImageCache(url: profileUrl.value);
+      // profileUrl.value = controller.getProfileLink(this.data.value.docLinks);
+
       if (data.value.born_at != null)
         bornAt.value = Jalali.fromDateTime(
                 DateTime.fromMillisecondsSinceEpoch(data.value.born_at! * 1000))

@@ -1,7 +1,7 @@
 class Variables {
   // static String DOMAIN = "http://192.168.44.2:8000";
 
-  static String DOMAIN = "http://2sport.ir";
+  static String DOMAIN = "https://2sport.ir";
 
   static String NOIMAGE_LINK = "${DOMAIN}/img/noimage.png";
   static String LINK_POLICY = "${DOMAIN}/policy";

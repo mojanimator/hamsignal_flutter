@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:get/get_connect/connect.dart';
 
 class ApiProvider extends GetConnect {
@@ -38,9 +39,10 @@ class ApiProvider extends GetConnect {
         Duration(seconds: 60),
         onTimeout: () {
           print("timeout get");
-          return Future.value(null);
+          return Future.value(Response(body: {'errors': 'check_network'.tr}));
         },
-      );
+      ).catchError((error, stacktrace) =>
+          Response(body: {'errors': 'check_network'.tr}));
     else
       response = await post(url, FormData(params),
               headers: {
@@ -56,8 +58,9 @@ class ApiProvider extends GetConnect {
                   onProgress != null ? onProgress(percent) : null)
           .timeout(Duration(seconds: 60), onTimeout: () {
         print("timeout post");
-        return Future.value(null);
-      });
+        return Future.value(Response(body: {'errors': 'check_network'.tr}));
+      }).catchError((error, stacktrace) =>
+              Response(body: {'errors': 'check_network'.tr}));
 
     // if (url.contains('setting')) print(response.bodyString);
     // if (url.contains('login')) print(response.bodyString);

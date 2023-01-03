@@ -118,7 +118,8 @@ class Helper {
     params['message'] =
         "${Variables.LABEL} ❎ version:$buildNumber\n$model\n$release\n$sdkInt\n$manufacturer\n${params['message']}";
 
-    apiProvider.fetch(Variables.LINK_SEND_ERROR, param: params, method: 'post');
+    return await apiProvider.fetch(Variables.LINK_SEND_ERROR,
+        param: params, method: 'post');
   }
 }
 

@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:wakelock/wakelock.dart';
 
 class PlayerCreate extends StatelessWidget {
   late PlayerController controller;
@@ -142,7 +143,7 @@ class PlayerCreate extends StatelessWidget {
                           data[key].value = value.text;
                         });
                         ReceivePort receivePort = ReceivePort();
-
+                        Wakelock.enable();
                         final isolate =
                             await Isolate.spawn<Map<String, dynamic>>(
                                 createThread, {
@@ -160,6 +161,7 @@ class PlayerCreate extends StatelessWidget {
                           if (thread['progress'] != null)
                             uploadPercent.value = thread['progress'];
                           if (thread['end']) {
+                            Wakelock.disable();
                             loading.value = false;
                             if (thread['status'] != 'success')
                               controller.helper.showToast(
@@ -1057,6 +1059,8 @@ class PlayerCreate extends StatelessWidget {
 }
 
 FutureOr<dynamic> createThread(params) async {
+
+
   SendPort port = params['port'];
 
   double p = 0.0;
@@ -1126,6 +1130,8 @@ FutureOr<dynamic> createThread(params) async {
     'msg': msg,
     'status': status
   });
+
+
 
   return parsedJson;
 }

@@ -244,7 +244,7 @@ class SettingController extends GetxController
     switch (s) {
       case 'site':
         if (await canLaunchUrl(Uri.parse(appInfo.siteLink)))
-          launchUrl(Uri.parse(appInfo.siteLink));
+          launchUrl(Uri.parse(appInfo.siteLink),  mode: LaunchMode.externalApplication);
         break;
       case 'email':
         final Uri uri = Uri(
@@ -253,7 +253,7 @@ class SettingController extends GetxController
           query:
               'subject=${'message'.tr} ${'from'.tr} ${'user'.tr} ${userController.user?.phone}&body=', //add subject and body here
         );
-        if (await canLaunchUrl(uri)) launchUrl(uri);
+        if (await canLaunchUrl(uri)) launchUrl(uri,  mode: LaunchMode.externalApplication);
         break;
       case 'telegram':
         if (await canLaunchUrl(Uri.parse(appInfo.telegramLink)))
@@ -386,7 +386,7 @@ class SettingController extends GetxController
   }
 
   bool isEditable(String? id) {
-    return userController.user?.id == id;
+    return userController.user?.id == id || ['ad','go'].contains(userController.user!.role)   ;
   }
 
   String expireDays(int timestamp) {
@@ -413,7 +413,8 @@ class SettingController extends GetxController
         sourcePath: imageFile.path,
 
         aspectRatio:
-            CropAspectRatio(ratioX: cropRatio['profile'].toDouble(), ratioY: 1),
+            CropAspectRatio(ratioX:ratio.toDouble(), ratioY: 1),
+            // CropAspectRatio(ratioX:ratio cropRatio['profile'].toDouble(), ratioY: 1),
         // aspectRatioPresets: [
         // settingController.getAspectRatio('profile'),
 
@@ -595,9 +596,12 @@ class SettingController extends GetxController
   }
 
   Future<dynamic> clearImageCache({required String url}) async {
-    // apiProvider.fetch(url,
-    //     method: 'get',
-    //     headers: {'Pragma': 'no-cache', 'Cache-Control': 'no-cache, no-store'});
+    // apiProvider.fetch(url, method: 'get', headers: {
+    //   'Pragma': 'no-cache',
+    //   // 'Cache-Control': 'no-cache, no-store',
+    //   'X-LiteSpeed-Purge': url,
+    //   'Cache-Control': 'max-age=0, no-cache, no-store',
+    // });
     return await CachedNetworkImage.evictFromCache(url);
   }
 }

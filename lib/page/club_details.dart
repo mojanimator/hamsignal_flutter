@@ -11,6 +11,7 @@ import 'package:dabel_sport/widget/MyGallery.dart';
 import 'package:dabel_sport/widget/MyMap.dart';
 import 'package:dabel_sport/widget/club_times.dart';
 import 'package:dabel_sport/widget/mini_card.dart';
+import 'package:dabel_sport/widget/report_dialog.dart';
 import 'package:dabel_sport/widget/shakeanimation.dart';
 import 'package:dabel_sport/widget/subscribe_dialog.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,12 +34,17 @@ class ClubDetails extends StatelessWidget {
 
   RxDouble uploadPercent = RxDouble(0.0);
   RxBool loading = RxBool(false);
+  RxString profileUrl = RxString('');
+  Rx<Map<String, String>> cacheHeaders = Rx<Map<String, String>>({});
 
   ClubDetails({required data, MaterialColor? colors, int this.index = -1}) {
     this.colors = colors ?? styleController.cardCoachColors;
     titleStyle =
         styleController.textMediumStyle.copyWith(color: this.colors[900]);
     this.data = Rx<Club>(data);
+
+    profileUrl.value = controller.getProfileLink(this.data.value.docLinks,
+        editable: isEditable());
   }
 
   @override
@@ -61,6 +67,7 @@ class ClubDetails extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       CachedNetworkImage(
+                        httpHeaders: cacheHeaders.value,
                         height: Get.height / 3 +
                             styleController.cardBorderRadius * 2,
                         imageBuilder: (context, imageProvider) => Container(
@@ -143,10 +150,14 @@ class ClubDetails extends StatelessWidget {
                                                                 InteractiveViewer(
                                                               child:
                                                                   CachedNetworkImage(
+                                                                httpHeaders:
+                                                                    cacheHeaders
+                                                                        .value,
                                                                 fit: BoxFit
                                                                     .contain,
                                                                 imageUrl:
-                                                                    "${controller.getProfileLink(data.value.docLinks, editable: isEditable())}",
+                                                                    profileUrl
+                                                                        .value,
                                                                 useOldImageOnUrlChange:
                                                                     true,
                                                               ),
@@ -202,12 +213,11 @@ class ClubDetails extends StatelessWidget {
                                                                             ratio:
                                                                                 settingController.cropRatio['profile'],
                                                                             colors: colors);
-                                                                        settingController.clearImageCache(
-                                                                            url:
-                                                                                "${controller.getProfileLink(data.value.docLinks, editable: isEditable())}");
+
                                                                         if (img !=
-                                                                            null)
-                                                                          edit({
+                                                                            null) {
+                                                                          Get.back();
+                                                                          await edit({
                                                                             'img':
                                                                                 img,
                                                                             'cmnd':
@@ -221,6 +231,14 @@ class ClubDetails extends StatelessWidget {
                                                                             'data_id':
                                                                                 "${data.value.id}"
                                                                           });
+                                                                          cacheHeaders.value =
+                                                                              {
+                                                                            'Cache-Control':
+                                                                                'max-age=0, no-cache, no-store'
+                                                                          };
+                                                                          settingController.clearImageCache(
+                                                                              url: "${controller.getProfileLink(data.value.docLinks, editable: isEditable())}");
+                                                                        }
                                                                       },
                                                                       style: ButtonStyle(
                                                                           shape: MaterialStateProperty.all(
@@ -256,12 +274,13 @@ class ClubDetails extends StatelessWidget {
                                             child: Stack(
                                               children: [
                                                 CachedNetworkImage(
+                                                  httpHeaders:
+                                                      cacheHeaders.value,
                                                   height: styleController
                                                       .imageHeight,
                                                   width: styleController
                                                       .imageHeight,
-                                                  imageUrl:
-                                                      "${controller.getProfileLink(data.value.docLinks, editable: isEditable())}",
+                                                  imageUrl: profileUrl.value,
                                                   imageBuilder: (context,
                                                           imageProvider) =>
                                                       Container(
@@ -531,11 +550,12 @@ class ClubDetails extends StatelessWidget {
                                                           .getDocType('club'))
                                                   .toList();
 
-                                              if (index + 1 <= docs.length)
+                                              if (index + 1 <=
+                                                  docs.length) //replace
                                                 settingController.clearImageCache(
                                                     url:
                                                         "${Variables.LINK_STORAGE}/${data.value.docLinks[index]['type_id']}/${data.value.docLinks[index]['id']}.jpg");
-
+                                              Get.back();
                                               edit({
                                                 'img': img,
                                                 'cmnd': file == null
@@ -732,6 +752,11 @@ class ClubDetails extends StatelessWidget {
                                                       }),
                                                   styleController:
                                                       styleController),
+                                              ReportDialog(
+                                                colors: colors,
+                                                text:
+                                                    "${Variables.DOMAIN}/club/${data.value.id}",
+                                              )
                                             ],
                                           ),
                                         ],
@@ -782,8 +807,9 @@ class ClubDetails extends StatelessWidget {
         });
 
     if (res != null) {
-      if (!params.keys.contains('active') && !params.keys.contains('times'))
-        Get.back();
+      if (!params.keys.contains('img') &&
+          !params.keys.contains('active') &&
+          !params.keys.contains('times')) Get.back();
       settingController.helper.showToast(
           msg: res['msg'] ?? 'edited_successfully'.tr, status: 'success');
       refresh();
@@ -803,10 +829,13 @@ class ClubDetails extends StatelessWidget {
     Club? res = await controller.find({'id': data.value.id, 'panel': '1'});
 
     if (res != null) {
-      settingController.clearImageCache(
-          url:
-          "${controller.getProfileLink(data.value.docLinks, editable: isEditable())}");
       this.data.value = res;
+      // cacheHeaders.value = {'Cache-Control': 'max-age=0, no-cache, no-store'};
+      // profileUrl.value = controller.getProfileLink(this.data.value.docLinks,
+      //     editable: isEditable());
+      // settingController.clearImageCache(
+      //     url:
+      //         "${controller.getProfileLink(this.data.value.docLinks, editable: isEditable())}");
 
       if (index != -1) controller.data[index] = data.value;
     }

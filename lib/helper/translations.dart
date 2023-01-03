@@ -152,6 +152,8 @@ class MyTranslations extends Translations {
           'pay_in_browser': 'لطفا صفحه پرداخت را در مرورگر باز نمایید',
           'accept_policy': 'شرایط استفاده و حریم خصوصی را می پذیرم',
           'review': 'بررسی',
+          'report_problem': 'گزارش مشکل',
+          'send': 'ارسال',
           'title': 'Hello World %s',
         },
         'en_US': {

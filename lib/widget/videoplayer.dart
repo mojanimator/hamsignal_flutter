@@ -209,7 +209,8 @@ class _ChewiePlayerState extends State<ChewiePlayer> {
     src = videoFile?.path != null && videoFile?.path != ''
         ? "${videoFile?.path}"
         : ' ';
-    await initializePlayer();
+
+    if (videoFile != null && videoFile.path != null) await initializePlayer();
   }
 
   @override
@@ -259,7 +260,8 @@ class _ChewiePlayerState extends State<ChewiePlayer> {
                                       controller: _chewieController!,
                                     ),
                                   ),
-                                  if (widget.mode == 'create' || widget.mode == 'edit')
+                                  if (widget.mode == 'create' ||
+                                      widget.mode == 'edit')
                                     TextButton.icon(
                                         style: ButtonStyle(
                                             backgroundColor:
@@ -272,7 +274,7 @@ class _ChewiePlayerState extends State<ChewiePlayer> {
                                               fontFamily: 'Shabnam',
                                             ))),
                                         onPressed: () {
-                                          src = ' ';
+                                          // src = ' ';
                                           toggleVideo();
                                           if (widget.onRefresh != null)
                                             widget.onRefresh;
@@ -298,7 +300,10 @@ class _ChewiePlayerState extends State<ChewiePlayer> {
                                         icon: Icon(Icons.refresh),
                                         onPressed: () => toggleVideo(),
                                       ),
-                                      Text('check_network'.tr)
+                                      Text(
+                                        'check_network'.tr,
+                                        textAlign: TextAlign.center,
+                                      )
                                     ],
                                   )
                                 : Center()),
