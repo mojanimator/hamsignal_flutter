@@ -1,13 +1,13 @@
-import 'package:dabel_sport/controller/AnimationController.dart';
-import 'package:dabel_sport/controller/BlogController.dart';
-import 'package:dabel_sport/controller/SettingController.dart';
-import 'package:dabel_sport/helper/styles.dart';
-import 'package:dabel_sport/widget/filter_widgets.dart';
+import 'package:dabel_adl/controller/AnimationController.dart';
+import 'package:dabel_adl/controller/ContentController.dart';
+import 'package:dabel_adl/controller/SettingController.dart';
+import 'package:dabel_adl/helper/styles.dart';
+import 'package:dabel_adl/widget/filter_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BlogFilterSection extends StatelessWidget {
-  final BlogController controller;
+  final ContentController controller;
   late final MyTabController tabController;
 
   final MyAnimationController animationController =
@@ -29,7 +29,9 @@ class BlogFilterSection extends StatelessWidget {
             physics: AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
-                SizedBox(height: styleController.cardMargin*2,),
+                SizedBox(
+                  height: styleController.cardMargin * 2,
+                ),
                 Center(
                   child: MyDropdownButton(
                       styleController: styleController,
@@ -71,7 +73,7 @@ class BlogFilterSection extends StatelessWidget {
                                               2)),
                                 ))),
                             onPressed: () {
-                              controller.getData(param : {'page': 'clear'});
+                              controller.getData(param: {'page': 'clear'});
                             },
                             icon: Icon(Icons.search, color: Colors.white),
                             label: Text(

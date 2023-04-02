@@ -2,63 +2,46 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dabel_sport/controller/APIProvider.dart';
-import 'package:dabel_sport/controller/BlogController.dart';
-import 'package:dabel_sport/controller/CoachController.dart';
-import 'package:dabel_sport/controller/PlayerController.dart';
-import 'package:dabel_sport/controller/ProductController.dart';
-import 'package:dabel_sport/controller/ShopController.dart';
-import 'package:dabel_sport/controller/UserController.dart';
-import 'package:dabel_sport/helper/IAPPurchase.dart';
-import 'package:dabel_sport/helper/helpers.dart';
-import 'package:dabel_sport/helper/styles.dart';
-import 'package:dabel_sport/helper/variables.dart';
-import 'package:dabel_sport/model/App.dart';
-import 'package:dabel_sport/model/Blog.dart';
-import 'package:dabel_sport/model/Club.dart';
-import 'package:dabel_sport/model/Coach.dart';
-import 'package:dabel_sport/model/Player.dart';
-import 'package:dabel_sport/model/Product.dart';
-import 'package:dabel_sport/model/Shop.dart';
-import 'package:dabel_sport/page/blog_details.dart';
-import 'package:dabel_sport/page/blogs.dart';
-import 'package:dabel_sport/page/club_details.dart';
-import 'package:dabel_sport/page/clubs.dart';
-import 'package:dabel_sport/page/coach_details.dart';
-import 'package:dabel_sport/page/coaches.dart';
-import 'package:dabel_sport/page/contact_us.dart';
-import 'package:dabel_sport/page/player_details.dart';
-import 'package:dabel_sport/page/players.dart';
-import 'package:dabel_sport/page/product_details.dart';
-import 'package:dabel_sport/page/products.dart';
-import 'package:dabel_sport/page/shop_details.dart';
-import 'package:dabel_sport/page/shops.dart';
+import 'package:dabel_adl/controller/APIProvider.dart';
+import 'package:dabel_adl/controller/ContentController.dart';
+import 'package:dabel_adl/controller/LinkController.dart';
+import 'package:dabel_adl/controller/UserController.dart';
+import 'package:dabel_adl/helper/IAPPurchase.dart';
+import 'package:dabel_adl/helper/helpers.dart';
+import 'package:dabel_adl/helper/styles.dart';
+import 'package:dabel_adl/helper/variables.dart';
+import 'package:dabel_adl/model/App.dart';
+import 'package:dabel_adl/model/Club.dart';
+import 'package:dabel_adl/model/Link.dart';
+import 'package:dabel_adl/model/Player.dart';
+import 'package:dabel_adl/model/Product.dart';
+import 'package:dabel_adl/model/Shop.dart';
+import 'package:dabel_adl/page/contact_us.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
-import 'ClubController.dart';
+import '../model/Content.dart';
+import '../page/content_details.dart';
+import '../page/contents.dart';
+import 'APIController.dart';
+import 'AnimationController.dart';
 
-class SettingController extends GetxController
-    with StateMixin<Map<String, dynamic>>, GetSingleTickerProviderStateMixin {
-  late List<dynamic> _sports;
-  late List<dynamic> _shops;
-  late List<dynamic> _days;
-  late List<dynamic> _years;
-  late List<dynamic> _prices;
-  late List<dynamic> _categories;
+class SettingController extends APIController<Map<String, dynamic>>
+    with GetSingleTickerProviderStateMixin {
+  late List<dynamic> shops;
+  late List<dynamic> days;
+  late List<dynamic> years;
+  late List<dynamic> prices;
+  late List<dynamic> plans;
   late Map<String, dynamic> _keys;
+  String? payment;
 
-  List<dynamic> get categories => _categories;
-
-  set categories(List<dynamic> value) {
-    _categories = value;
-  }
-
-  late Map<String, dynamic> _cropRatio;
+  late Map<String, dynamic> cropRatio = {'profile': 1.0, 'document': null};
   late Map<String, dynamic> _limits;
   late String _chatScript;
 
@@ -68,51 +51,13 @@ class SettingController extends GetxController
     _chatScript = value;
   }
 
-  Map<String, dynamic> get limits => _limits;
+  Map<String, dynamic> get limits => {'club': 1};
 
   set limits(Map<String, dynamic> value) {
     _limits = value;
   }
 
-  Map<String, dynamic> get cropRatio => _cropRatio;
-
-  set cropRatio(Map<String, dynamic> value) {
-    _cropRatio = value;
-  }
-
   Helper helper = Get.find<Helper>();
-
-  List<dynamic> get prices => _prices;
-
-  set prices(List<dynamic> value) {
-    _prices = value;
-  }
-
-  List<dynamic> get days => _days;
-
-  set days(List<dynamic> value) {
-    _days = value;
-  }
-
-  List<dynamic> get years => _years;
-
-  set years(List<dynamic> value) {
-    _years = value;
-  }
-
-  List<dynamic> get shops => _shops;
-
-  set shops(List<dynamic> value) {
-    _shops = value;
-  }
-
-  List<dynamic> get sports => _sports;
-
-  set sports(List<dynamic> value) {
-    _sports = value;
-  }
-
-  late List<dynamic> _provinces;
 
   bool _isVisibleBottomNavigationBar = true;
 
@@ -120,13 +65,7 @@ class SettingController extends GetxController
     _isVisibleBottomNavigationBar = value;
   }
 
-  List<dynamic> get provinces => _provinces;
-
   get isVisible => _isVisibleBottomNavigationBar;
-
-  set provinces(List<dynamic> value) {
-    _provinces = value;
-  }
 
   Map<String, dynamic> get keys => _keys;
 
@@ -134,7 +73,10 @@ class SettingController extends GetxController
     _keys = value;
   }
 
-  late List<dynamic> _counties;
+  late List<dynamic> categories;
+  late List<dynamic> provinces;
+  late List<dynamic> counties;
+  late Map<String, dynamic> dates;
   late Map<String, dynamic> _docTypes;
   late int _appVersion;
   late String _appLink;
@@ -152,18 +94,6 @@ class SettingController extends GetxController
 
   set data(Map<String, dynamic> value) {
     _data = value;
-  }
-
-  List<dynamic> get counties => _counties;
-
-  set counties(List<dynamic> value) {
-    _counties = value;
-  }
-
-  Map<String, dynamic> get docTypes => _docTypes;
-
-  set docTypes(Map<String, dynamic> value) {
-    _docTypes = value;
   }
 
   int get appVersion => _appVersion;
@@ -191,50 +121,54 @@ class SettingController extends GetxController
     update();
   }
 
+  late TabController bottomSheetController;
+
   SettingController() {
     apiProvider = Get.find<ApiProvider>();
-    userController = Get.find<UserController>();
+
     styleController = Get.find<Style>();
+
+    bottomSheetController =
+        TabController(length: 5, initialIndex: currentPageIndex, vsync: this);
+    bottomSheetController.addListener(() {
+      // settingController.currentPageIndex =bottomSheetController.index;
+    });
   }
 
   @override
   onInit() async {
-    await getData();
+    await getData(params: {'market': Variables.MARKET});
     super.onInit();
   }
 
   Future<Map<String, dynamic>?> getData({Map<String, dynamic>? params}) async {
     change(null, status: RxStatus.loading());
-    final parsedJson = await apiProvider.fetch(
-      Variables.LINK_GET_SETTINGS,
-      param: params,
-    );
-
+    final parsedJson = await apiProvider.fetch(Variables.LINK_GET_SETTINGS,
+        param: params, tryReminded: ApiProvider.maxRetry);
+    // print(parsedJson);
     if (parsedJson == null) {
       change(null, status: RxStatus.empty());
       return null;
     } else {
       data = parsedJson;
-
+      keys = _data['keys'];
+      prices = _data['prices'];
+      plans = _data['plans'];
       provinces = _data['provinces'];
       counties = _data['counties'];
-
-      docTypes = _data['doc_types'];
-      sports = _data['sports'];
-      shops = _data['shops'];
-      days = _data['days'];
-      prices = _data['prices'];
-      cropRatio = _data['crop_ratio'];
-      chatScript = _data['chat_script'];
-      limits = _data['limits'];
       categories = _data['categories'];
-      keys = _data['keys'];
-      years = _data['years'];
+      dates = _data['dates'];
+      payment = _data['payment'];
+      appInfo = App.fromJson(
+          _data['app_info'] ?? {}, await PackageInfo.fromPlatform());
 
-      appInfo =
-          App.fromJson(_data['app_info'], await PackageInfo.fromPlatform());
-      await userController.getUser();
-      Get.put(IAPPurchase(keys: keys, products: prices));
+      Variables.LINK_SEND_ERROR = appInfo.errorLink != ''
+          ? appInfo.errorLink
+          : Variables.LINK_SEND_ERROR;
+      if (!Get.isRegistered<UserController>())
+        userController = Get.put(UserController());
+      else
+        Get.find<IAPPurchase>().init();
       change(_data, status: RxStatus.success());
       return _data;
     }
@@ -242,18 +176,25 @@ class SettingController extends GetxController
 
   void goTo(String s) async {
     switch (s) {
+      case 'your_comments':
+        if (await canLaunchUrlString(appInfo.marketLink))
+          launchUrlString(appInfo.marketLink,
+              mode: LaunchMode.externalApplication);
+        break;
       case 'site':
         if (await canLaunchUrl(Uri.parse(appInfo.siteLink)))
-          launchUrl(Uri.parse(appInfo.siteLink),  mode: LaunchMode.externalApplication);
+          launchUrl(Uri.parse(appInfo.siteLink),
+              mode: LaunchMode.externalApplication);
         break;
       case 'email':
         final Uri uri = Uri(
           scheme: 'mailto',
           path: appInfo.emailLink,
           query:
-              'subject=${'message'.tr} ${'from'.tr} ${'user'.tr} ${userController.user?.phone}&body=', //add subject and body here
+              'subject=${'message'.tr} ${'from'.tr} ${'user'.tr} ${userController.user?.mobile}&body=', //add subject and body here
         );
-        if (await canLaunchUrl(uri)) launchUrl(uri,  mode: LaunchMode.externalApplication);
+        if (await canLaunchUrl(uri))
+          launchUrl(uri, mode: LaunchMode.externalApplication);
         break;
       case 'telegram':
         if (await canLaunchUrl(Uri.parse(appInfo.telegramLink)))
@@ -291,7 +232,7 @@ class SettingController extends GetxController
   }
 
   String getDocType(type) {
-    return docTypes[type].toString();
+    return "";
   }
 
   String? getDocId(List<dynamic>? docs, String type) {
@@ -308,32 +249,17 @@ class SettingController extends GetxController
     return days[day_id];
   }
 
-  String shop(int? shop_id) {
-    var t = shops.firstWhereOrNull((element) => element['id'] == shop_id);
+  String province(dynamic province_id) {
+    var t = provinces
+        .firstWhereOrNull((element) => "${element['id']}" == "$province_id");
 
-    return t == null ? '' : t['name'];
+    return t == null ? '' : t['title'];
   }
 
-  String sport(String? sport_id) {
-    var t = sports.firstWhereOrNull((element) => element['id'] == sport_id);
-    return t == null ? '' : t['name'];
-  }
-
-  String province(String? province_id) {
-    var t =
-        provinces.firstWhereOrNull((element) => element['id'] == province_id);
-    return t == null ? '' : t['name'];
-  }
-
-  String county(String? county_id) {
-    var t = counties.firstWhereOrNull((element) => element['id'] == county_id);
-    return t == null ? '' : t['name'];
-  }
-
-  String category(String? category_id) {
-    var t =
-        categories.firstWhereOrNull((element) => element['id'] == category_id);
-    return t == null ? '' : t['name'];
+  String county(dynamic county_id) {
+    var t = counties
+        .firstWhereOrNull((element) => "${element['id']}" == "$county_id");
+    return t == null ? '' : t['title'];
   }
 
   Future<bool> sendActivationCode({required String phone}) async {
@@ -385,10 +311,6 @@ class SettingController extends GetxController
     return parsedJson;
   }
 
-  bool isEditable(String? id) {
-    return userController.user?.id == id || ['ad','go'].contains(userController.user!.role)   ;
-  }
-
   String expireDays(int timestamp) {
     if (timestamp == -1)
       return '0';
@@ -412,9 +334,10 @@ class SettingController extends GetxController
       CroppedFile? cp = await ImageCropper().cropImage(
         sourcePath: imageFile.path,
 
-        aspectRatio:
-            CropAspectRatio(ratioX:ratio.toDouble(), ratioY: 1),
-            // CropAspectRatio(ratioX:ratio cropRatio['profile'].toDouble(), ratioY: 1),
+        aspectRatio: ratio != null
+            ? CropAspectRatio(ratioX: ratio.toDouble(), ratioY: 1)
+            : null,
+        // CropAspectRatio(ratioX:ratio cropRatio['profile'].toDouble(), ratioY: 1),
         // aspectRatioPresets: [
         // settingController.getAspectRatio('profile'),
 
@@ -427,9 +350,13 @@ class SettingController extends GetxController
               toolbarWidgetColor: Colors.white,
               hideBottomControls: false,
               statusBarColor: colors[500],
+              initAspectRatio: ratio != null
+                  ? CropAspectRatioPreset.square
+                  : CropAspectRatioPreset.originalFa,
+
               // initAspectRatio: settingController
               //     .getAspectRatio('profile'),
-              lockAspectRatio: true),
+              lockAspectRatio: ratio != null),
           IOSUiSettings(
             title: 'select_crop_section'.tr,
           ),
@@ -438,6 +365,7 @@ class SettingController extends GetxController
 
       if (cp != null) {
         File f = File(cp.path);
+        return cp.path;
         return "image/${cp.path.split('.').last};base64," +
             base64.encode(await f.readAsBytes());
       }
@@ -499,8 +427,9 @@ class SettingController extends GetxController
                                   ))),
                               onPressed: () async {
                                 if (await canLaunchUrl(
-                                    Uri.parse(appInfo.appLink)))
-                                  launchUrl((Uri.parse(appInfo.appLink)));
+                                    Uri.parse(appInfo.marketLink)))
+                                  launchUrl((Uri.parse(appInfo.marketLink)),
+                                      mode: LaunchMode.externalApplication);
                                 Get.back();
                               },
                               child: Row(
@@ -539,23 +468,8 @@ class SettingController extends GetxController
     if (path.length == 1) {
       var model = path[0];
       switch (model) {
-        case 'blogs':
-          Get.to(BlogsPage());
-          break;
-        case 'players':
-          Get.to(PlayersPage());
-          break;
-        case 'coaches':
-          Get.to(CoachesPage());
-          break;
-        case 'clubs':
-          Get.to(ClubsPage());
-          break;
-        case 'shops':
-          Get.to(ShopsPage());
-          break;
-        case 'products':
-          Get.to(ProductsPage());
+        case 'contents':
+          Get.to(ContentsPage());
           break;
       }
     } else if (path.length >= 2) {
@@ -567,29 +481,9 @@ class SettingController extends GetxController
         id = path[3];
       }
       switch (model) {
-        case 'blog':
-          Blog? tmp = await Get.find<BlogController>().find({'id': id});
-          if (tmp != null) Get.to(BlogDetails(data: tmp));
-          break;
-        case 'player':
-          Player? tmp = await Get.find<PlayerController>().find({'id': id});
-          if (tmp != null) Get.to(PlayerDetails(data: tmp));
-          break;
-        case 'coach':
-          Coach? tmp = await Get.find<CoachController>().find({'id': id});
-          if (tmp != null) Get.to(CoachDetails(data: tmp));
-          break;
-        case 'club':
-          Club? tmp = await Get.find<ClubController>().find({'id': id});
-          if (tmp != null) Get.to(ClubDetails(data: tmp));
-          break;
-        case 'shop':
-          Shop? tmp = await Get.find<ShopController>().find({'id': id});
-          if (tmp != null) Get.to(ShopDetails(data: tmp));
-          break;
-        case 'product':
-          Product? tmp = await Get.find<ProductController>().find({'id': id});
-          if (tmp != null) Get.to(ProductDetails(data: tmp));
+        case 'content':
+          Content? tmp = await Get.find<ContentController>().find({'id': id});
+          if (tmp != null) Get.to(ContentDetails(data: tmp));
           break;
       }
     }
@@ -604,4 +498,13 @@ class SettingController extends GetxController
     // });
     return await CachedNetworkImage.evictFromCache(url);
   }
+
+  String category(category_id) {
+    var t = categories
+        .firstWhereOrNull((element) => "${element['id']}" == "$category_id");
+    return t == null ? '' : t['title'];
+  }
+
+  @override
+  Map<String, dynamic> filters = {};
 }

@@ -1,5 +1,5 @@
-import 'package:dabel_sport/helper/helpers.dart';
-import 'package:dabel_sport/model/Table.dart';
+import 'package:dabel_adl/helper/helpers.dart';
+import 'package:dabel_adl/model/Table.dart';
 
 class Tournament {
   final int id;

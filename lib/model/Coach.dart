@@ -1,6 +1,6 @@
-import 'package:dabel_sport/helper/variables.dart';
+import 'package:dabel_adl/helper/variables.dart';
 
-class Coach {
+class Link {
   int id;
   String user_id;
   String province_id;
@@ -21,7 +21,7 @@ class Coach {
   int expires_at;
   int? born_at;
 
-  Coach.fromJson(Map<String, dynamic> json)
+  Link.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         user_id = json['user_id'],
         province_id = json['province_id'] ?? '',

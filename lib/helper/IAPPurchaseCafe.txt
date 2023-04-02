@@ -1,0 +1,573 @@
+import 'dart:convert';
+
+import 'package:connecting/helper/advhelper.dart';
+import 'package:connecting/helper/styles.dart';
+import 'package:connecting/model/product.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:flutter_poolakey/flutter_poolakey.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../controller/APIProvider.dart';
+import '../controller/SettingController.dart';
+import '../controller/UserController.dart';
+import 'helper.dart';
+import 'producthelper.dart';
+import 'variables.dart';
+
+class IAPPurchase {
+  bool bazaarConnected = false;
+  bool myketConnected = false;
+
+  late ApiProvider apiProvider;
+  late Helper helper;
+  late AdvHelper advHelper;
+  late ProductHelper productHelper;
+  late UserController userController;
+
+  List<PurchaseInfo> allPurchases = <PurchaseInfo>[];
+
+  /*** myket
+      // List<Purchase> allPurchases = <Purchase>[];
+   **/
+  List<ProductItem> allProducts = <ProductItem>[];
+
+  late SettingController settingController;
+
+  IAPPurchase() {
+    // init();
+  }
+
+  static dispose() async {
+    /** myket
+        await MyketIAP.dispose();
+     **/
+  }
+
+  Future<void> init() async {
+    apiProvider = Get.find<ApiProvider>();
+    helper = Get.find<Helper>();
+    advHelper = Get.find<AdvHelper>();
+    userController = Get.find<UserController>();
+    settingController = Get.find<SettingController>();
+    productHelper = Get.find<ProductHelper>();
+
+    await checkMarketsInstalled();
+    await checkBeforePurchases();
+  }
+
+  checkMarketsInstalled() async {
+    advHelper.appIds = await advHelper.loadAppIds();
+
+    //check bazaar
+    try {
+      bazaarConnected = await FlutterPoolakey.connect(
+          settingController.keys['BAZAAR_RSA'],
+          onDisconnected: () => print("Poolakey disconnected!"));
+      // print( "***bazaar connected $bazaarConnected");
+    } catch (e) {
+      // print(e.runtimeType == PlatformException);
+      //bazaar not installed
+    }
+
+    /**** myket
+        //check myket
+        try {
+        IabResult? result = await MyketIAP.init(
+        rsaKey: settingController.keys['MYKET_RSA'],
+        enableDebugLogging: true);
+        myketConnected = result?.isSuccess() ?? false;
+        } catch (e) {
+        print("****myket init exception $e");
+        }
+     **/
+  }
+
+  Future<void> purchase(
+      {Map<String, dynamic>? params, String mode = 'create'}) async {
+
+
+    params = {
+      ...(params ?? {}),
+      'name': Variable.LANG,
+      'app_id': Variable.APP_ID,
+      'phone': userController.user?.phone
+    };
+
+    var res = await makePayment(params: params);
+    print(res);
+    if (res['status'] != 'SUCCESS') {
+      Get.back();
+      helper.showToast(
+          msg: res['res'] != null ? res['res'] : 'CHECK_NETWORK'.tr);
+    } else if (res['market'] == null || res['market'] == 'bank') {
+      Get.back();
+      //idpay
+      Uri url = Uri.parse(res['res']);
+
+      if (await canLaunchUrl(url)) {
+        helper.showToast(msg: 'PAY_IN_BROWSER'.tr, status: 'success');
+        launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+    } else if (res['market'] == 'bazaar') {
+      var res2 = await purchaseBazaar(params: res);
+      Get.back();
+      // print("purchase result");
+      // print(res2);
+
+      if (res2 != null && res2['status'] != 'success')
+        helper.showToast(msg: res2['msg'], status: 'danger');
+      if (res2 != null && res2['status'] == 'success') {
+        helper.showToast(msg: res2['msg'], status: 'success');
+        userController.user = null;
+        userController.getUser();
+      }
+      // else if (res['url'] != null)
+      // settingController.resolveDeepLink(Uri.parse(res['url']));
+      // else
+    }
+
+    /*** myket
+        else if (res['market'] == 'myket') {
+        var res2 = await purchaseMyket(params: res);
+        Get.back();
+        // print("purchase result");
+        // print(res2);
+
+        if (res2 != null && res2['status'] != 'success')
+        helper.showToast(msg: res2['msg'], status: 'danger');
+        if (res2 != null && res2['status'] == 'success') {
+        helper.showToast(msg: res2['msg'], status: 'success');
+        userController.user = null;
+        userController.getUser();
+        }
+        // else if (res['url'] != null)
+        // settingController.resolveDeepLink(Uri.parse(res['url']));
+        // else
+        }
+     **/
+  }
+
+  Future<dynamic> purchaseBazaar(
+      {required Map<String, dynamic> params,
+      PurchaseInfo? purchaseInfo}) async {
+    try {
+      // print('**** start purchase bazaar ');
+      // print(params);
+      if (!bazaarConnected) return null;
+
+      if (purchaseInfo == null) {
+        // if null=> consume before purchases
+
+        // print(params['consumable']);
+        // print(params['consumable'].runtimeType);
+        if (params['consumable'])
+          purchaseInfo = await FlutterPoolakey.purchase(params['sku'],
+              payload: jsonEncode({
+                'market': Variable.MARKET,
+                'user_id': params['user_id'],
+                'amount': params['amount'],
+              }),
+              dynamicPriceToken: params['dynamicPriceToken']);
+        else
+          purchaseInfo = await FlutterPoolakey.subscribe(params['sku'],
+              payload: jsonEncode({
+                'market': Variable.MARKET,
+                'user_id': params['user_id'],
+                'amount': params['amount'],
+              }),
+              dynamicPriceToken: params['dynamicPriceToken']);
+
+        // print("--bazaar purchase result:");
+        // print(purchaseInfo.originalJson + "\n");
+      }
+
+      var consume = false;
+      if (params['consumable'])
+        consume = await FlutterPoolakey.consume(purchaseInfo.purchaseToken);
+
+      params['info'] = purchaseInfo.originalJson;
+      params['pay_id'] = purchaseInfo.purchaseToken;
+      params['market'] = Variable.MARKET;
+
+      var result2 = {};
+      if (consume == true || (!params['consumable'] && userController.user?.unlockSub==null)) {
+        params['consumable'] = params['consumable'] ? 1 : 0;
+        // print("***_addBazaarPurchaseToServer");
+        // print(params);
+        result2 = await _addPurchaseToServer(params: params);
+        print(result2);
+        if (result2['status'] == 'success')
+          return {'status': 'success', 'msg': "${'PURCHASE_SUCCESS'.tr}"};
+      }
+
+      return {
+        'status': 'danger',
+        'msg': result2['msg'] ?? "${'PURCHASE_FAILED'.tr}"
+      };
+    } on PlatformException catch (e) {
+      // print('!!!!! bazaar platform exception:');
+      // if (e.code == 'PURCHASE_FAILED')
+      // print(e.message);
+      // print(e.details);
+      if (e.code == 'PURCHASE_CANCELLED')
+        return {'status': 'danger', 'msg': "${'PURCHASE_CANCELLED'.tr}"};
+      return {'status': 'danger', 'msg': "${'PURCHASE_FAILED'.tr}"};
+    } catch (e) {
+      // print('!!!!! bazaar exception:');
+      // print(e);
+
+      return {'status': 'danger', 'msg': "${'PURCHASE_FAILED'.tr}"};
+      return null;
+    }
+  }
+
+  /**** myket
+      Future<dynamic> purchaseMyket(
+      {required Map<String, dynamic> params, Purchase? purchaseInfo}) async {
+      try {
+      // print('**** start purchase myket ');
+      // print(params);
+      if (!myketConnected) return null;
+      IabResult? purchaseResult;
+      if (purchaseInfo == null) {
+      // if null=> consume before purchases
+      Map result = await MyketIAP.launchPurchaseFlow(
+      sku: params['sku'],
+      payload: jsonEncode({
+      'market': Variable.MARKET,
+      'user_id': params['user_id'],
+      'amount': params['amount'],
+      }));
+      purchaseResult = result[MyketIAP.RESULT];
+      purchaseInfo = result[MyketIAP.PURCHASE];
+      // print("*****myket purchaseResult******");
+      // print(purchaseResult);
+      // print("*****myket purchaseInfo******");
+      // print(purchaseInfo);
+      // print(params['consumable'].runtimeType);
+      // print("--bazaar purchase result:");
+      // print(purchaseInfo.originalJson + "\n");
+      }
+
+      Map consumeResult;
+      // print("*****myket before******");
+      // print(purchaseResult?.mResponse);
+
+      if (purchaseInfo != null && purchaseInfo.mToken != '') {
+      // print("*****myket consume******");
+
+      consumeResult = await MyketIAP.consume(purchase: purchaseInfo);
+      purchaseResult = consumeResult[MyketIAP.RESULT];
+      // print("*****myket purchaseResult consume******");
+      // print(purchaseResult);
+      purchaseInfo = consumeResult[MyketIAP.PURCHASE];
+      // print("*****myket purchaseInfo consume******");
+      // print(purchaseInfo);
+      }
+
+      var result2 = {};
+      if (purchaseResult != null && purchaseResult.mResponse == 0) {
+      params['consumable'] = params['consumable'] ? 1 : 0;
+      params['info'] = purchaseInfo?.mOriginalJson;
+      params['pay_id'] = purchaseInfo?.mToken;
+      // print("*****myket _addMyketPurchaseToServer");
+      // print("$params");
+      result2 = await _addPurchaseToServer(params: params);
+      // print(result2);
+      if (result2['status'] == 'success')
+      return {'status': 'success', 'msg': "${'PURCHASE_SUCCESS'.tr}"};
+      }
+      return {
+      'status': 'danger',
+      'msg': result2['msg'] ?? "${'PURCHASE_FAILED'.tr}"
+      };
+      } on PlatformException catch (e) {
+      // print('!!!!! bazaar platform exception:');
+      // if (e.code == 'PURCHASE_FAILED')
+      // print(e.message);
+      // print(e.details);
+      if (e.code == 'PURCHASE_CANCELLED')
+      return {'status': 'danger', 'msg': "${'PURCHASE_CANCELLED'.tr}"};
+      return {'status': 'danger', 'msg': "${'PURCHASE_FAILED'.tr}"};
+      } catch (e) {
+      // print('!!!!! bazaar exception:');
+      // print(e);
+
+      return {'status': 'danger', 'msg': "${'PURCHASE_FAILED'.tr}"};
+      return null;
+      }
+      }
+   **/
+
+  ///
+  Future<void> checkBeforePurchases() async {
+    // await Future.delayed(Duration(seconds: 2));
+    if (userController.ACCESS_TOKEN == '' ||
+        userController.user == null ||
+        userController.user?.id == null) return;
+
+    //check cafebazaar
+    if (bazaarConnected) {
+      try {
+        allPurchases.addAll(await FlutterPoolakey.getAllPurchasedProducts());
+        print("****consume before purchases ${allPurchases.length}");
+        for (PurchaseInfo purchase in allPurchases) {
+          Map<String, dynamic> info = json.decode(purchase.payload);
+          purchaseBazaar(params: {
+            'consumable': true,
+            'user_id': userController.user?.id,
+            'phone': userController.user?.phone,
+            'telegram_id': userController.user?.telegram_id,
+            'app_id': Variable.APP_ID,
+            'type': purchase.productId,
+            'pay_id': purchase.purchaseToken,
+            'info': purchase.originalJson,
+            'market': info['market'],
+            'amount': info['amount'],
+          }, purchaseInfo: purchase);
+          await Future.delayed(
+              Duration(
+                seconds: 2,
+              ), () async {
+            userController.user = null;
+            await userController.getUser();
+          });
+        }
+        allPurchases.clear();
+
+        allPurchases.addAll(await FlutterPoolakey.getAllSubscribedProducts());
+        print("****consume before subscribes ${allPurchases.length}");
+        for (PurchaseInfo purchase in allPurchases) {
+          if (userController.user?.unlockSub != null &&
+              userController.user?.unlockSub != 0) break; //user have active sub
+          Map<String, dynamic> info = json.decode(purchase.payload);
+          purchaseBazaar(params: {
+            'consumable': false,
+            'user_id': userController.user?.id,
+            'phone': userController.user?.phone,
+            'telegram_id': userController.user?.telegram_id,
+            'app_id': Variable.APP_ID,
+            'type': purchase.productId,
+            'pay_id': purchase.purchaseToken,
+            'info': purchase.originalJson,
+            'market': info['market'],
+            'amount': info['amount'],
+          }, purchaseInfo: purchase);
+          await Future.delayed(
+              Duration(
+                seconds: 2,
+              ), () async {
+            userController.user = null;
+            await userController.getUser();
+          });
+        }
+      } catch (e) {
+        print("****before purchases catch $e");
+      }
+    }
+
+    /*****myket***
+        //check myket
+        if (myketConnected) {
+        try {
+        Map result = await MyketIAP.queryInventory(querySkuDetails: false);
+        IabResult purchaseResult = result[MyketIAP.RESULT];
+        Inventory inventory = result[MyketIAP.INVENTORY];
+        // print("****myket before purchases purchaseResult ");
+        // print(purchaseResult);
+        // print("****myket before purchases inventory ");
+        // print(inventory);
+        for (Purchase purchase in inventory.mPurchaseMap.values) {
+        print(purchase);
+        if (userController.user?.unlockSub != null &&
+        userController.user?.unlockSub != 0) break; //user have active sub
+        Map<String, dynamic> info = purchase?.mDeveloperPayload != null
+        ? json.decode(purchase.mDeveloperPayload!)
+        : {};
+        purchaseMyket(params: {
+        'consumable': false,
+        'user_id': userController.user?.id,
+        'phone': userController.user?.phone,
+        'telegram_id': userController.user?.telegram_id,
+        'app_id': Variable.APP_ID,
+        'type': purchase.mSku,
+        'pay_id': purchase.mToken,
+        'info': purchase.mOriginalJson,
+        'market': info['market'],
+        'amount': info['amount'],
+        }, purchaseInfo: purchase);
+        await Future.delayed(
+        Duration(
+        seconds: 2,
+        ), () async {
+        userController.user = null;
+        await userController.getUser();
+        });
+        }
+        } catch (e) {
+        print("****myket before purchases catch $e");
+        }
+        }
+     */
+
+    ///
+  }
+
+  Future<dynamic> _addPurchaseToServer({Map<String, dynamic>? params}) async {
+    final parsedJson = await apiProvider.fetch(
+      Variable.LINK_CONFIRM_PAYMENT,
+      ACCESS_TOKEN: userController.ACCESS_TOKEN,
+      param: params,
+    );
+
+    if (parsedJson == null) {
+      return null;
+    } else {
+      dynamic res = parsedJson;
+
+      return res;
+    }
+  }
+
+//  renew subscribes
+  Future<dynamic> makePayment({required Map<String, dynamic> params}) async {
+    // print(bazaarConnected || myketConnected);
+
+    if (bazaarConnected || myketConnected)
+      params = {...params, 'market': Variable.MARKET};
+    print(params);
+    return (await productHelper.buyProduct(params)) ?? {};
+  }
+
+  showPayDialog(
+      {required ProductItem product,
+      required dynamic Function() onPayClicked}) {
+    if (helper.setting['payment'] != null)
+      Variable.MARKET = helper.setting['payment'];
+    if (Variable.MARKET == 'bazaar' && !bazaarConnected)
+      Variable.MARKET = 'bank';
+    if (Variable.MARKET == 'myket' && !myketConnected) Variable.MARKET = 'bank';
+
+    Rx<bool> loading = false.obs;
+    Style style = helper.style;
+    Get.dialog(
+      Material(
+        color: Colors.transparent,
+        child: StatefulBuilder(
+          builder:
+              (BuildContext context, void Function(void Function()) setState) {
+            String message = "📌اطلاعات پرداخت\n" +
+                "👤 ${product.name}\n" +
+                "📦 " +
+                "${product.price}"
+                    " تومان "
+                    "\n"
+                    "      صفحه پرداخت در ${Variable.MARKET == 'bazaar' ? 'کافه بازار' :Variable.MARKET == 'myket' ? 'مایکت': 'مرورگر'} باز خواهد شد.\n";
+            return Center(
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(Style.bigSize ? 16 : 8),
+                    color: Colors.white),
+                padding: EdgeInsets.all(Style.bigSize ? 32 : 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Obx(
+                      () => Visibility(
+                          visible: loading.value,
+                          child: Center(
+                              child: LinearProgressIndicator(
+                            backgroundColor: Style.primaryColor,
+                          ))),
+                    ),
+                    Text(
+                      message,
+                      style: Style.bigSize
+                          ? style.TEXTSTYLE
+                          : style.TEXTSTYLE_SMALL,
+                      textDirection: Variable.LANG == 'fa'
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: style.buttonStyle(
+                              padding: EdgeInsets.all(4),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10.0))),
+                              textColor: Colors.white,
+                              splashColor: Style.secondaryColor,
+                              color: Style.primaryColor,
+                            ),
+                            onPressed: () async {
+                              loading.value = true;
+                              await onPayClicked();
+                              loading.value = false;
+                            },
+                            icon: Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              textDirection: TextDirection.rtl,
+                            ),
+                            label: FittedBox(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'PAY'.tr,
+                                  style: style.TABSELECTEDSTYLE,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: Style.bigSize ? 16 : 8,
+                        ),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: style.buttonStyle(
+                              padding: EdgeInsets.all(4),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10.0))),
+                              textColor: Colors.white,
+                              splashColor: Style.secondaryColor,
+                              color: style.cancelColor,
+                            ),
+                            onPressed: () async {
+                              Get.back();
+                            },
+                            icon: Icon(
+                              Icons.clear,
+                              color: Colors.white,
+                              textDirection: TextDirection.rtl,
+                            ),
+                            label: FittedBox(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'CANCEL'.tr,
+                                  style: style.TABSELECTEDSTYLE,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

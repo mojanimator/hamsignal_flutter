@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import 'package:dabel_sport/controller/SettingController.dart';
-import 'package:dabel_sport/helper/helpers.dart';
-import 'package:dabel_sport/helper/styles.dart';
+import 'package:dabel_adl/controller/SettingController.dart';
+import 'package:dabel_adl/helper/helpers.dart';
+import 'package:dabel_adl/helper/styles.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

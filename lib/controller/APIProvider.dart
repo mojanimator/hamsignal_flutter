@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:get/get_connect/connect.dart';
 
 class ApiProvider extends GetConnect {
+  static const int maxRetry = 3;
+
   ApiProvider() {
     // final box = GetStorage();
     // blogController = Get.find<BlogController>();
@@ -14,7 +16,8 @@ class ApiProvider extends GetConnect {
       String method = 'get',
       String? ACCESS_TOKEN,
       Map<String, dynamic> headers = const {},
-      Function(double percent)? onProgress}) async {
+      Function(double percent)? onProgress,
+      int tryReminded = 0}) async {
     Map<String, dynamic>? params = {...param ?? {}};
     // Map<String, dynamic>? params = {...param ?? {}};
     // print(url);
@@ -75,15 +78,33 @@ class ApiProvider extends GetConnect {
     // if (url.startsWith('https:'))
     //   url = url.replaceFirst('https:', 'http:');
     //
+    // print(url);
     // print(response.bodyString);
+    // //
     // print(response.status.code);
     //{"message":"Unauthenticated."}
     if (response.status.code == 401 ||
         response.status.code == 422 ||
         response.status.code == 429) {
-      return Future.value({'user': null, 'errors': response.body['errors']});
-    } else if (response.status.hasError || response.bodyString == null) {
+      return Future.value({
+        'user': null,
+        'error': (response.body is List ? response.body[0] : null) ??
+            response.body['errors'] ??
+            response.body['message']
+      });
+    } else if (response.status.hasError) {
       return Future.value(null);
+    } else if (response.bodyString == null) {
+      if (tryReminded <= 0) return Future.value(null);
+      tryReminded--;
+      Future.delayed(Duration(seconds: 2));
+      fetch(url,
+          method: method,
+          ACCESS_TOKEN: ACCESS_TOKEN,
+          headers: headers,
+          param: params,
+          onProgress: onProgress,
+          tryReminded: tryReminded);
     } else {
       try {
         return json.decode(response.bodyString as String);

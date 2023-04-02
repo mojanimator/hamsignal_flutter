@@ -1,32 +1,39 @@
-import 'package:dabel_sport/controller/SettingController.dart';
-import 'package:dabel_sport/helper/styles.dart';
-import 'package:dabel_sport/page/blogs.dart';
-import 'package:dabel_sport/page/clubs.dart';
-import 'package:dabel_sport/page/coaches.dart';
-import 'package:dabel_sport/page/players.dart';
-import 'package:dabel_sport/page/shops.dart';
-import 'package:dabel_sport/page/tournaments.dart';
-import 'package:dabel_sport/widget/shakeanimation.dart';
+import 'package:dabel_adl/controller/SettingController.dart';
+import 'package:dabel_adl/helper/styles.dart';
+import 'package:dabel_adl/widget/shakeanimation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../page/Contents.dart';
 
 class MainVitrin extends StatelessWidget {
   late Style styleController;
   late SettingController settingController;
   late MaterialColor colors;
   late EdgeInsets margin;
+  late List<dynamic> data;
 
   MainVitrin({EdgeInsets? margin, MaterialColor? colors}) {
+    styleController = Get.find<Style>();
+    settingController = Get.find<SettingController>();
     this.margin = margin ??
         EdgeInsets.symmetric(
           vertical: styleController.cardMargin / 8,
           horizontal: styleController.cardMargin,
         );
-    styleController = Get.find<Style>();
-    settingController = Get.find<SettingController>();
     this.colors = colors ?? styleController.primaryMaterial;
-
+    data = [
+      {'title': 'قوانین'},
+      {'title': 'دادخواست/لایحه'},
+      {'title': 'جستجو وکیل'},
+      {'title': 'قرارداد'},
+      {'title': 'جستجو کارشناس'},
+      {'title': 'اخبار حقوقی'},
+      {'title': 'دفاتر قضایی'},
+      {'title': 'کنوانسیون ها'},
+      {'title': 'نظریات مشورتی/آرای وحدت رویه'},
+    ];
     // WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
     //   Future.delayed(
     //       Duration(seconds: 1),
@@ -46,7 +53,7 @@ class MainVitrin extends StatelessWidget {
           borderRadius: BorderRadius.circular(styleController.cardBorderRadius),
         ),
         shadowColor: styleController.primaryColor.withOpacity(.3),
-        color: Colors.white.withOpacity(.98),
+        color: styleController.theme3,
         elevation: 20,
         margin: margin,
         child: Padding(
@@ -58,93 +65,9 @@ class MainVitrin extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TextButton(
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/player.png',
-                              color: styleController.primaryColor,
-                              height: styleController.iconHeight,
-                            ),
-                            Text('player'.tr),
-                          ],
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        ),
-                        onPressed: () {
-                          Get.to(PlayersPage(),
-                              transition: Transition.topLevel,
-                              duration: Duration(milliseconds: 400));
-                        },
-                      ),
                       const VerticalDivider(
                         endIndent: 15,
                         indent: 15,
-                      ),
-                      TextButton(
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/coach.png',
-                              color: styleController.primaryColor,
-                              height: styleController.iconHeight,
-                            ),
-                            Text('coach'.tr),
-                          ],
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        ),
-                        onPressed: () {
-                          Get.to(CoachesPage(),
-                              transition: Transition.topLevel,
-                              duration: Duration(milliseconds: 400));
-                        },
-                      ),
-                      const VerticalDivider(
-                        endIndent: 15,
-                        indent: 15,
-                      ),
-                      TextButton(
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/club.png',
-                              color: styleController.primaryColor,
-                              height: styleController.iconHeight,
-                            ),
-                            Text('club'.tr),
-                          ],
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        ),
-                        onPressed: () {
-                          Get.to(ClubsPage(),
-                              transition: Transition.topLevel,
-                              duration: Duration(milliseconds: 400));
-                        },
-                      ),
-                      const VerticalDivider(
-                        endIndent: 15,
-                        indent: 15,
-                      ),
-                      TextButton(
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/shop.png',
-                              color: styleController.primaryColor,
-                              height: styleController.iconHeight,
-                            ),
-                            Text('shop'.tr),
-                          ],
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        ),
-                        onPressed: () {
-                          Get.to(ShopsPage(),
-                              transition: Transition.topLevel,
-                              duration: Duration(milliseconds: 400));
-                        },
                       ),
                     ],
                   ),
@@ -169,7 +92,7 @@ class MainVitrin extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                         ),
                         onPressed: () {
-                          Get.to(BlogsPage());
+                          Get.to(ContentsPage());
                         },
                       ),
                       const VerticalDivider(
@@ -196,23 +119,6 @@ class MainVitrin extends StatelessWidget {
                       const VerticalDivider(
                         endIndent: 15,
                         indent: 15,
-                      ),
-                      TextButton(
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/table.png',
-                              color: styleController.primaryColor,
-                              height: styleController.iconHeight,
-                            ),
-                            Text('tables'.tr),
-                          ],
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        ),
-                        onPressed: () {
-                          Get.to(TournamentsPage());
-                        },
                       ),
                     ],
                   ),

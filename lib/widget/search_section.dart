@@ -1,15 +1,18 @@
-import 'package:dabel_sport/controller/AnimationController.dart';
-import 'package:dabel_sport/controller/BlogController.dart';
-import 'package:dabel_sport/controller/ClubController.dart';
-import 'package:dabel_sport/controller/CoachController.dart';
-import 'package:dabel_sport/controller/PlayerController.dart';
-import 'package:dabel_sport/controller/ProductController.dart';
-import 'package:dabel_sport/controller/ShopController.dart';
-import 'package:dabel_sport/controller/TournamentController.dart';
-import 'package:dabel_sport/helper/styles.dart';
+import 'package:dabel_adl/controller/AnimationController.dart';
+import 'package:dabel_adl/controller/BookController.dart';
+import 'package:dabel_adl/controller/ContractController.dart';
+import 'package:dabel_adl/controller/DocumentController.dart';
+import 'package:dabel_adl/controller/FinderController.dart';
+import 'package:dabel_adl/controller/LawyerController.dart';
+import 'package:dabel_adl/controller/LegalController.dart';
+import 'package:dabel_adl/controller/LinkController.dart';
+import 'package:dabel_adl/controller/LocationController.dart';
+import 'package:dabel_adl/helper/styles.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../controller/ContentController.dart';
 
 class SearchSection extends StatelessWidget {
   TextEditingController textController = TextEditingController();
@@ -27,7 +30,7 @@ class SearchSection extends StatelessWidget {
     required this.controller,
     required this.hintText,
   }) {
-    controller.filterController.filters['name'] = '';
+    controller.filterController.filters['search'] = '';
   }
 
   @override
@@ -55,8 +58,8 @@ class SearchSection extends StatelessWidget {
                       child: SizeTransition(
                         sizeFactor: animationController.animation_height_filter,
                         child: Container(
-                          padding: EdgeInsets.only(
-                              top: styleController.cardMargin * 2),
+                          padding:
+                              EdgeInsets.only(top: styleController.tabHeight),
                           child: filterSection,
                         ),
                       ),
@@ -125,7 +128,8 @@ class SearchSection extends StatelessWidget {
                             //   controller.getData(param: {'page': 'clear'});
                             // },
                             onChanged: (str) {
-                              controller.filterController.filters['name'] = str;
+                              controller.filterController.filters['search'] =
+                                  str;
                               controller.filterController.filters['page'] = '1';
                               animationController
                                   .toggleCloseSearchIcon(str.length);
@@ -138,7 +142,7 @@ class SearchSection extends StatelessWidget {
                               icon: Icon(Icons.close),
                               onPressed: () {
                                 textController.clear();
-                                controller.filterController.filters['name'] =
+                                controller.filterController.filters['search'] =
                                     '';
                                 animationController.toggleCloseSearchIcon(0);
 
@@ -178,17 +182,17 @@ class SelectedFiltersSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (controller is PlayerController)
-      return Get.find<PlayerController>().filterController.obx((data) {
+    if (controller is LinkController)
+      return Get.find<LinkController>().filterController.obx((data) {
         filters = controller.filterController.filters;
         filters = controller.filterController.filters.keys
             .where((type) =>
                 type != 'page' &&
-                type != 'name' &&
+                type != 'search' &&
                 type != 'panel' &&
                 filters[type] != '' &&
                 filters[type] != null)
-            .toList();
+            .toList().reversed;
         return Container(
           height: filters.length > 0 ? 48 : 0,
           margin: EdgeInsets.only(top: styleController.cardMargin / 2),
@@ -199,17 +203,20 @@ class SelectedFiltersSection extends StatelessWidget {
           ),
         );
       });
-    if (controller is CoachController)
-      return Get.find<CoachController>().filterController.obx((data) {
+
+    if (controller is ContentController)
+      return Get.find<ContentController>().filterController.obx((data) {
         filters = controller.filterController.filters;
         filters = controller.filterController.filters.keys
             .where((type) =>
                 type != 'page' &&
-                type != 'name' &&
+                type != 'search' &&
+                type != 'type' &&
                 type != 'panel' &&
                 filters[type] != '' &&
                 filters[type] != null)
-            .toList();
+            .toList().reversed;
+
         return Container(
           height: filters.length > 0 ? 48 : 0,
           margin: EdgeInsets.only(top: styleController.cardMargin / 2),
@@ -220,17 +227,22 @@ class SelectedFiltersSection extends StatelessWidget {
           ),
         );
       });
-    if (controller is ClubController)
-      return Get.find<ClubController>().filterController.obx((data) {
+
+    if (controller is LawyerController)
+      return Get.find<LawyerController>().filterController.obx((data) {
         filters = controller.filterController.filters;
         filters = controller.filterController.filters.keys
             .where((type) =>
                 type != 'page' &&
-                type != 'name' &&
+                type != 'search' &&
+                type != 'target' &&
+                type != 'city_id' &&
+                type != 'province_id' &&
                 type != 'panel' &&
                 filters[type] != '' &&
                 filters[type] != null)
-            .toList();
+            .toList().reversed;
+
         return Container(
           height: filters.length > 0 ? 48 : 0,
           margin: EdgeInsets.only(top: styleController.cardMargin / 2),
@@ -241,17 +253,19 @@ class SelectedFiltersSection extends StatelessWidget {
           ),
         );
       });
-    if (controller is ShopController)
-      return Get.find<ShopController>().filterController.obx((data) {
+    if (controller is LocationController)
+      return Get.find<LocationController>().filterController.obx((data) {
         filters = controller.filterController.filters;
         filters = controller.filterController.filters.keys
             .where((type) =>
                 type != 'page' &&
-                type != 'name' &&
+                type != 'search' &&
+                type != 'target' &&
                 type != 'panel' &&
                 filters[type] != '' &&
                 filters[type] != null)
-            .toList();
+            .toList().reversed;
+
         return Container(
           height: filters.length > 0 ? 48 : 0,
           margin: EdgeInsets.only(top: styleController.cardMargin / 2),
@@ -262,17 +276,22 @@ class SelectedFiltersSection extends StatelessWidget {
           ),
         );
       });
-    if (controller is ProductController)
-      return Get.find<ProductController>().filterController.obx((data) {
+    if (controller is DocumentController)
+      return Get.find<DocumentController>().filterController.obx((data) {
         filters = controller.filterController.filters;
         filters = controller.filterController.filters.keys
             .where((type) =>
                 type != 'page' &&
-                type != 'name' &&
+                type != 'search' &&
+                type != 'target' &&
+                type != 'city_id' &&
+                type != 'province_id' &&
+                type != 'document_type' &&
                 type != 'panel' &&
                 filters[type] != '' &&
                 filters[type] != null)
-            .toList();
+            .toList().reversed;
+
         return Container(
           height: filters.length > 0 ? 48 : 0,
           margin: EdgeInsets.only(top: styleController.cardMargin / 2),
@@ -283,17 +302,21 @@ class SelectedFiltersSection extends StatelessWidget {
           ),
         );
       });
-    if (controller is BlogController)
-      return Get.find<BlogController>().filterController.obx((data) {
+    if (controller is FinderController)
+      return Get.find<FinderController>().filterController.obx((data) {
         filters = controller.filterController.filters;
         filters = controller.filterController.filters.keys
             .where((type) =>
                 type != 'page' &&
-                type != 'name' &&
-                type != 'panel' &&
+                type != 'search' &&
+                type != 'target' &&
+                type != 'paginate' &&
+                type != 'finder' &&
+                type != 'document_type' &&
                 filters[type] != '' &&
                 filters[type] != null)
-            .toList();
+            .toList().reversed;
+
         return Container(
           height: filters.length > 0 ? 48 : 0,
           margin: EdgeInsets.only(top: styleController.cardMargin / 2),
@@ -304,17 +327,20 @@ class SelectedFiltersSection extends StatelessWidget {
           ),
         );
       });
-    if (controller is TournamentController)
-      return Get.find<TournamentController>().filterController.obx((data) {
+    if (controller is LegalController)
+      return Get.find<LegalController>().filterController.obx((data) {
         filters = controller.filterController.filters;
         filters = controller.filterController.filters.keys
             .where((type) =>
                 type != 'page' &&
-                type != 'name' &&
-                type != 'panel' &&
+                type != 'search' &&
+                type != 'target' &&
+                type != 'paginate' &&
+                type != 'finder' &&
                 filters[type] != '' &&
                 filters[type] != null)
-            .toList();
+            .toList().reversed;
+
         return Container(
           height: filters.length > 0 ? 48 : 0,
           margin: EdgeInsets.only(top: styleController.cardMargin / 2),
@@ -325,6 +351,57 @@ class SelectedFiltersSection extends StatelessWidget {
           ),
         );
       });
+
+    if (controller is ContractController)
+      return Get.find<ContractController>().filterController.obx((data) {
+        filters = controller.filterController.filters;
+        filters = controller.filterController.filters.keys
+            .where((type) =>
+                type != 'page' &&
+                type != 'search' &&
+                type != 'target' &&
+                type != 'paginate' &&
+                type != 'finder' &&
+                filters[type] != '' &&
+                filters[type] != null)
+            .toList().reversed;
+
+        return Container(
+          height: filters.length > 0 ? 48 : 0,
+          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
+          child: ListView(
+            shrinkWrap: false,
+            scrollDirection: Axis.horizontal,
+            children: filters.map<Widget>((key) => makeWidget(key)).toList(),
+          ),
+        );
+      });
+
+    if (controller is BookController)
+      return Get.find<BookController>().filterController.obx((data) {
+        filters = controller.filterController.filters;
+        filters = controller.filterController.filters.keys
+            .where((type) =>
+                type != 'page' &&
+                type != 'search' &&
+                type != 'target' &&
+                type != 'paginate' &&
+                type != 'finder' &&
+                filters[type] != '' &&
+                filters[type] != null)
+            .toList().reversed;
+
+        return Container(
+          height: filters.length > 0 ? 48 : 0,
+          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
+          child: ListView(
+            shrinkWrap: false,
+            scrollDirection: Axis.horizontal,
+            children: filters.map<Widget>((key) => makeWidget(key)).toList(),
+          ),
+        );
+      });
+
     return Center();
   }
 

@@ -1,4 +1,4 @@
-import 'package:dabel_sport/helper/helpers.dart';
+import 'package:dabel_adl/helper/helpers.dart';
 
 class Event {
   final int id;

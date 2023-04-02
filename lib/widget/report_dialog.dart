@@ -1,4 +1,4 @@
-import 'package:dabel_sport/controller/UserController.dart';
+import 'package:dabel_adl/controller/UserController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,7 +12,7 @@ class ReportDialog extends StatelessWidget {
   final Helper helper = Get.find<Helper>();
   late MaterialColor colors;
   RxBool loading = RxBool(false);
-  String? userId;
+  late String userId;
   String? text;
   TextEditingController descController = TextEditingController();
 
@@ -28,16 +28,15 @@ class ReportDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return   Padding(
-      padding:
-      EdgeInsets.symmetric(
+    return Padding(
+      padding: EdgeInsets.symmetric(
           horizontal: styleController.cardMargin,
           vertical: styleController.cardMargin / 4),
       child: (widget != null)
           ? widget
           : Container(
               child: TextButton(
-                style: styleController.buttonStyle(colors[100]!),
+                style: styleController.buttonStyle(backgroundColor: colors[100]!),
                 onPressed: () => Get.dialog(
                   Obx(
                     () => Center(

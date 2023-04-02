@@ -1,19 +1,22 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:dabel_sport/controller/APIProvider.dart';
-import 'package:dabel_sport/helper/styles.dart';
-import 'package:dabel_sport/helper/variables.dart';
+import 'package:dabel_adl/controller/APIProvider.dart';
+import 'package:dabel_adl/helper/styles.dart';
+import 'package:dabel_adl/helper/variables.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 import 'package:share_plus/share_plus.dart';
 
 class Helper {
+  static late GetStorage box;
+
   late final Style styleController;
   static late ApiProvider apiProvider;
 
@@ -22,8 +25,30 @@ class Helper {
   static AndroidDeviceInfo? androidInfo;
 
   Helper() {
+    box = GetStorage();
+
     styleController = Get.find<Style>();
     apiProvider = ApiProvider();
+    getAndroidInfo();
+    getPackageInfo();
+  }
+
+  static localStorage({required String key, dynamic def, dynamic write}) {
+    if (write != null) {
+      box.write(key, write);
+    } else {
+      return box.read(key) ?? def;
+    }
+  }
+
+  static Future<AndroidDeviceInfo?> getAndroidInfo() async {
+    androidInfo ??= await DeviceInfoPlugin().androidInfo;
+    return androidInfo;
+  }
+
+  static Future<PackageInfo?> getPackageInfo() async {
+    packageInfo ??= await PackageInfo.fromPlatform();
+    return packageInfo;
   }
 
   showToast({required String msg, String status = 'info'}) {
@@ -36,10 +61,13 @@ class Helper {
       onTap: (snack) => Get.closeCurrentSnackbar(),
       borderRadius: styleController.cardBorderRadius,
       icon: status == 'danger'
-          ? Icon(Icons.dangerous_outlined)
+          ? Icon(
+              Icons.dangerous_outlined,
+              color: Colors.white,
+            )
           : status == 'success'
-              ? Icon(Icons.done)
-              : Icon(Icons.info_outline),
+              ? Icon(Icons.done, color: Colors.white)
+              : Icon(Icons.info_outline, color: Colors.white),
       snackPosition: SnackPosition.BOTTOM,
       snackStyle: SnackStyle.FLOATING,
 

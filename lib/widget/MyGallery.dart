@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
-import 'package:dabel_sport/helper/helpers.dart';
-import 'package:dabel_sport/helper/styles.dart';
-import 'package:dabel_sport/helper/variables.dart';
+import 'package:dabel_adl/helper/helpers.dart';
+import 'package:dabel_adl/helper/styles.dart';
+import 'package:dabel_adl/helper/variables.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -413,7 +413,6 @@ class MyGallery extends StatelessWidget {
                                                                       };
                                                                       if (onChanged !=
                                                                           null) {
-
                                                                         onChanged!(
                                                                             index,
                                                                             items[index].value);
@@ -503,7 +502,7 @@ class MyGallery extends StatelessWidget {
                                                                                             cacheHeaders.value = {
                                                                                               'Cache-Control': 'max-age=0, no-cache, no-store'
                                                                                             };
-                                                                                            if(onChanged != null) {
+                                                                                            if (onChanged != null) {
                                                                                               Get.back();
                                                                                               onChanged!(index, null);
                                                                                             }
@@ -765,8 +764,9 @@ class MyGallery extends StatelessWidget {
                                                                 .withOpacity(
                                                                     .0),
                                                             BlendMode.darken),
-                                                    image: FileImage(
-                                                        items[index].value),
+                                                    image:
+                                                        CachedNetworkImageProvider(
+                                                            items[index].value??''),
                                                     fit: BoxFit.contain,
                                                     filterQuality:
                                                         FilterQuality.medium),

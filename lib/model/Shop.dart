@@ -1,6 +1,6 @@
 import 'dart:convert' as converter;
 
-import 'package:dabel_sport/helper/variables.dart';
+import 'package:dabel_adl/helper/variables.dart';
 
 class Shop {
   int id;

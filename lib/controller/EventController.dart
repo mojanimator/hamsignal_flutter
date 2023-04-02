@@ -1,5 +1,5 @@
-import 'package:dabel_sport/controller/APIProvider.dart';
-import 'package:dabel_sport/helper/variables.dart';
+import 'package:dabel_adl/controller/APIProvider.dart';
+import 'package:dabel_adl/helper/variables.dart';
 import 'package:get/get.dart';
 
 class EventController extends GetxController

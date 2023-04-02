@@ -1,11 +1,11 @@
-import 'package:dabel_sport/controller/APIProvider.dart';
-import 'package:dabel_sport/helper/variables.dart';
-import 'package:dabel_sport/model/Club.dart';
-import 'package:dabel_sport/model/Coach.dart';
-import 'package:dabel_sport/model/Player.dart';
-import 'package:dabel_sport/model/Product.dart';
-import 'package:dabel_sport/model/Shop.dart';
-import 'package:dabel_sport/model/latest.dart';
+import 'package:dabel_adl/controller/APIProvider.dart';
+import 'package:dabel_adl/helper/variables.dart';
+import 'package:dabel_adl/model/Club.dart';
+import 'package:dabel_adl/model/Link.dart';
+import 'package:dabel_adl/model/Player.dart';
+import 'package:dabel_adl/model/Product.dart';
+import 'package:dabel_adl/model/Shop.dart';
+import 'package:dabel_adl/model/latest.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
@@ -46,7 +46,7 @@ class LatestController extends GetxController with StateMixin<List<Latest>> {
 
   @override
   onInit() {
-    getData();
+    // getData();
     super.onInit();
   }
 
@@ -104,9 +104,9 @@ class LatestController extends GetxController with StateMixin<List<Latest>> {
 
       case 'co':
         parsedJson =
-            await apiProvider.fetch(Variables.LINK_GET_COACHES, param: params);
+            await apiProvider.fetch(Variables.LINK_GET_LinkES, param: params);
         if (parsedJson != null && parsedJson['data'].length > 0)
-          return Coach.fromJson(parsedJson['data'][0]);
+          return Link.fromJson(parsedJson['data'][0]);
         else
           return null;
 
@@ -126,13 +126,6 @@ class LatestController extends GetxController with StateMixin<List<Latest>> {
         else
           return null;
 
-      case 'pr':
-        parsedJson =
-            await apiProvider.fetch(Variables.LINK_GET_PRODUCTS, param: params);
-        if (parsedJson != null && parsedJson['data'].length > 0)
-          return Product.fromJson(parsedJson['data'][0]);
-        else
-          return null;
     }
   }
 }

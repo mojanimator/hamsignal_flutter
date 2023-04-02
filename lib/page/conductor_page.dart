@@ -1,14 +1,14 @@
-import 'package:dabel_sport/controller/AnimationController.dart';
-import 'package:dabel_sport/controller/EventController.dart';
-import 'package:dabel_sport/helper/helpers.dart';
-import 'package:dabel_sport/helper/styles.dart';
-import 'package:dabel_sport/model/Event.dart';
-import 'package:dabel_sport/page/menu_drawer.dart';
-import 'package:dabel_sport/widget/AppBar.dart';
-import 'package:dabel_sport/widget/blinkanimation.dart';
-import 'package:dabel_sport/widget/loader.dart';
-import 'package:dabel_sport/widget/mini_card.dart';
-import 'package:dabel_sport/widget/slide_menu.dart';
+import 'package:dabel_adl/controller/AnimationController.dart';
+import 'package:dabel_adl/controller/EventController.dart';
+import 'package:dabel_adl/helper/helpers.dart';
+import 'package:dabel_adl/helper/styles.dart';
+import 'package:dabel_adl/model/Event.dart';
+import 'package:dabel_adl/page/menu_drawer.dart';
+import 'package:dabel_adl/widget/AppBar.dart';
+import 'package:dabel_adl/widget/blinkanimation.dart';
+import 'package:dabel_adl/widget/loader.dart';
+import 'package:dabel_adl/widget/mini_card.dart';
+import 'package:dabel_adl/widget/slide_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,7 +30,7 @@ class ConductorPage extends StatelessWidget {
     animationController = Get.find<MyAnimationController>();
     colors = styleController.primaryMaterial;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      refresh();
+      // refresh();
     });
   }
 
@@ -188,7 +188,7 @@ class ConductorPage extends StatelessWidget {
                           TextButton(
                               onPressed: () => refresh(),
                               style: styleController
-                                  .buttonStyle(styleController.primaryColor),
+                                  .buttonStyle(backgroundColor:styleController.primaryColor),
                               child: Padding(
                                 padding: EdgeInsets.symmetric(
                                   vertical: styleController.cardMargin / 2,

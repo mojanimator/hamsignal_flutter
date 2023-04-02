@@ -1,6 +1,6 @@
-import 'package:dabel_sport/controller/AnimationController.dart';
-import 'package:dabel_sport/helper/styles.dart';
-import 'package:dabel_sport/widget/slide_menu.dart';
+import 'package:dabel_adl/controller/AnimationController.dart';
+import 'package:dabel_adl/helper/styles.dart';
+import 'package:dabel_adl/widget/slide_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,7 +13,7 @@ class MyAppBar extends StatefulWidget {
 
   late MyAnimationController animationController;
 
-  MyAppBar({Key? key, required Widget this.child,  required this.sideMenuKey}) {
+  MyAppBar({Key? key, required Widget this.child, required this.sideMenuKey}) {
     animationController = Get.find<MyAnimationController>();
     styleController = Get.find<Style>();
   }
@@ -97,7 +97,7 @@ class _AppBarState extends State<MyAppBar>
                       splashColor: Colors.white,
                       icon: AnimatedIcon(
                         size: widget.styleController.iconHeight,
-                        color: Colors.white,
+                        color: widget.styleController.secondaryColor,
                         progress: widget.animationController.controller,
                         icon: AnimatedIcons.menu_arrow,
                       ),

@@ -1,9 +1,9 @@
-import 'package:dabel_sport/controller/SettingController.dart';
-import 'package:dabel_sport/helper/IAPPurchase.dart';
-import 'package:dabel_sport/helper/helpers.dart';
-import 'package:dabel_sport/helper/styles.dart';
-import 'package:dabel_sport/helper/variables.dart';
-import 'package:dabel_sport/widget/mini_card.dart';
+import 'package:dabel_adl/controller/SettingController.dart';
+import 'package:dabel_adl/helper/IAPPurchase.dart';
+import 'package:dabel_adl/helper/helpers.dart';
+import 'package:dabel_adl/helper/styles.dart';
+import 'package:dabel_adl/helper/variables.dart';
+import 'package:dabel_adl/widget/mini_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,7 +33,7 @@ class SubscribeDialog extends StatelessWidget {
       : super(key: key) {
     initDiscounts = {
       for (var item
-          in iAPPurchase.allProducts.where((e) => e.type == '${type}'))
+          in iAPPurchase.products.where((e) => e.consumable == '${type}'))
         item.id: item.price
     };
     discounts = RxMap(initDiscounts);
@@ -54,10 +54,10 @@ class SubscribeDialog extends StatelessWidget {
                 children: [
                   Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: iAPPurchase.allProducts
-                          .where((el) => el.type == type)
+                      children: iAPPurchase.products
+                          .where((el) => el.consumable == type)
                           .map((e) => InkWell(
-                                onTap: () => renewMonth.value = e.month,
+                                onTap: () => renewMonth.value = e.value,
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -69,7 +69,7 @@ class SubscribeDialog extends StatelessWidget {
                                         Radio<String>(
                                           fillColor: MaterialStateProperty.all(
                                               colors[500]),
-                                          value: e.month,
+                                          value: e.value,
                                           groupValue: renewMonth.value,
                                           onChanged: (value) {
                                             renewMonth.value = "$value";

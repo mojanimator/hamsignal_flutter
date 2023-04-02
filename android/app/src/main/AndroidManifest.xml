@@ -1,11 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.dabel.dabel_sport">
+    package="ir.dabeladl.app">
 
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
-        android:label="دبل اسپورت">
+        android:label="دبل عدل">
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -29,7 +29,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="2sport.ir"
+                    android:host="dabeladl.com"
                     android:scheme="http" />
             </intent-filter>
 
@@ -49,18 +49,19 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="2sport.ir"
+                    android:host="dabeladl.com"
                     android:scheme="https" />
             </intent-filter>
 
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
-            <tools:validation testUrl="http://2sport.ir" />
+            <tools:validation testUrl="http://dabeladl.com" />
 
         </activity>
         <activity
-            android:name="com.yalantis.ucrop.UCropActivity"
+            android:name="vn.hunghd.flutter.plugins.imagecropper.MyUCropActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <!-- Don't delete the meta-data below.
@@ -100,7 +101,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-<!--    <uses-permission android:name="android.permission.SET_WALLPAPER" />-->
+    <!--    <uses-permission android:name="android.permission.SET_WALLPAPER" />-->
 
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

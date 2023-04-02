@@ -1,4 +1,4 @@
-import 'package:dabel_sport/helper/variables.dart';
+import 'package:dabel_adl/helper/variables.dart';
 
 class Latest {
   int id;

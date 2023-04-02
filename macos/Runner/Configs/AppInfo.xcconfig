@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = dabel_sport
+PRODUCT_NAME = dabel_adl
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.dabel.dabelsport.dabelSport
+PRODUCT_BUNDLE_IDENTIFIER = ir.dabeladl.app.dabelAdl
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2022 com.dabel.dabelsport. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2023 ir.dabeladl.app. All rights reserved.

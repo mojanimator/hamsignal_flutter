@@ -1,4 +1,4 @@
-import 'package:dabel_sport/controller/SettingController.dart';
+import 'package:dabel_adl/controller/SettingController.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
@@ -22,6 +22,11 @@ class MyAnimationController extends GetxController
   late AnimationController _fadeShowController;
   late AnimationController _bottomNavigationBarController;
   late AnimationController _showFieldController;
+  late AnimationController fadeShowClearPhoneIconController;
+  late AnimationController fadeShowClearPasswordIconController;
+  late AnimationController fadeShowClearFullNameIconController;
+  late AnimationController fadeShowClearInviterCodeIconController;
+  late AnimationController fadeShowClearSmsCodeIconController;
 
   AnimationController get showFieldController => _showFieldController;
 
@@ -58,6 +63,32 @@ class MyAnimationController extends GetxController
       duration: Duration(milliseconds: 200),
     );
     _fadeShowController.value = 0;
+    fadeShowClearPhoneIconController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    fadeShowClearPhoneIconController.value = 0;
+    fadeShowClearPasswordIconController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    fadeShowClearPasswordIconController.value = 0;
+    fadeShowClearInviterCodeIconController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    fadeShowClearInviterCodeIconController.value = 0;
+    fadeShowClearSmsCodeIconController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    fadeShowClearSmsCodeIconController.value = 0;
+
+    fadeShowClearFullNameIconController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    fadeShowClearFullNameIconController.value = 0;
 
     animation_height_filter = Tween<double>(
       begin: 0,
@@ -77,14 +108,13 @@ class MyAnimationController extends GetxController
   }
 
   void openBottomNavigationBar() {
+
     _bottomNavigationBarController.forward();
-
-
   }
 
   void closeBottomNavigationBar() {
-    _bottomNavigationBarController.reverse();
 
+    _bottomNavigationBarController.reverse();
   }
 
   void showField() {
@@ -102,6 +132,7 @@ class MyAnimationController extends GetxController
     if (notification.depth == 0) {
       if (notification is UserScrollNotification) {
         final UserScrollNotification userScroll = notification;
+
         switch (userScroll.direction) {
           case ScrollDirection.forward:
             openBottomNavigationBar();
@@ -121,6 +152,36 @@ class MyAnimationController extends GetxController
     if (length == 1)
       _fadeShowController.forward();
     else if (length == 0) _fadeShowController.reverse();
+  }
+
+  toggleClearPhoneIcon(int length) {
+    if (length == 1)
+      fadeShowClearPhoneIconController.forward();
+    else if (length == 0) fadeShowClearPhoneIconController.reverse();
+  }
+
+  toggleClearFullNameIcon(int length) {
+    if (length == 1)
+      fadeShowClearFullNameIconController.forward();
+    else if (length == 0) fadeShowClearFullNameIconController.reverse();
+  }
+
+  toggleClearPasswordIcon(int length) {
+    if (length == 1)
+      fadeShowClearPasswordIconController.forward();
+    else if (length == 0) fadeShowClearPasswordIconController.reverse();
+  }
+
+  toggleClearInviterCodeIcon(int length) {
+    if (length == 1)
+      fadeShowClearInviterCodeIconController.forward();
+    else if (length == 0) fadeShowClearInviterCodeIconController.reverse();
+  }
+
+  toggleClearSmsCodeIcon(int length) {
+    if (length == 1)
+      fadeShowClearSmsCodeIconController.forward();
+    else if (length == 0) fadeShowClearSmsCodeIconController.reverse();
   }
 
   void toggleFilterSearch({bool? open}) {

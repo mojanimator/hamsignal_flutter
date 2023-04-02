@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Loader extends StatefulWidget {
@@ -80,13 +81,16 @@ class _LoaderState extends State<Loader> with SingleTickerProviderStateMixin {
       child: Stack(
         children: <Widget>[
           RotationTransition(
-            turns:animation_rotation,
+            turns: animation_rotation,
             child: Transform.scale(
               scale: radius,
               child: SizedBox(
-                  height: 42,
-                  width: 42,
-                  child: Image.asset('assets/images/icon-light.png')),
+                  // height: 42,
+                  // width: 42,
+                  // child: Image.asset('assets/images/icon-light.png')
+                  child: CupertinoActivityIndicator(
+                color: Colors.white,
+              )),
             ),
           ),
         ],
