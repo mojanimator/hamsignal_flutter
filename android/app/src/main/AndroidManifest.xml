@@ -72,7 +72,9 @@
         <meta-data
             android:name="com.pushpole.sdk.token"
             android:value="PUSHPOLE_929091177869" />
-
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4161485899394281~4380123709" />
     </application>
     <queries>
         <!-- If your app opens https URLs -->
