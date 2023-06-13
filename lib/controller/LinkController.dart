@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/LinkFilterController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/Link.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/LinkFilterController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/Link.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -49,7 +49,7 @@ class LinkController extends GetxController with StateMixin<List<Link>> {
     if (id != null)
       return "${storageLink}/$id.png";
     else
-      return Variables.NOIMAGE_LINK;
+      return Variables.NO_IMAGE_LINK;
   }
 
   Future<List<Link>?> getData({Map<String, dynamic>? param}) async {
@@ -79,7 +79,8 @@ class LinkController extends GetxController with StateMixin<List<Link>> {
     final parsedJson = await apiProvider.fetch(Variables.LINK_GET_LINKS,
         param: params, ACCESS_TOKEN: userController.ACCESS_TOKEN);
 
-    if (parsedJson == null || parsedJson['data'].length == 0) {
+    if (parsedJson == null || parsedJson['data'] == null ||
+        parsedJson['data'].length == 0) {
       loading = false;
       if (int.parse(filterController.filters['page']) > 1)
         change(_data, status: RxStatus.success());
@@ -117,9 +118,8 @@ class LinkController extends GetxController with StateMixin<List<Link>> {
       return null;
   }
 
-  Future<dynamic>? create(
-      {required Map<String, dynamic> params,
-      Function(double percent)? onProgress}) async {
+  Future<dynamic>? create({required Map<String, dynamic> params,
+    Function(double percent)? onProgress}) async {
 // print(params);
     // send video after verifying other inputs
 
@@ -128,7 +128,7 @@ class LinkController extends GetxController with StateMixin<List<Link>> {
         ACCESS_TOKEN: userController.ACCESS_TOKEN,
         method: 'upload',
         onProgress: (percent) =>
-            onProgress != null ? onProgress(percent) : null);
+        onProgress != null ? onProgress(percent) : null);
 
     // print(params);
     if (parsedJson != null && parsedJson['errors'] != null) {
@@ -141,15 +141,14 @@ class LinkController extends GetxController with StateMixin<List<Link>> {
     return parsedJson;
   }
 
-  Future<dynamic> edit(
-      {required Map<String, dynamic> params,
-      Function(double percent)? onProgress}) async {
+  Future<dynamic> edit({required Map<String, dynamic> params,
+    Function(double percent)? onProgress}) async {
     var parsedJson = await apiProvider.fetch(Variables.LINK_EDIT_LinkES,
         param: params,
         ACCESS_TOKEN: userController.ACCESS_TOKEN,
         method: 'post',
         onProgress: (percent) =>
-            onProgress != null ? onProgress(percent) : null);
+        onProgress != null ? onProgress(percent) : null);
 
     if (parsedJson != null && parsedJson['errors'] != null) {
       var msg;
@@ -173,4 +172,6 @@ class LinkController extends GetxController with StateMixin<List<Link>> {
         helper.showToast(msg: 'cant_launch_url'.tr, status: 'danger');
     }
   }
+
+
 }

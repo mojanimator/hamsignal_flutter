@@ -1,205 +1,208 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dabel_adl/controller/LinkController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/model/Link.dart';
-import 'package:dabel_adl/widget/MyNetWorkImage.dart';
-import 'package:dabel_adl/widget/banner_card.dart';
-import 'package:dabel_adl/widget/loader.dart';
-import 'package:dabel_adl/widget/shakeanimation.dart';
+import 'package:card_swiper/card_swiper.dart';
+import 'package:hamsignal/controller/AdvController.dart';
+import 'package:hamsignal/model/adv.dart';
+import 'package:hamsignal/widget/MyNativeAdv.dart';
+import 'package:hamsignal/widget/loader.dart';
+import 'package:hamsignal/widget/shakeanimation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'ScrollingText.dart';
+import '../helper/styles.dart';
 
-class AdvVitrin extends StatelessWidget {
-  late Style styleController;
-  late LinkController linkController;
-  late SettingController settingController;
-  late MaterialColor colors;
+class VitrinAdv extends StatelessWidget {
   late EdgeInsets margin;
-  RxDouble _dividerWidth = 0.0.obs;
+  late double swiperFraction;
+  late MaterialColor colors;
   final _key = Get.key;
+  var _dividerWidth = 0.0.obs;
+  late AdvController controller;
+  late Style style;
+  Widget failedWidget;
 
-  LinkVitrin({EdgeInsets? margin, MaterialColor? colors}) {
+  VitrinAdv(
+      {EdgeInsets? margin,
+      double? swiperFraction,
+      MaterialColor? colors,
+      required Widget this.failedWidget}) {
+    style = Get.find<Style>();
+    controller = AdvController();
     this.margin = margin ??
         EdgeInsets.symmetric(
-          vertical: styleController.cardMargin / 8,
-          horizontal: styleController.cardMargin,
+          vertical: style.cardMargin / 8,
+          horizontal: style.cardMargin,
         );
-    styleController = Get.find<Style>();
-    settingController = Get.find<SettingController>();
-    linkController = Get.find<LinkController>();
-    this.colors = colors ?? styleController.primaryMaterial;
+    this.swiperFraction = swiperFraction ?? 1;
+    this.colors = colors ?? style.cardNewsColors;
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      _dividerWidth.value = (_key.currentContext?.size?.width ?? 0) / 2;
-
-      await linkController.getData(param: {'page': 'clear'});
-
-      //   Future.delayed(
-      //       Duration(seconds: 1),
-      //       () => Get.to(PlayerCreate(),
-      //           transition: Transition.circularReveal,
-      //           duration: Duration(milliseconds: 500)));
-      //   //   var data=await LatestController().find({'id':'20','type':'cl'});
-      //   // Get.to(ClubDetails(data: data, colors: styleController.cardClubColors));
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      // _dividerWidth.value = (_key.currentContext?.size?.width ?? 0) / 2;
+      controller.getData(param: {'page': 'clear'});
+      // controller.getData(param: {'page': 'clear'});
+      // Future.delayed(
+      //   Duration(seconds: 2),
+      //   // () => Get.to(ContentDetails(data: controller.data[0])),
+      //       () => Get.to(LawyersPage()),
+      // );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return linkController.obx((data) {
-      if (data != null && data.length > 0) {
-        var first = data[0];
-        data.removeWhere((e) => e.name.contains('ثنا'));
+    // TODO: implement build
+    return controller.obx((data) {
+      if (data != null) {
+        List<AdvItem> advs = data.advs;
+        if (data.type['native'] == null) return failedWidget;
+        if (data.type['native'] != 'dabel')
+          return MyNativeAdv(
+              controller: controller, failedWidget: failedWidget);
         return ShakeWidget(
+          key: _key,
           child: Card(
             shape: RoundedRectangleBorder(
               borderRadius:
-                  BorderRadius.circular(styleController.cardBorderRadius),
+                  BorderRadius.circular(style.cardBorderRadius),
             ),
-            shadowColor: styleController.primaryColor.withOpacity(.3),
-            color: styleController.secondaryColor,
+            shadowColor: colors[500]?.withOpacity(.3),
+            color: colors[100]?.withOpacity(.8),
             elevation: 20,
-            margin: margin,
-            child: Padding(
-                padding: EdgeInsets.all(styleController.cardMargin),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            margin: EdgeInsets.symmetric(
+              vertical: style.cardMargin / 8,
+              horizontal: style.cardMargin,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                  borderRadius:
+                      BorderRadius.circular(style.cardBorderRadius),
+                  image: DecorationImage(
+                      image: AssetImage("assets/images/back3.png"),
+                      fit: BoxFit.cover)),
+              padding: EdgeInsets.symmetric(horizontal: 0),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Padding(
-                      padding: EdgeInsets.all(styleController.cardMargin / 2),
-                      child: Text(
-                        'links'.tr,
-                        style: styleController.textHeaderStyle
-                            .copyWith(color: colors[900]),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    Obx(
-                      () => Divider(
-                        height: 1,
-                        thickness: 3,
-                        endIndent: _dividerWidth.value,
-                        color: colors[900],
-                      ),
-                    ),
-                    BannerCard(
-                      margin: EdgeInsets.all(  styleController.cardMargin ),
-                      onClick: () => linkController.launchUrl(first),
-                      background: 'back6.png',
-                      titleColor: styleController.primaryColor,
-                      title: first.name,
-                      icon: linkController.getIconLink(first.id),
-                    ),
-                    if (false)
-                      Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              styleController.cardBorderRadius / 2),
+                    if (data.type['native'] == 'dabel')
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: style.cardMargin / 2),
+                        height: style.cardVitrinHeight,
+                        child: Swiper(
+                          autoplay: true,
+                          duration: 300,
+                          autoplayDelay: 8000,
+                          // itemWidth: Get.width -
+                          //     ((style.cardMargin * 2.0).round()),
+                          viewportFraction: swiperFraction,
+                          layout: SwiperLayout.DEFAULT,
+                          control: SwiperControl(color: Colors.transparent),
+                          pagination: SwiperPagination(
+                              margin: EdgeInsets.all(1.0),
+                              alignment: Alignment.bottomCenter,
+                              builder: SwiperCustomPagination(builder:
+                                  (BuildContext context,
+                                      SwiperPluginConfig config) {
+                                return Row(
+                                  children: <Widget>[
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: style.primaryColor),
+                                    ),
+                                    Expanded(
+                                      child: Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: DotSwiperPaginationBuilder(
+                                                color: colors[300],
+                                                activeColor: colors[500]
+                                                    ?.withOpacity(.8),
+                                                size: 5.0,
+                                                activeSize: 8.0)
+                                            .build(context, config),
+                                      ),
+                                    )
+                                  ],
+                                );
+                              })),
+                          itemBuilder: (BuildContext context, int index) {
+                            return GestureDetector(
+                              onTap: () => controller.launchUrl(advs[index]),
+                              child: Container(
+                                margin: EdgeInsets.only(
+                                  top: style.cardMargin / 2,
+                                  bottom: style.cardMargin,
+                                  left: style.cardMargin / 2,
+                                  right: style.cardMargin / 2,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    //***image section
+                                    Expanded(
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          CachedNetworkImage(
+                                            imageUrl: advs[index].bannerLink,
+                                            imageBuilder:
+                                                (context, imageProvider) =>
+                                                    Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(
+                                                        style
+                                                            .cardBorderRadius)),
+                                                image: DecorationImage(
+                                                    colorFilter:
+                                                        ColorFilter.mode(
+                                                            colors[200]!
+                                                                .withOpacity(
+                                                                    .5),
+                                                            BlendMode.darken),
+                                                    image: imageProvider,
+                                                    fit: BoxFit.cover,
+                                                    filterQuality:
+                                                        FilterQuality.medium),
+                                              ),
+                                            ),
+                                            placeholder: (context, url) =>
+                                                CupertinoActivityIndicator(),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    Text(error.toString()),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    //***text section
+                                    if (advs[index].title != '')
+                                      Container(
+                                        padding: EdgeInsets.all(
+                                            style.cardMargin / 2),
+                                        child: Text(
+                                          advs[index].title,
+                                          style: style
+                                              .textHeaderLightStyle
+                                              .copyWith(color: colors[50]),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          itemCount: advs.length,
                         ),
-                        child: ListTile(
-                          contentPadding:
-                              EdgeInsets.all(styleController.cardMargin),
-                          onTap: () => linkController.launchUrl(data[0]),
-                          leading: MyNetWorkImage(
-                            width: styleController.cardVitrinHeight / 2,
-                            url: linkController.getIconLink(data[0].id),
-                            loadingWidgetBuilder: (double) =>
-                                CupertinoActivityIndicator(),
-                            fit: BoxFit.contain,
-                          ),
-                          title: Text(
-                            first.name,
-                            maxLines: 2,
-                            style: styleController.textMediumStyle,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
                       ),
-                    GridView(
-                        padding: EdgeInsets.zero,
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          mainAxisSpacing: styleController.cardMargin/2,
-                            crossAxisCount: styleController.linksGridCount,
-                            childAspectRatio: styleController.linksRatio),
-                        children: renderItems(data)),
-                    // Center(
-                    //   child: Wrap(
-                    //       // spacing: styleController.cardMargin / 4,
-                    //       crossAxisAlignment: WrapCrossAlignment.center,
-                    //       alignment: WrapAlignment.center,
-                    //       children: renderItems(data)),
-                    // ),
-                  ],
-                )),
+                  ]),
+            ),
           ),
         );
       } else
         return Center();
     }, onLoading: Loader(), onEmpty: Center());
-  }
-
-  List<Widget> renderItems(List<Link>? data) {
-    bool first = true;
-
-    return (data ?? []).map<Widget>((link) {
-      return BannerCard(
-        onClick: () => linkController.launchUrl(link),
-        background: 'back6.png',
-        titleColor: styleController.primaryColor,
-        title: link.name,
-        icon: linkController.getIconLink(link.id),
-      );
-      return Card(
-        shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(styleController.cardBorderRadius / 2),
-        ),
-        child: TextButton(
-          onPressed: () {
-            linkController.launchUrl(link);
-          },
-          child: Column(
-            children: [
-              MyNetWorkImage(
-                height: styleController.iconHeight,
-                url: linkController.getIconLink(link.id),
-                loadingWidgetBuilder: (double) => CupertinoActivityIndicator(),
-                fit: BoxFit.contain,
-              ),
-
-              // IntrinsicWidth(
-              //   child: SingleChildScrollView(
-              //     scrollDirection: Axis.horizontal,
-              //     physics: BouncingScrollPhysics(),
-              //     child: Text(
-              //       link.name,
-              //       softWrap: true,
-              //       maxLines: 2,
-              //       textAlign: TextAlign.center,
-              //     ),
-              //   ),
-              // ),
-              // Expanded(child: ScrollingText(text: link.name, reverse: false)),
-              Padding(
-                padding: EdgeInsets.all(styleController.cardMargin / 2),
-                child: Text(
-                  link.name,
-                  style: styleController.textSmallStyle,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.center,
-          ),
-        ),
-      );
-    }).toList();
   }
 }

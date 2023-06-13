@@ -35,12 +35,17 @@ android {
 //    compileSdkVersion flutter.compileSdkVersion.toInteger()
 //    targetSdkVersion flutter.targetSdkVersion.toInteger()
 //    ndkVersion flutter.ndkVersion.toInteger()
-//
-//    compileOptions {
+
+    compileOptions {
 //        sourceCompatibility JavaVersion.VERSION_1_8
 //        targetCompatibility JavaVersion.VERSION_1_8
-//    }
+        coreLibraryDesugaringEnabled false
+    }
 
+//    lintOptions {
+//        disable 'InvalidPackage'
+//        checkReleaseBuilds false
+//    }
     kotlinOptions {
         jvmTarget = '1.8'
     }
@@ -50,13 +55,20 @@ android {
     }
 
     defaultConfig {
+
+        def marketApplicationId = "ir.mservices.market"
+        def marketBindAddress = "ir.mservices.market.InAppBillingService.BIND"
+        manifestPlaceholders += [marketApplicationId: "${marketApplicationId}",
+                                 marketBindAddress  : "${marketBindAddress}",
+                                 marketPermission   : "${marketApplicationId}.BILLING"]
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "ir.dabeladl.app"
+        applicationId "com.varta.hamsignal"
         minSdkVersion localProperties.getProperty('flutter.minSdkVersion').toInteger()
         targetSdkVersion localProperties.getProperty('flutter.targetSdkVersion').toInteger()
         compileSdkVersion localProperties.getProperty('flutter.compileSdkVersion').toInteger()
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+
     }
     signingConfigs {
         release {
@@ -68,7 +80,7 @@ android {
     }
     buildTypes {
         release {
-            shrinkResources false
+            shrinkResources true
             minifyEnabled true
 //            useProguard true
             multiDexEnabled true
@@ -90,4 +102,16 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
+    implementation 'com.unity3d.ads:unity-ads:4.6.0'
+    // For chartboost
+    implementation 'com.chartboost:chartboost-sdk:9.2.1'
+//    implementation("com.google.android.gms:play-services-ads-identifier:18.0.1") {
+//        exclude group: 'com.android.support'
+//    }
+    // For adcolony
+    implementation 'com.adcolony:sdk:4.8.0'
+
+    // For applovin
+    implementation 'com.applovin:applovin-sdk:11.8.2'
 }

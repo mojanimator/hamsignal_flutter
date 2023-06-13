@@ -1,4 +1,4 @@
-import 'package:dabel_adl/helper/styles.dart';
+import 'package:hamsignal/helper/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -6,20 +6,20 @@ import 'package:get/get_core/src/get_main.dart';
 class MyTextField extends StatelessWidget {
   TextEditingController controller;
   String hintText;
-  TextInputType keyboardType;
+  TextInputType? keyboardType;
   late EdgeInsets margin;
   late IconData icon;
   late BorderRadius borderRadius;
   late int minLines;
   late Color backgroundColor;
-  Style styleController = Get.find<Style>();
+  Style style = Get.find<Style>();
   late MyTextFieldAnimationController animationController;
   late bool obscure;
 
   MyTextField({
     required this.controller,
     required this.hintText,
-    required this.keyboardType,
+    TextInputType? keyboardType,
     EdgeInsets? margin,
     IconData? icon,
     BorderRadius? borderRadius,
@@ -44,14 +44,14 @@ class MyTextField extends StatelessWidget {
     return Container(
       padding: EdgeInsets.zero,
       decoration:
-          BoxDecoration(color: backgroundColor, borderRadius: borderRadius),
+          BoxDecoration(color: backgroundColor,  border: Border(bottom: BorderSide(color: style.primaryMaterial[50]!))),
       margin: margin,
       child: ListTile(
           dense: true,
           visualDensity: VisualDensity(horizontal: 0, vertical: -4),
           minVerticalPadding: 0.0,
           contentPadding: EdgeInsets.all(0),
-          tileColor: styleController.primaryColor,
+          tileColor: style.primaryColor,
           leading: IntrinsicHeight(
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -62,7 +62,7 @@ class MyTextField extends StatelessWidget {
                     onPressed: () => null,
                     icon: Icon(
                       icon,
-                      color: styleController.primaryColor,
+                      color: style.primaryColor,
                     )),
               ],
             ),
@@ -74,15 +74,21 @@ class MyTextField extends StatelessWidget {
             keyboardType: keyboardType,
             controller: controller,
             textInputAction: TextInputAction.next,
-            style: TextStyle(color: styleController.primaryColor),
+            style: TextStyle(color: style.primaryColor),
             decoration: InputDecoration(
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: style.primaryMaterial[50]!),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: style.primaryMaterial[50]!),
+              ),
               hintText: hintText,
-              hintStyle: TextStyle(color: styleController.primaryColor),
+              hintStyle: TextStyle(color: style.primaryColor),
               border: InputBorder.none,
 
               // isDense: true,
               contentPadding: EdgeInsets.symmetric(
-                  horizontal: 0, vertical: styleController.cardMargin),
+                  horizontal: 0, vertical: style.cardMargin),
             ),
             onSubmitted: (str) {},
             // onEditingComplete: () {
@@ -95,7 +101,7 @@ class MyTextField extends StatelessWidget {
           trailing: FadeTransition(
             opacity: animationController.fadeShowController,
             child: IconButton(
-              splashColor: styleController.secondaryColor,
+              splashColor: style.secondaryColor,
               icon: Icon(Icons.close),
               onPressed: () {
                 controller.clear();

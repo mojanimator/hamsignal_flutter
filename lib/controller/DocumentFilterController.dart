@@ -1,6 +1,6 @@
-import 'package:dabel_adl/controller/APIController.dart';
-import 'package:dabel_adl/controller/DocumentController.dart';
-import 'package:dabel_adl/model/Category.dart';
+import 'package:hamsignal/controller/APIController.dart';
+import 'package:hamsignal/controller/DocumentController.dart';
+import 'package:hamsignal/model/Category.dart';
 import 'package:get/get.dart';
 
 class DocumentFilterController extends APIController<bool> {

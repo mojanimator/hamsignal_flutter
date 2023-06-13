@@ -1,5 +1,5 @@
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/helper/variables.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/helper/variables.dart';
 import 'package:get/get.dart';
 
 class EventController extends GetxController

@@ -1,23 +1,23 @@
-import 'package:dabel_adl/controller/AnimationController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/page/contact_us.dart';
-import 'package:dabel_adl/page/menu_drawer.dart';
-import 'package:dabel_adl/widget/AppBar.dart';
-import 'package:dabel_adl/widget/slide_menu.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/page/contact_us.dart';
+import 'package:hamsignal/page/menu_drawer.dart';
+import 'package:hamsignal/widget/AppBar.dart';
+import 'package:hamsignal/widget/slide_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SupportPage extends StatelessWidget {
   late SettingController settingController;
-  late Style styleController;
+  late Style style;
   late MyAnimationController animationController;
   GlobalKey<SideMenuState> _sideMenuKey =
       GlobalKey<SideMenuState>(debugLabel: 'sideMenuKey');
 
   SupportPage({Key? key}) : super(key: key) {
     settingController = Get.find<SettingController>();
-    styleController = Get.find<Style>();
+    style = Get.find<Style>();
     animationController = Get.find<MyAnimationController>();
   }
 
@@ -27,16 +27,16 @@ class SupportPage extends StatelessWidget {
       backgroundColor: Colors.white,
       // key: _key,
       body: Container(
-        decoration: BoxDecoration(gradient: styleController.splashBackground),
+        decoration: BoxDecoration(gradient: style.splashBackground),
         child: RefreshIndicator(
           child: SideMenu(
             key: _sideMenuKey,
             inverse: true,
             closeIcon: Icon(
               Icons.close,
-              color: styleController.primaryColor,
+              color: style.primaryColor,
             ),
-            radius: BorderRadius.circular(styleController.cardBorderRadius),
+            radius: BorderRadius.circular(style.cardBorderRadius),
             closeDrawer: animationController.closeDrawer,
             menu: DrawerMenu(onTap: () {
               final _state = _sideMenuKey.currentState;
@@ -52,7 +52,7 @@ class SupportPage extends StatelessWidget {
             background: Colors.transparent,
             child: Container(
               decoration: BoxDecoration(
-                  gradient: styleController.mainGradientBackground),
+                  gradient: style.mainGradientBackground),
               child: MyAppBar(
                 sideMenuKey: _sideMenuKey,
                 child: SingleChildScrollView(

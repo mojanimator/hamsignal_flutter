@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +54,7 @@ class Style {
       primaryColor: primaryColor,
     );
     buttonStyle = (
-            {Color? backgroundColor = const Color(0xFF7e394b),
+            {Color? backgroundColor = const Color(0xFF8364e8),
             EdgeInsets? padding,
             double? elevation,
             OutlinedBorder? shape,
@@ -95,71 +96,45 @@ class Style {
     isBigSize = width != null && width > 500;
   }
 
-  Color get primaryColor => const Color(0xFF7e394b);
+  Color get primaryColor => Color(0xff8364e8);
 
-  Color get secondaryColor => const Color(0xfffeebca);
+  Color get secondaryColor => const Color(0xFFfbe9d7);
 
-  Color get theme1 => const Color(0xff4d4b30);
+  Color get theme1 => const Color(0xff84ffc9);
 
-  Color get theme2 => const Color(0xff908660);
+  Color get theme2 => const Color(0xffaab2ff);
 
-  Color get theme3 => const Color(0xfffeebca);
+  Color get theme3 => const Color(0xffeca0ff);
 
-  Color get theme4 => const Color(0xfff4cca6);
+  Color get theme4 => const Color(0xfff9c58d);
 
-  Color get theme5 => const Color(0xffdaa38b);
+  Color get theme5 => const Color(0xfff492f0);
 
-  Color get theme6 => const Color(0xFF7e394b);
+  Color get theme6 => const Color(0xFFf6d5f7);
+
+  Color get theme7 => const Color(0xFFfbe9d7);
+
+  Color get theme8 => const Color(0xFF2feaa8);
+
+  Color get theme9 => const Color(0xFF028cf3);
 
   MaterialColor primaryMaterial = null ??
       MaterialColor(
         0xFF343265,
         // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
         <int, Color>{
-          50: Color(0xfffff4f6), //10%
-          100: Color(0xffdf7c8b), //20%
-          200: Color(0xffa65b64), //30%
-          300: Color(0xff8d4d57), //40%
-          400: Color(0xff8e4055), //50%
-          500: Color(0xFF7e394b), //60%
-          600: Color(0xff8b3c47), //70%
-          700: Color(0xff823843), //80%
-          800: Color(0xff5d272c), //90%
-          900: Color(0xff552327), //100%
+          50: Color(0xffE8DDF0), //10%
+          100: Color(0xffD9CBEF), //20%
+          200: Color(0xffCAB9EE), //30%
+          300: Color(0xffBBA6ED), //40%
+          400: Color(0xffAC94EC), //50%
+          500: Color(0xFF9D82EA), //60%
+          600: Color(0xff8E70E9), //70%
+          700: Color(0xff7F5DE8), //80%
+          800: Color(0xff704BE7), //90%
+          900: Color(0xff6139E6), //100%
         },
       );
-  MaterialColor greenMaterial = MaterialColor(
-    0xFF343265,
-    // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
-    <int, Color>{
-      50: Color(0xFF03F5B1), //10%
-      100: Color(0xFF02D79B), //20%
-      200: Color(0xFF02B986), //30%
-      300: Color(0xFF01AE7D), //40%
-      400: Color(0xFF02966C), //50%
-      500: Color(0xFF018660), //60%
-      600: Color(0xFF017453), //70%
-      700: Color(0xFF004E38), //80%
-      800: Color(0xFF003224), //90%
-      900: Color(0xFF00120D), //100%
-    },
-  );
-  MaterialColor redMaterial = MaterialColor(
-    0xFF343265,
-    // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
-    <int, Color>{
-      50: Color(0xffe2d8da), //10%
-      100: Color(0xffcea5ac), //20%
-      200: Color(0xffd47082), //30%
-      300: Color(0xff8d4d57), //40%
-      400: Color(0xff8e4055), //50%
-      500: Color(0xFF7e394b), //60%
-      600: Color(0xff8b3c47), //70%
-      700: Color(0xff823843), //80%
-      800: Color(0xff5d272c), //90%
-      900: Color(0xff552327), //100%
-    },
-  );
 
   get theme => themeData;
 
@@ -217,13 +192,9 @@ class Style {
       );
 
   LinearGradient get splashBackground => LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            primaryMaterial[100]!,
-            primaryMaterial[700]!,
-            primaryMaterial[900]!
-          ]);
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      colors: [theme1, theme2, theme3]);
 
   LinearGradient get splashBackgroundReverse => LinearGradient(
           begin: Alignment.topCenter,
@@ -240,9 +211,23 @@ class Style {
   LinearGradient get mainGradientBackground => LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [theme3, theme4, theme5]);
+      colors: [primaryColor, theme2, theme1]);
+
+  LinearGradient get cardGradientBackground => LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Colors.white, theme7,  ]);
+
+  LinearGradient get cardGradientBackgroundReverse => LinearGradient(
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      colors: [Colors.white, theme7,  ]);
 
   double get bottomNavigationBarHeight => 70.0;
+
+  MaterialColor get boorsMaterial => primaryMaterial;
+
+  MaterialColor get cardNewsColors => primaryMaterial;
 
   MaterialColor get cardContentColors => Colors.blueGrey;
 
@@ -252,17 +237,11 @@ class Style {
 
   MaterialColor get cardLegalColors => Colors.brown;
 
-  MaterialColor get cardBookColors => redMaterial;
-
   MaterialColor get cardVotesColors => Colors.indigo;
 
   MaterialColor get cardOpinionsColors => Colors.teal;
 
   MaterialColor get cardConventionsColors => Colors.brown;
-
-  MaterialColor get cardNewsColors => redMaterial;
-
-  MaterialColor get cardContractColors => redMaterial;
 
   MaterialColor get cardPlayerColors => Colors.blueGrey;
 

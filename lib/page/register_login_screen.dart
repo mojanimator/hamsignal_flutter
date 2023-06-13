@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:dabel_adl/controller/AnimationController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/User.dart';
-import 'package:dabel_adl/widget/blinkanimation.dart';
-import 'package:dabel_adl/widget/loader.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/User.dart';
+import 'package:hamsignal/widget/blinkanimation.dart';
+import 'package:hamsignal/widget/loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -18,16 +18,19 @@ import 'package:url_launcher/url_launcher.dart';
 class RegisterLoginScreen extends StatelessWidget {
   final bool isLoading;
   final String? error;
-  late final Style styleController;
+  late final Style style;
   late final SettingController settingController;
   late final UserController userController = Get.find<UserController>();
   late TextEditingController textPhoneController;
   late TextEditingController textVerifyController;
   late TextEditingController textRefController;
   late TextEditingController textPasswordController;
+  late TextEditingController textPasswordVerifyController;
   late TextEditingController textFullNameController;
+  late TextEditingController textEmailController;
   late TextEditingController textInviterCodeController;
   late TextEditingController textSmsCodeController;
+  late TextEditingController textUsernameController;
 
   late MyAnimationController animationController;
 
@@ -44,7 +47,7 @@ class RegisterLoginScreen extends StatelessWidget {
 
   RegisterLoginScreen({Key? key, this.isLoading = false, String? this.error}) {
     // userController = Get.find<UserController>();
-    styleController = Get.find<Style>();
+    style = Get.find<Style>();
     settingController = Get.find<SettingController>();
     helper = Get.find<Helper>();
     textPhoneController = TextEditingController();
@@ -55,11 +58,14 @@ class RegisterLoginScreen extends StatelessWidget {
     textPasswordController = TextEditingController();
     textFullNameController = TextEditingController();
     textInviterCodeController = TextEditingController();
+    textEmailController = TextEditingController();
+    textUsernameController = TextEditingController();
+    textPasswordVerifyController = TextEditingController();
     animationController = Get.find<MyAnimationController>();
 
-    buttonStyle = styleController.buttonStyle(
-      padding: EdgeInsets.symmetric(vertical: styleController.cardMargin),
-      backgroundColor: styleController.primaryColor,
+    buttonStyle = style.buttonStyle(
+      padding: EdgeInsets.symmetric(vertical: style.cardMargin),
+      backgroundColor: style.primaryColor,
     );
 
     enableButton = true.obs;
@@ -68,10 +74,16 @@ class RegisterLoginScreen extends StatelessWidget {
 
     userController.addListener(() {});
 
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   textPhoneController.text = '09228641244';
-    //   loginRegister();
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      textPhoneController.text = '09228641244';
+      textFullNameController.text = 'نام تست';
+      textUsernameController.text = 'mojanimaton';
+      textEmailController.text = 'moj2raj2@hotmail.com';
+      textPasswordController.text = '556435i';
+      textPasswordVerifyController.text = '556435i';
+      textSmsCodeController.text = '00654';
+      loginRegister();
+    });
   }
 
   @override
@@ -83,27 +95,26 @@ class RegisterLoginScreen extends StatelessWidget {
         () => Material(
           child: Container(
             decoration: BoxDecoration(
-              gradient: styleController.splashBackground,
+              gradient: style.splashBackground,
               image: DecorationImage(
                   image: AssetImage("assets/images/texture.jpg"),
                   repeat: ImageRepeat.repeat,
                   fit: BoxFit.scaleDown,
                   filterQuality: FilterQuality.medium,
                   colorFilter: ColorFilter.mode(
-                      styleController.primaryColor.withOpacity(.4),
-                      BlendMode.colorBurn),
-                  opacity: .03),
+                      style.primaryColor.withOpacity(.4), BlendMode.colorBurn),
+                  opacity: .1),
             ),
             // width: Get.width,
-            padding: EdgeInsets.all(styleController.cardMargin),
+            padding: EdgeInsets.all(style.cardMargin),
             child: FadeTransition(
               opacity: animationController.showFieldController,
               child: Center(
                 child: ListView(
                   shrinkWrap: true,
                   children: [
-                    Image.asset('assets/images/icon-light.png',
-                        height: styleController.cardVitrinHeight),
+                    Image.asset('assets/images/icon-dark.png',
+                        height: style.cardVitrinHeight),
 
                     //phone field
                     if (show.value == 'PHONE' ||
@@ -111,17 +122,17 @@ class RegisterLoginScreen extends StatelessWidget {
                         show.value == 'REGISTER')
                       Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              styleController.cardBorderRadius * 2),
+                          borderRadius:
+                              BorderRadius.circular(style.cardBorderRadius * 2),
                         ),
                         child: Directionality(
                           textDirection: TextDirection.ltr,
                           child: ListTile(
-                              contentPadding: EdgeInsets.only(
-                                  left: styleController.cardMargin),
+                              contentPadding:
+                                  EdgeInsets.only(left: style.cardMargin),
                               horizontalTitleGap: 2,
                               // contentPadding: EdgeInsets.symmetric(
-                              //   horizontal: styleController.cardMargin / 4,
+                              //   horizontal: style.cardMargin / 4,
                               //
                               // ),
                               leading: Row(
@@ -129,15 +140,13 @@ class RegisterLoginScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     '09',
-                                    style: styleController.textHeaderStyle
-                                        .copyWith(
-                                            color: styleController.primaryColor
-                                                .withOpacity(.8)),
+                                    style: style.textHeaderStyle.copyWith(
+                                        color:
+                                            style.primaryColor.withOpacity(.8)),
                                   ),
                                   Padding(
                                     padding: EdgeInsets.symmetric(
-                                        vertical:
-                                            styleController.cardMargin / 2),
+                                        vertical: style.cardMargin / 2),
                                     child: VerticalDivider(),
                                   ),
                                 ],
@@ -146,7 +155,7 @@ class RegisterLoginScreen extends StatelessWidget {
                                 controller: textPhoneController,
                                 enabled: show.value == 'PHONE',
                                 keyboardType: TextInputType.number,
-                                textInputAction: TextInputAction.search,
+                                textInputAction: TextInputAction.done,
                                 decoration: InputDecoration(
                                     hintText: 'phone'.tr,
                                     border: InputBorder.none),
@@ -172,8 +181,7 @@ class RegisterLoginScreen extends StatelessWidget {
                                     opacity: animationController
                                         .fadeShowClearPhoneIconController,
                                     child: IconButton(
-                                      splashColor:
-                                          styleController.secondaryColor,
+                                      splashColor: style.secondaryColor,
                                       icon: Icon(Icons.close),
                                       onPressed: () {
                                         if (show.value != 'PHONE') return;
@@ -191,8 +199,7 @@ class RegisterLoginScreen extends StatelessWidget {
                                                 RoundedRectangleBorder(
                                           borderRadius: BorderRadius.horizontal(
                                             right: Radius.circular(
-                                                styleController
-                                                    .cardBorderRadius),
+                                                style.cardBorderRadius),
                                           ),
                                         ))),
                                         onPressed: () {
@@ -203,12 +210,10 @@ class RegisterLoginScreen extends StatelessWidget {
                                         },
                                         child: Padding(
                                           padding: EdgeInsets.symmetric(
-                                              horizontal:
-                                                  styleController.cardMargin),
+                                              horizontal: style.cardMargin),
                                           child: Text(
                                             'edit'.tr,
-                                            style: styleController
-                                                .textMediumLightStyle,
+                                            style: style.textMediumLightStyle,
                                           ),
                                         ))
                                 ],
@@ -220,8 +225,8 @@ class RegisterLoginScreen extends StatelessWidget {
                     if (show.value == 'REGISTER')
                       Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              styleController.cardBorderRadius * 2),
+                          borderRadius:
+                              BorderRadius.circular(style.cardBorderRadius * 2),
                         ),
                         child: Directionality(
                           textDirection: TextDirection.ltr,
@@ -260,8 +265,7 @@ class RegisterLoginScreen extends StatelessWidget {
                                     opacity: animationController
                                         .fadeShowClearFullNameIconController,
                                     child: IconButton(
-                                      splashColor:
-                                          styleController.secondaryColor,
+                                      splashColor: style.secondaryColor,
                                       icon: Icon(Icons.close),
                                       onPressed: () {
                                         textFullNameController.clear();
@@ -274,13 +278,126 @@ class RegisterLoginScreen extends StatelessWidget {
                               )),
                         ),
                       ), //inviter code field
-
+                    //username field
+                    if (show.value == 'REGISTER')
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(style.cardBorderRadius * 2),
+                        ),
+                        child: Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: ListTile(
+                              leading: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.person_outline),
+                                  VerticalDivider(),
+                                ],
+                              ),
+                              title: TextField(
+                                controller: textUsernameController,
+                                keyboardType: TextInputType.text,
+                                textInputAction: TextInputAction.done,
+                                enableSuggestions: true,
+                                autocorrect: false,
+                                decoration: InputDecoration(
+                                    hintText: 'username'.tr,
+                                    border: InputBorder.none),
+                                onSubmitted: (str) {},
+                                // onEditingComplete: () {
+                                //   controller.getData(param: {'page': 'clear'});
+                                // },
+                                onChanged: (str) {
+                                  animationController
+                                      .toggleClearUsernameIcon(str.length);
+                                },
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  FadeTransition(
+                                    opacity: animationController
+                                        .fadeShowClearUsernameIconController,
+                                    child: IconButton(
+                                      splashColor: style.secondaryColor,
+                                      icon: Icon(Icons.close),
+                                      onPressed: () {
+                                        textUsernameController.clear();
+                                        animationController
+                                            .toggleClearUsernameIcon(0);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              )),
+                        ),
+                      ),
+                    //email field
+                    if (show.value == 'REGISTER')
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(style.cardBorderRadius * 2),
+                        ),
+                        child: Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: ListTile(
+                              leading: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.email),
+                                  VerticalDivider(),
+                                ],
+                              ),
+                              title: TextField(
+                                controller: textEmailController,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.done,
+                                enableSuggestions: true,
+                                autocorrect: false,
+                                decoration: InputDecoration(
+                                    hintText: 'email'.tr,
+                                    border: InputBorder.none),
+                                onSubmitted: (str) {},
+                                // onEditingComplete: () {
+                                //   controller.getData(param: {'page': 'clear'});
+                                // },
+                                onChanged: (str) {
+                                  animationController
+                                      .toggleClearEmailIcon(str.length);
+                                },
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  FadeTransition(
+                                    opacity: animationController
+                                        .fadeShowClearEmailIconController,
+                                    child: IconButton(
+                                      splashColor: style.secondaryColor,
+                                      icon: Icon(Icons.close),
+                                      onPressed: () {
+                                        textEmailController.clear();
+                                        animationController
+                                            .toggleClearEmailIcon(0);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              )),
+                        ),
+                      ),
                     //password field
                     if (show.value == 'REGISTER' || show.value == 'LOGIN')
                       Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              styleController.cardBorderRadius * 2),
+                          borderRadius:
+                              BorderRadius.circular(style.cardBorderRadius * 2),
                         ),
                         child: Directionality(
                           textDirection: TextDirection.ltr,
@@ -294,6 +411,7 @@ class RegisterLoginScreen extends StatelessWidget {
                               ),
                               title: TextField(
                                 controller: textPasswordController,
+                                textInputAction: TextInputAction.done,
                                 obscureText: true,
                                 enableSuggestions: false,
                                 autocorrect: false,
@@ -318,8 +436,7 @@ class RegisterLoginScreen extends StatelessWidget {
                                     opacity: animationController
                                         .fadeShowClearPasswordIconController,
                                     child: IconButton(
-                                      splashColor:
-                                          styleController.secondaryColor,
+                                      splashColor: style.secondaryColor,
                                       icon: Icon(Icons.close),
                                       onPressed: () {
                                         textPasswordController.clear();
@@ -332,12 +449,70 @@ class RegisterLoginScreen extends StatelessWidget {
                               )),
                         ),
                       ),
+                    //password verify field
+                    if (show.value == 'REGISTER')
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(style.cardBorderRadius * 2),
+                        ),
+                        child: Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: ListTile(
+                              leading: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.lock),
+                                  VerticalDivider(),
+                                ],
+                              ),
+                              title: TextField(
+                                controller: textPasswordVerifyController,
+                                textInputAction: TextInputAction.done,
+                                obscureText: true,
+                                enableSuggestions: false,
+                                autocorrect: false,
+                                decoration: InputDecoration(
+                                    hintText: 'password_verify'.tr,
+                                    border: InputBorder.none),
+                                onSubmitted: (str) {},
+                                // onEditingComplete: () {
+                                //   controller.getData(param: {'page': 'clear'});
+                                // },
+                                onChanged: (str) {
+                                  animationController
+                                      .toggleClearPasswordVerifyIcon(
+                                          str.length);
+                                },
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  FadeTransition(
+                                    opacity: animationController
+                                        .fadeShowClearPasswordVerifyIconController,
+                                    child: IconButton(
+                                      splashColor: style.secondaryColor,
+                                      icon: Icon(Icons.close),
+                                      onPressed: () {
+                                        textPasswordVerifyController.clear();
+                                        animationController
+                                            .toggleClearPasswordVerifyIcon(0);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              )),
+                        ),
+                      ),
                     //sms code field
                     if (show.value == 'REGISTER')
                       Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              styleController.cardBorderRadius * 2),
+                          borderRadius:
+                              BorderRadius.circular(style.cardBorderRadius * 2),
                         ),
                         child: Directionality(
                           textDirection: TextDirection.ltr,
@@ -374,8 +549,7 @@ class RegisterLoginScreen extends StatelessWidget {
                                     opacity: animationController
                                         .fadeShowClearSmsCodeIconController,
                                     child: IconButton(
-                                      splashColor:
-                                          styleController.secondaryColor,
+                                      splashColor: style.secondaryColor,
                                       icon: Icon(Icons.close),
                                       onPressed: () {
                                         textSmsCodeController.clear();
@@ -389,11 +563,11 @@ class RegisterLoginScreen extends StatelessWidget {
                         ),
                       ),
                     //inviter code field
-                    if (show.value == 'REGISTER')
+                    if (false && show.value == 'REGISTER')
                       Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              styleController.cardBorderRadius * 2),
+                          borderRadius:
+                              BorderRadius.circular(style.cardBorderRadius * 2),
                         ),
                         child: Directionality(
                           textDirection: TextDirection.ltr,
@@ -430,8 +604,7 @@ class RegisterLoginScreen extends StatelessWidget {
                                     opacity: animationController
                                         .fadeShowClearInviterCodeIconController,
                                     child: IconButton(
-                                      splashColor:
-                                          styleController.secondaryColor,
+                                      splashColor: style.secondaryColor,
                                       icon: Icon(Icons.close),
                                       onPressed: () {
                                         textInviterCodeController.clear();
@@ -445,75 +618,47 @@ class RegisterLoginScreen extends StatelessWidget {
                         ),
                       ),
                     if (show.value == 'REGISTER')
-                      InkWell(
-                        onTap: () {
-                          isLawyer.value = !isLawyer.value;
-                        },
-                        child: Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(
-                                'i_am_lawyer'.tr,
-                                style: styleController.textMediumLightStyle
-                                    .copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              CupertinoSwitch(
-                                activeColor: styleController.primaryColor,
-                                trackColor: styleController.secondaryColor
-                                    .withOpacity(.3),
-                                value: isLawyer.value,
-                                onChanged: (value) {
-                                  isLawyer.value = value;
-                                },
-                              ),
-                            ],
+                      if (show.value == 'REGISTER')
+                        InkWell(
+                          onTap: () {
+                            isAcceptedPolicy.value = !isAcceptedPolicy.value;
+                          },
+                          child: Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'i_accept_policy'.tr,
+                                  style: style.textMediumLightStyle
+                                      .copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                CupertinoSwitch(
+                                  activeColor: style.primaryColor,
+                                  trackColor:
+                                      style.secondaryColor.withOpacity(.3),
+                                  value: isAcceptedPolicy.value,
+                                  onChanged: (value) {
+                                    isAcceptedPolicy.value = value;
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    if (show.value == 'REGISTER')
-                      InkWell(
-                        onTap: () {
-                          isAcceptedPolicy.value = !isAcceptedPolicy.value;
-                        },
-                        child: Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(
-                                'i_accept_policy'.tr,
-                                style: styleController.textMediumLightStyle
-                                    .copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              CupertinoSwitch(
-                                activeColor: styleController.primaryColor,
-                                trackColor: styleController.secondaryColor
-                                    .withOpacity(.3),
-                                value: isAcceptedPolicy.value,
-                                onChanged: (value) {
-                                  isAcceptedPolicy.value = value;
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     //login|register  button
                     if (show.value == 'PHONE' ||
                         show.value == 'LOGIN' ||
                         show.value == 'REGISTER')
                       Padding(
-                        padding: EdgeInsets.symmetric(
-                            vertical: styleController.cardMargin),
+                        padding:
+                            EdgeInsets.symmetric(vertical: style.cardMargin),
                         child: TextButton(
                             style: buttonStyle.copyWith(
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(
-                                Radius.circular(
-                                    styleController.cardBorderRadius),
+                                Radius.circular(style.cardBorderRadius),
                               ),
                             ))),
                             onPressed: () {
@@ -521,12 +666,12 @@ class RegisterLoginScreen extends StatelessWidget {
                             },
                             child: Padding(
                               padding: EdgeInsets.symmetric(
-                                  vertical: styleController.cardMargin),
+                                  vertical: style.cardMargin),
                               child: Text(
                                 show.value == 'REGISTER'
                                     ? 'register'.tr
                                     : 'login'.tr,
-                                style: styleController.textMediumLightStyle,
+                                style: style.textMediumLightStyle,
                               ),
                             )),
                       ),
@@ -535,36 +680,40 @@ class RegisterLoginScreen extends StatelessWidget {
                       Obx(
                         () => Padding(
                           padding: EdgeInsets.symmetric(
-                              vertical: styleController.cardMargin / 2),
-                          child: TextButton(
-                              style: buttonStyle.copyWith(
-                                  shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(
-                                      styleController.cardBorderRadius),
-                                ),
-                              ))),
-                              onPressed: () {
-                                if (time.value == 60) recoverPassword();
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: styleController.cardMargin),
-                                child: Text(
-                                  time.value != 60
-                                      ? "${time.value}"
-                                      : 'password_recover'.tr,
-                                  style: styleController.textMediumLightStyle,
-                                ),
-                              )),
+                              vertical: style.cardMargin / 2),
+                          child: Opacity(
+                            opacity: time.value == 60 ? 1 : .4,
+                            child: TextButton(
+                                style: buttonStyle.copyWith(
+                                    backgroundColor: MaterialStateProperty.all(
+                                        style.primaryColor),
+                                    shape: MaterialStateProperty.all(
+                                        RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(style.cardBorderRadius),
+                                      ),
+                                    ))),
+                                onPressed: () {
+                                  if (time.value == 60) recoverPassword();
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: style.cardMargin),
+                                  child: Text(
+                                    time.value != 60
+                                        ? "${time.value}"
+                                        : 'password_recover'.tr,
+                                    style: style.textMediumLightStyle,
+                                  ),
+                                )),
+                          ),
                         ),
                       ),
                     if (show.value == 'VERIFY')
                       Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              styleController.cardBorderRadius * 2),
+                          borderRadius:
+                              BorderRadius.circular(style.cardBorderRadius * 2),
                         ),
                         child: Directionality(
                           textDirection: TextDirection.ltr,
@@ -604,7 +753,7 @@ class RegisterLoginScreen extends StatelessWidget {
                               shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(
-                              Radius.circular(styleController.cardBorderRadius),
+                              Radius.circular(style.cardBorderRadius),
                             ),
                           ))),
                           onPressed: () {
@@ -613,15 +762,15 @@ class RegisterLoginScreen extends StatelessWidget {
                           },
                           child: Padding(
                             padding: EdgeInsets.symmetric(
-                                horizontal: styleController.cardMargin),
+                                horizontal: style.cardMargin),
                             child: Text(
                               'edit_phone'.tr,
-                              style: styleController.textMediumLightStyle,
+                              style: style.textMediumLightStyle,
                             ),
                           )),
 
                     Container(
-                      margin: EdgeInsets.all(styleController.cardMargin),
+                      margin: EdgeInsets.all(style.cardMargin),
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
@@ -633,9 +782,8 @@ class RegisterLoginScreen extends StatelessWidget {
                           child: Text(
                             'policy'.tr,
                             textAlign: TextAlign.center,
-                            style:
-                                styleController.textMediumLightStyle.copyWith(
-                              color: styleController.secondaryColor,
+                            style: style.textMediumLightStyle.copyWith(
+                              color: style.secondaryColor,
                               // shadows: [
                               //   Shadow(
                               //       color: Colors.black45,
@@ -677,9 +825,14 @@ class RegisterLoginScreen extends StatelessWidget {
     //       "\u06a9\u0627\u0631\u0628\u0631 \u06af\u0631\u0627\u0645\u06cc \u0627\u0637\u0644\u0627\u0639\u0627\u062a \u0628\u0627\u0644\u0627 \u0631\u0627 \u062a\u06a9\u0645\u06cc\u0644 \u06a9\u0646\u06cc\u062f",
     //   "code": "4472"
     // };
-    // print(res);
-    if (res==null || res['error'] != null) {
-      helper.showToast(msg: res['error'], status: 'danger');
+    print(res);
+
+    if (res == null || res['error'] != null) {
+      helper.showToast(
+          msg: res == null || res['error'] == null
+              ? 'check_network'.tr
+              : res['error'] ?? 'check_network'.tr,
+          status: 'danger');
       show.value = "PHONE";
       return;
     }
@@ -787,12 +940,14 @@ class RegisterLoginScreen extends StatelessWidget {
       final res = await userController.register(
         phone: "$p",
         code: textSmsCodeController.text,
+        username: textUsernameController.text,
+        email: textEmailController.text,
         fullname: textFullNameController.text,
         password: textPasswordController.text,
+        passwordVerify: textPasswordVerifyController.text,
         inviter: textInviterCodeController.text,
-        isLawyer: isLawyer.value,
       );
-      print(res);
+      // print(res);
       show.value = back;
     }
     // show.value = 'VERIFY';

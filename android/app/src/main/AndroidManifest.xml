@@ -1,11 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="ir.dabeladl.app">
+    package="com.varta.hamsignal">
 
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
-        android:label="دبل عدل">
+        android:label="هم سیگنال">
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -39,19 +39,18 @@
 
 
             <!-- App Links -->
-            <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST/NAME/NAME... -->
-            <!-- Accepts URIs that begin with       https://YOUR_HOST/NAME/NAME... -->
+
             <!-- note that the leading "/" is required for pathPrefix -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
+            <!--            <intent-filter android:autoVerify="true">-->
+            <!--                <action android:name="android.intent.action.VIEW" />-->
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+            <!--                <category android:name="android.intent.category.DEFAULT" />-->
+            <!--                <category android:name="android.intent.category.BROWSABLE" />-->
 
-                <data
-                    android:host="dabeladl.com"
-                    android:scheme="https" />
-            </intent-filter>
+            <!--                <data-->
+            <!--                    android:host="dabeladl.com"-->
+            <!--                    android:scheme="https" />-->
+            <!--            </intent-filter>-->
 
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
@@ -72,9 +71,14 @@
         <meta-data
             android:name="com.pushpole.sdk.token"
             android:value="PUSHPOLE_929091177869" />
+        <!--   com.varta.hamsignal-->
+        <!--        <meta-data-->
+        <!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
+        <!--            android:value="ca-app-pub-4161485899394281~4380123709" />-->
+        <!--        com.varta.hamsignal-->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-4161485899394281~4380123709" />
+            android:value="ca-app-pub-4161485899394281~7869011804" />
     </application>
     <queries>
         <!-- If your app opens https URLs -->

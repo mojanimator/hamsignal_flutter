@@ -1,4 +1,4 @@
-import 'package:dabel_adl/controller/SettingController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
@@ -27,6 +27,9 @@ class MyAnimationController extends GetxController
   late AnimationController fadeShowClearFullNameIconController;
   late AnimationController fadeShowClearInviterCodeIconController;
   late AnimationController fadeShowClearSmsCodeIconController;
+  late AnimationController fadeShowClearEmailIconController;
+  late AnimationController fadeShowClearUsernameIconController;
+  late AnimationController fadeShowClearPasswordVerifyIconController;
 
   AnimationController get showFieldController => _showFieldController;
 
@@ -90,6 +93,24 @@ class MyAnimationController extends GetxController
     );
     fadeShowClearFullNameIconController.value = 0;
 
+    fadeShowClearEmailIconController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    fadeShowClearEmailIconController.value = 0;
+
+    fadeShowClearUsernameIconController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    fadeShowClearUsernameIconController.value = 0;
+
+    fadeShowClearPasswordVerifyIconController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    fadeShowClearPasswordVerifyIconController.value = 0;
+
     animation_height_filter = Tween<double>(
       begin: 0,
       end: 1,
@@ -108,12 +129,10 @@ class MyAnimationController extends GetxController
   }
 
   void openBottomNavigationBar() {
-
     _bottomNavigationBarController.forward();
   }
 
   void closeBottomNavigationBar() {
-
     _bottomNavigationBarController.reverse();
   }
 
@@ -128,7 +147,6 @@ class MyAnimationController extends GetxController
   }
 
   bool handleScrollNotification(ScrollNotification notification) {
-
     if (notification.depth == 0) {
       if (notification is UserScrollNotification) {
         final UserScrollNotification userScroll = notification;
@@ -149,39 +167,57 @@ class MyAnimationController extends GetxController
   }
 
   toggleCloseSearchIcon(int length) {
-    if (length == 1)
+    if (length >0)
       _fadeShowController.forward();
     else if (length == 0) _fadeShowController.reverse();
   }
 
   toggleClearPhoneIcon(int length) {
-    if (length == 1)
+    if (length >0)
       fadeShowClearPhoneIconController.forward();
     else if (length == 0) fadeShowClearPhoneIconController.reverse();
   }
 
   toggleClearFullNameIcon(int length) {
-    if (length == 1)
+    if (length >0)
       fadeShowClearFullNameIconController.forward();
     else if (length == 0) fadeShowClearFullNameIconController.reverse();
   }
 
   toggleClearPasswordIcon(int length) {
-    if (length == 1)
+    if (length >0)
       fadeShowClearPasswordIconController.forward();
     else if (length == 0) fadeShowClearPasswordIconController.reverse();
   }
 
   toggleClearInviterCodeIcon(int length) {
-    if (length == 1)
+    if (length >0)
       fadeShowClearInviterCodeIconController.forward();
     else if (length == 0) fadeShowClearInviterCodeIconController.reverse();
   }
 
   toggleClearSmsCodeIcon(int length) {
-    if (length == 1)
+    if (length >0)
       fadeShowClearSmsCodeIconController.forward();
     else if (length == 0) fadeShowClearSmsCodeIconController.reverse();
+  }
+
+  toggleClearEmailIcon(int length) {
+    if (length >0)
+      fadeShowClearEmailIconController.forward();
+    else if (length == 0) fadeShowClearEmailIconController.reverse();
+  }
+
+  toggleClearUsernameIcon(int length) {
+    if (length >0)
+      fadeShowClearUsernameIconController.forward();
+    else if (length == 0) fadeShowClearUsernameIconController.reverse();
+  }
+
+  toggleClearPasswordVerifyIcon(int length) {
+    if (length >0)
+      fadeShowClearUsernameIconController.forward();
+    else if (length == 0) fadeShowClearUsernameIconController.reverse();
   }
 
   void toggleFilterSearch({bool? open}) {

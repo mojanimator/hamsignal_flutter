@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'package:dabel_adl/controller/APIController.dart';
+import 'package:hamsignal/controller/APIController.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/User.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -29,6 +29,7 @@ class UserFilterController extends APIController {
   late final ApiProvider apiProvider;
 
   TextEditingController textNameCtrl = TextEditingController();
+  TextEditingController textUsernameCtrl = TextEditingController();
   TextEditingController textEmailCtrl = TextEditingController();
   TextEditingController textPaswOldCtrl = TextEditingController();
   TextEditingController textPaswCtrl = TextEditingController();
@@ -59,7 +60,7 @@ class UserFilterController extends APIController {
     'year': '',
     'sex': false,
     'lawyer/expert': false,
-    'categories': categories(),
+    'categories':  [],
   };
 
   dynamic toggleFilter(String type, {idx}) {
@@ -111,7 +112,7 @@ class UserFilterController extends APIController {
   @override
   void onInit() async {
     // ACCESS_TOKEN = '';
-    change(user, status: RxStatus.success());
+    // change(user, status: RxStatus.success());
     super.onInit();
   }
 
@@ -126,16 +127,6 @@ class UserFilterController extends APIController {
 
   List categories() {
     return settingController.categories
-        .where((element) => element['related'] == CategoryRelate.Lawyer)
-        .map<Map>((e) => {
-              ...e,
-              ...{
-                'selected': user != null &&
-                        user!.categories.split(', ').contains(e['title'])
-                    ? true
-                    : false
-              }
-            })
         .toList();
   }
 
@@ -147,28 +138,8 @@ class UserFilterController extends APIController {
 
   Future initFilters() async {
     user = parent.user;
-    filters['sex'] = user?.lawyerSex != null ? user?.lawyerSex : false;
 
-    filters['lawyer/expert'] =
-        user?.isExpert != null && user?.isExpert == true ? true : false;
-    DateTime? beforeData = DateTime.tryParse(user?.lawyerBirthday ?? '');
-    Jalali? j = beforeData != null ? Jalali.fromDateTime(beforeData) : null;
-    filters['day'] =
-        settingController.dates['days'].contains(j?.day) ? "${j?.day}" : '';
-    filters['month'] = settingController.dates['months'].contains(j?.month)
-        ? "${j?.month}"
-        : '';
-    filters['year'] =
-        settingController.dates['years'].contains(j?.year) ? "${j?.year}" : '';
-    filters['county'] = user?.cityId ?? '';
-    var city = settingController.counties
-        .firstWhereOrNull((e) => "${e['id']}" == "${filters['county']}");
-    if (city != null) {
-      filters['province'] = int.parse("${city['province_id']}");
-      filters['county'] = int.parse("${city['id']}");
-    }
     await getImageFile(url: "${user?.avatar}", type: 'avatar');
-    await getImageFile(url: "${user?.lawyerDocument}", type: 'document');
 
     change(user, status: RxStatus.success());
   }
@@ -176,10 +147,11 @@ class UserFilterController extends APIController {
   Future<File?> getImageFile(
       {required String url, required String type}) async {
     var rng = Random();
-    var link = Uri.tryParse("$url?rev=${rng.nextInt(100)}" );
+    var link = Uri.tryParse("$url?rev=${rng.nextInt(100)}");
     dynamic response = link != null && link?.host != null && link?.host != ''
         ? (await http.get(link))
         : Response(statusCode: 404);
+
     if (response.statusCode == 200) {
       filters[type] =
           await File((await getTemporaryDirectory()).path + '/' + "${type}")

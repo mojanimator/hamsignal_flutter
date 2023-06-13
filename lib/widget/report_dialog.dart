@@ -1,4 +1,4 @@
-import 'package:dabel_adl/controller/UserController.dart';
+import 'package:hamsignal/controller/UserController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,7 +7,7 @@ import '../helper/styles.dart';
 
 class ReportDialog extends StatelessWidget {
   Widget? widget;
-  final Style styleController = Get.find<Style>();
+  final Style style = Get.find<Style>();
   final UserController userController = Get.find<UserController>();
   final Helper helper = Get.find<Helper>();
   late MaterialColor colors;
@@ -21,7 +21,7 @@ class ReportDialog extends StatelessWidget {
     Widget? widget,
     MaterialColor? colors,
   }) {
-    this.colors = colors ?? styleController.primaryMaterial;
+    this.colors = colors ?? style.primaryMaterial;
     userId = userController.user?.id ?? '';
     this.text = text;
   }
@@ -30,36 +30,36 @@ class ReportDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-          horizontal: styleController.cardMargin,
-          vertical: styleController.cardMargin / 4),
+          horizontal: style.cardMargin,
+          vertical: style.cardMargin / 4),
       child: (widget != null)
           ? widget
           : Container(
               child: TextButton(
-                style: styleController.buttonStyle(backgroundColor: colors[100]!),
+                style: style.buttonStyle(backgroundColor: colors[100]!),
                 onPressed: () => Get.dialog(
                   Obx(
                     () => Center(
                       child: Material(
                         color: Colors.transparent,
                         child: Card(
-                          margin: EdgeInsets.all(styleController.cardMargin),
+                          margin: EdgeInsets.all(style.cardMargin),
                           elevation: 5,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(
-                                styleController.cardBorderRadius),
+                                style.cardBorderRadius),
                           ),
                           child: Padding(
-                            padding: EdgeInsets.all(styleController.cardMargin),
+                            padding: EdgeInsets.all(style.cardMargin),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Container(
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: styleController.cardMargin),
+                                      horizontal: style.cardMargin),
                                   margin: EdgeInsets.symmetric(
-                                      vertical: styleController.cardMargin / 4),
+                                      vertical: style.cardMargin / 4),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     //background color of dropdown button
@@ -67,7 +67,7 @@ class ReportDialog extends StatelessWidget {
                                         color: colors[500]!, width: 1),
                                     //border of dropdown button
                                     borderRadius: BorderRadius.circular(
-                                        styleController.cardBorderRadius /
+                                        style.cardBorderRadius /
                                             2), //border raiuds of dropdown button
                                   ),
                                   child: TextField(
@@ -92,7 +92,7 @@ class ReportDialog extends StatelessWidget {
                                 ),
                                 Padding(
                                   padding: EdgeInsets.symmetric(
-                                      vertical: styleController.cardMargin / 2),
+                                      vertical: style.cardMargin / 2),
                                   child: Visibility(
                                       visible: loading.value,
                                       child: LinearProgressIndicator(
@@ -112,7 +112,7 @@ class ReportDialog extends StatelessWidget {
                                                 (states) {
                                                   return states.contains(
                                                           MaterialState.pressed)
-                                                      ? styleController
+                                                      ? style
                                                           .secondaryColor
                                                       : null;
                                                 },
@@ -125,11 +125,11 @@ class ReportDialog extends StatelessWidget {
                                                 borderRadius:
                                                     BorderRadius.horizontal(
                                                   right: Radius.circular(
-                                                      styleController
+                                                      style
                                                               .cardBorderRadius /
                                                           2),
                                                   left: Radius.circular(
-                                                      styleController
+                                                      style
                                                               .cardBorderRadius /
                                                           4),
                                                 ),
@@ -137,14 +137,14 @@ class ReportDialog extends StatelessWidget {
                                           onPressed: () => Get.back(),
                                           child: Text(
                                             'cancel'.tr,
-                                            style: styleController
+                                            style: style
                                                 .textMediumStyle
                                                 .copyWith(color: colors[500]),
                                           )),
                                     ),
                                     VerticalDivider(
-                                      indent: styleController.cardMargin / 2,
-                                      endIndent: styleController.cardMargin / 2,
+                                      indent: style.cardMargin / 2,
+                                      endIndent: style.cardMargin / 2,
                                     ),
                                     Expanded(
                                       child: TextButton(
@@ -155,7 +155,7 @@ class ReportDialog extends StatelessWidget {
                                                 (states) {
                                                   return states.contains(
                                                           MaterialState.pressed)
-                                                      ? styleController
+                                                      ? style
                                                           .secondaryColor
                                                       : null;
                                                 },
@@ -168,11 +168,11 @@ class ReportDialog extends StatelessWidget {
                                                 borderRadius:
                                                     BorderRadius.horizontal(
                                                   left: Radius.circular(
-                                                      styleController
+                                                      style
                                                               .cardBorderRadius /
                                                           2),
                                                   right: Radius.circular(
-                                                      styleController
+                                                      style
                                                               .cardBorderRadius /
                                                           4),
                                                 ),
@@ -197,7 +197,7 @@ class ReportDialog extends StatelessWidget {
                                           },
                                           child: Text(
                                             'send'.tr,
-                                            style: styleController
+                                            style: style
                                                 .textMediumLightStyle,
                                           )),
                                     ),
@@ -218,11 +218,11 @@ class ReportDialog extends StatelessWidget {
                   children: [
                     Icon(Icons.assignment_late_outlined, color: colors[500]),
                     SizedBox(
-                      width: styleController.cardMargin,
+                      width: style.cardMargin,
                     ),
                     Text(
                       'report_problem'.tr,
-                      style: styleController.textMediumStyle.copyWith(
+                      style: style.textMediumStyle.copyWith(
                           color: colors[500], fontWeight: FontWeight.bold),
                     ),
                   ],

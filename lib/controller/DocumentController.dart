@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/DocumentFilterController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/Document.dart';
-import 'package:dabel_adl/page/document_details.dart';
-import 'package:dabel_adl/page/documents.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/DocumentFilterController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/Document.dart';
+import 'package:hamsignal/page/document_details.dart';
+import 'package:hamsignal/page/documents.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -77,7 +77,7 @@ class DocumentController extends GetxController
     if (doc != null)
       return "${Variables.LINK_STORAGE}/${doc['type_id']}/${doc['id']}.jpg";
     else
-      return Variables.NOIMAGE_LINK;
+      return Variables.NO_IMAGE_LINK;
   }
 
   String getProvince(pId) {
@@ -184,7 +184,7 @@ class DocumentController extends GetxController
 
   launchPage({required int categoryType, required Document data,required MaterialColor colors}) {
     if (userController.hasPlan(goShop: true, message: true)) {
-      MaterialColor colors = settingController.styleController.primaryMaterial;
+      MaterialColor colors = settingController.style.primaryMaterial;
 
 
       Get.to(DocumentDetails(

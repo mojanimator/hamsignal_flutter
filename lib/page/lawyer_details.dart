@@ -2,17 +2,17 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dabel_adl/controller/LawyerController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/Lawyer.dart';
-import 'package:dabel_adl/widget/MyGallery.dart';
-import 'package:dabel_adl/widget/MyMap.dart';
-import 'package:dabel_adl/widget/mini_card.dart';
-import 'package:dabel_adl/widget/report_dialog.dart';
-import 'package:dabel_adl/widget/shakeanimation.dart';
-import 'package:dabel_adl/widget/subscribe_dialog.dart';
+import 'package:hamsignal/controller/LawyerController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/Lawyer.dart';
+import 'package:hamsignal/widget/MyGallery.dart';
+import 'package:hamsignal/widget/MyMap.dart';
+import 'package:hamsignal/widget/mini_card.dart';
+import 'package:hamsignal/widget/report_dialog.dart';
+import 'package:hamsignal/widget/shakeanimation.dart';
+import 'package:hamsignal/widget/subscribe_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -31,7 +31,7 @@ class LawyerDetails extends StatelessWidget {
 
   final SettingController settingController = Get.find<SettingController>();
   int index;
-  final Style styleController = Get.find<Style>();
+  final Style style = Get.find<Style>();
 
   RxDouble uploadPercent = RxDouble(0.0);
   RxBool loading = RxBool(false);
@@ -39,9 +39,9 @@ class LawyerDetails extends StatelessWidget {
   Rx<Map<String, String>> cacheHeaders = Rx<Map<String, String>>({});
 
   LawyerDetails({required data, MaterialColor? colors, int this.index = -1}) {
-    this.colors = colors ?? styleController.cardLinkColors;
+    this.colors = colors ?? style.cardLinkColors;
     titleStyle =
-        styleController.textMediumStyle.copyWith(color: this.colors[900]);
+        style.textMediumStyle.copyWith(color: this.colors[900]);
     this.data = Rx<Lawyer>(data);
 
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
@@ -71,7 +71,7 @@ class LawyerDetails extends StatelessWidget {
                       CachedNetworkImage(
                         httpHeaders: cacheHeaders.value,
                         height: Get.height / 3 +
-                            styleController.cardBorderRadius * 2,
+                            style.cardBorderRadius * 2,
                         imageBuilder: (context, imageProvider) => Container(
                           decoration: BoxDecoration(
                             image: DecorationImage(
@@ -112,18 +112,18 @@ class LawyerDetails extends StatelessWidget {
                       physics: AlwaysScrollableScrollPhysics(),
                       children: [
                         Container(
-                          height: styleController.topOffset,
+                          height: style.topOffset,
                         ),
                         Container(
                           decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.only(
                                   topRight: Radius.circular(
-                                      styleController.cardBorderRadius * 2),
+                                      style.cardBorderRadius * 2),
                                   topLeft: Radius.circular(
-                                      styleController.cardBorderRadius * 2))),
+                                      style.cardBorderRadius * 2))),
                           child: Transform.translate(
-                            offset: Offset(0, -styleController.imageHeight / 2),
+                            offset: Offset(0, -style.imageHeight / 2),
                             child: Column(
                               children: [
                                 Row(
@@ -149,7 +149,7 @@ class LawyerDetails extends StatelessWidget {
                                                           Container(
                                                             decoration: BoxDecoration(
                                                                 gradient:
-                                                                    styleController
+                                                                    style
                                                                         .splashBackground),
                                                             child:
                                                                 InteractiveViewer(
@@ -204,11 +204,11 @@ class LawyerDetails extends StatelessWidget {
                                                                           CircleBorder(
                                                                               side: BorderSide(color: colors[50]!, width: 1)),
                                                                         ),
-                                                                        backgroundColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.pressed) ? styleController.secondaryColor : Colors.transparent)),
+                                                                        backgroundColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.pressed) ? style.secondaryColor : Colors.transparent)),
                                                                     child:
                                                                         Padding(
                                                                       padding: EdgeInsets.all(
-                                                                          styleController.cardMargin /
+                                                                          style.cardMargin /
                                                                               2),
                                                                       child:
                                                                           Icon(
@@ -258,11 +258,11 @@ class LawyerDetails extends StatelessWidget {
                                                                           shape: MaterialStateProperty.all(
                                                                             CircleBorder(side: BorderSide(color: colors[50]!, width: 1)),
                                                                           ),
-                                                                          backgroundColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.pressed) ? styleController.secondaryColor : Colors.transparent)),
+                                                                          backgroundColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.pressed) ? style.secondaryColor : Colors.transparent)),
                                                                       child:
                                                                           Padding(
                                                                         padding:
-                                                                            EdgeInsets.all(styleController.cardMargin /
+                                                                            EdgeInsets.all(style.cardMargin /
                                                                                 2),
                                                                         child:
                                                                             Icon(
@@ -290,9 +290,9 @@ class LawyerDetails extends StatelessWidget {
                                                 CachedNetworkImage(
                                                   httpHeaders:
                                                       cacheHeaders.value,
-                                                  height: styleController
+                                                  height: style
                                                       .imageHeight,
-                                                  width: styleController
+                                                  width: style
                                                       .imageHeight,
                                                   imageUrl: data.value.avatar,
                                                   imageBuilder: (context,
@@ -303,28 +303,28 @@ class LawyerDetails extends StatelessWidget {
                                                           BorderRadius.only(
                                                         topLeft:
                                                             Radius.circular(
-                                                          styleController
+                                                          style
                                                               .cardBorderRadius,
                                                         ),
                                                         topRight:
                                                             Radius.circular(
-                                                          styleController
+                                                          style
                                                               .cardBorderRadius,
                                                         ),
                                                         bottomRight:
                                                             Radius.circular(
-                                                                styleController
+                                                                style
                                                                         .cardBorderRadius /
                                                                     4),
                                                         bottomLeft: Radius.circular(
-                                                            styleController
+                                                            style
                                                                     .cardBorderRadius /
                                                                 4),
                                                       ),
                                                       image: DecorationImage(
                                                           colorFilter:
                                                               ColorFilter.mode(
-                                                                  styleController
+                                                                  style
                                                                       .primaryColor
                                                                       .withOpacity(
                                                                           .0),
@@ -347,7 +347,7 @@ class LawyerDetails extends StatelessWidget {
                                                       borderRadius:
                                                           BorderRadius.all(
                                                         Radius.circular(
-                                                          styleController
+                                                          style
                                                               .cardBorderRadius,
                                                         ),
                                                       ),
@@ -372,7 +372,7 @@ class LawyerDetails extends StatelessWidget {
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(
-                                                      styleController
+                                                      style
                                                           .cardBorderRadius),
                                             ),
                                           ),
@@ -402,7 +402,7 @@ class LawyerDetails extends StatelessWidget {
                                             ),
                                           ),
                                           SizedBox(
-                                            width: styleController.cardMargin,
+                                            width: style.cardMargin,
                                           ),
                                           CircleAvatar(
                                             backgroundColor: colors[500],
@@ -427,15 +427,15 @@ class LawyerDetails extends StatelessWidget {
                                 Container(
                                   child: Padding(
                                       padding: EdgeInsets.all(
-                                          styleController.cardMargin / 4),
+                                          style.cardMargin / 4),
                                       child: Column(
                                         children: [
                                           Column(
                                             children: [
                                               MiniCard(
                                                 colors: colors,
-                                                styleController:
-                                                    styleController,
+                                                style:
+                                                    style,
                                                 desc1:
                                                     "${data.value.lawyerNumber}",
                                                 title: "${'cert_number'.tr}",
@@ -448,8 +448,8 @@ class LawyerDetails extends StatelessWidget {
                                               ),
                                               MiniCard(
                                                 colors: colors,
-                                                styleController:
-                                                    styleController,
+                                                style:
+                                                    style,
                                                 desc1: "",
                                                 title: "${'activity'.tr}",
                                                 onTap: () => isEditable()
@@ -490,8 +490,8 @@ class LawyerDetails extends StatelessWidget {
                                               ),
                                               MiniCard(
                                                 colors: colors,
-                                                styleController:
-                                                    styleController,
+                                                style:
+                                                    style,
                                                 desc1: "${data.value.fullName}",
                                                 title:
                                                     "${'name'.tr} ${'family'.tr}",
@@ -502,29 +502,7 @@ class LawyerDetails extends StatelessWidget {
                                                       })
                                                     : null,
                                               ),
-                                              MiniCard(
-                                                colors: colors,
-                                                title:
-                                                    "${'province'.tr} ${'and'.tr} ${'county'.tr}",
-                                                desc1: data.value.location,
-                                                styleController:
-                                                    styleController,
-                                                onTap: () => isEditable()
-                                                    ? showEditDialog(params: {
-                                                        'province_id':
-                                                            data.value.cityId,
-                                                        'county_id':
-                                                            data.value.cityId,
-                                                      }, dropdowns: {
-                                                        'province_id':
-                                                            settingController
-                                                                .provinces,
-                                                        'county_id':
-                                                            settingController
-                                                                .counties
-                                                      })
-                                                    : null,
-                                              ),
+
                                               InkWell(
                                                   onTap: isEditable()
                                                       ? () => showEditDialog(
@@ -553,8 +531,8 @@ class LawyerDetails extends StatelessWidget {
                                                           ? "${data.value.mobile}"
                                                           : "${data.value.tel}",
                                                       desc2: "📱",
-                                                      styleController:
-                                                          styleController)),
+                                                      style:
+                                                          style)),
                                               if (data.value.email != '')
                                                 InkWell(
                                                     onTap: isEditable()
@@ -581,27 +559,27 @@ class LawyerDetails extends StatelessWidget {
                                                         desc1:
                                                             "${data.value.email}",
                                                         desc2: "📧",
-                                                        styleController:
-                                                            styleController)),
+                                                        style:
+                                                            style)),
                                               MiniCard(
                                                   colors: colors,
                                                   title: 'address'.tr,
                                                   desc1:
                                                       "${data.value.address}",
                                                   // desc2: "📌",
-                                                  styleController:
-                                                      styleController),
+                                                  style:
+                                                      style),
                                               MiniCard(
                                                   colors: colors,
                                                   title: 'bio'.tr,
                                                   desc1: "${data.value.cv}",
                                                   // desc2: "✏️",
                                                   child: Padding(
-                                                    padding:   EdgeInsets.all(styleController.cardMargin),
+                                                    padding:   EdgeInsets.all(style.cardMargin),
                                                     child: Text("${data.value.cv}"),
                                                   ),
-                                                  styleController:
-                                                      styleController),
+                                                  style:
+                                                      style),
                                               ReportDialog(
                                                 colors: colors,
                                                 text:
@@ -628,9 +606,9 @@ class LawyerDetails extends StatelessWidget {
                           color: Colors.white,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
-                                  styleController.cardMargin)),
+                                  style.cardMargin)),
                           child: Padding(
-                            padding: EdgeInsets.all(styleController.cardMargin),
+                            padding: EdgeInsets.all(style.cardMargin),
                             child: CircularProgressIndicator(
                               value: null /*uploadPercent.value / 100*/,
                               color: colors[800],
@@ -696,14 +674,14 @@ class LawyerDetails extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               child: Card(
-                margin: EdgeInsets.all(styleController.cardMargin),
+                margin: EdgeInsets.all(style.cardMargin),
                 elevation: 5,
                 shape: RoundedRectangleBorder(
                   borderRadius:
-                      BorderRadius.circular(styleController.cardBorderRadius),
+                      BorderRadius.circular(style.cardBorderRadius),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(styleController.cardMargin),
+                  padding: EdgeInsets.all(style.cardMargin),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -720,7 +698,7 @@ class LawyerDetails extends StatelessWidget {
                                         (states) {
                                           return states.contains(
                                                   MaterialState.pressed)
-                                              ? styleController.secondaryColor
+                                              ? style.secondaryColor
                                               : null;
                                         },
                                       ),
@@ -731,10 +709,10 @@ class LawyerDetails extends StatelessWidget {
                                           RoundedRectangleBorder(
                                         borderRadius: BorderRadius.horizontal(
                                           right: Radius.circular(
-                                              styleController.cardBorderRadius /
+                                              style.cardBorderRadius /
                                                   2),
                                           left: Radius.circular(
-                                              styleController.cardBorderRadius /
+                                              style.cardBorderRadius /
                                                   2),
                                         ),
                                       ))),
@@ -743,14 +721,14 @@ class LawyerDetails extends StatelessWidget {
                                           phone: tcs['phone']!.text),
                                   child: Text(
                                     'receive_code'.tr,
-                                    style: styleController.textMediumLightStyle,
+                                    style: style.textMediumLightStyle,
                                   )),
                             ),
                           ],
                         ),
                       Padding(
                         padding: EdgeInsets.symmetric(
-                            vertical: styleController.cardMargin / 2),
+                            vertical: style.cardMargin / 2),
                         child: Visibility(
                             visible: loading.value,
                             child: LinearProgressIndicator(
@@ -770,7 +748,7 @@ class LawyerDetails extends StatelessWidget {
                                       (states) {
                                         return states
                                                 .contains(MaterialState.pressed)
-                                            ? styleController.secondaryColor
+                                            ? style.secondaryColor
                                             : null;
                                       },
                                     ),
@@ -780,23 +758,23 @@ class LawyerDetails extends StatelessWidget {
                                         RoundedRectangleBorder(
                                       borderRadius: BorderRadius.horizontal(
                                         right: Radius.circular(
-                                            styleController.cardBorderRadius /
+                                            style.cardBorderRadius /
                                                 2),
                                         left: Radius.circular(
-                                            styleController.cardBorderRadius /
+                                            style.cardBorderRadius /
                                                 4),
                                       ),
                                     ))),
                                 onPressed: () => Get.back(),
                                 child: Text(
                                   'cancel'.tr,
-                                  style: styleController.textMediumStyle
+                                  style: style.textMediumStyle
                                       .copyWith(color: colors[500]),
                                 )),
                           ),
                           VerticalDivider(
-                            indent: styleController.cardMargin / 2,
-                            endIndent: styleController.cardMargin / 2,
+                            indent: style.cardMargin / 2,
+                            endIndent: style.cardMargin / 2,
                           ),
                           Expanded(
                             child: TextButton(
@@ -806,7 +784,7 @@ class LawyerDetails extends StatelessWidget {
                                       (states) {
                                         return states
                                                 .contains(MaterialState.pressed)
-                                            ? styleController.secondaryColor
+                                            ? style.secondaryColor
                                             : null;
                                       },
                                     ),
@@ -816,17 +794,17 @@ class LawyerDetails extends StatelessWidget {
                                         RoundedRectangleBorder(
                                       borderRadius: BorderRadius.horizontal(
                                         left: Radius.circular(
-                                            styleController.cardBorderRadius /
+                                            style.cardBorderRadius /
                                                 2),
                                         right: Radius.circular(
-                                            styleController.cardBorderRadius /
+                                            style.cardBorderRadius /
                                                 4),
                                       ),
                                     ))),
                                 onPressed: () => callback(),
                                 child: Text(
                                   'edit'.tr,
-                                  style: styleController.textMediumLightStyle,
+                                  style: style.textMediumLightStyle,
                                 )),
                           ),
                         ],
@@ -870,7 +848,7 @@ class LawyerDetails extends StatelessWidget {
                 }).toList();
 
                 return Padding(
-                  padding: EdgeInsets.all(styleController.cardMargin / 2),
+                  padding: EdgeInsets.all(style.cardMargin / 2),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -878,14 +856,14 @@ class LawyerDetails extends StatelessWidget {
                       border: Border.all(color: colors[500]!, width: 1),
                       //border of dropdown button
                       borderRadius: BorderRadius.circular(
-                          styleController.cardBorderRadius /
+                          style.cardBorderRadius /
                               2), //border raiuds of dropdown button
                     ),
                     child: DropdownButton<dynamic>(
                       elevation: 10,
 
                       borderRadius: BorderRadius.circular(
-                          styleController.cardBorderRadius),
+                          style.cardBorderRadius),
                       dropdownColor: Colors.white,
                       underline: Container(),
                       items: items,
@@ -922,7 +900,7 @@ class LawyerDetails extends StatelessWidget {
                               .map<Widget>((el) => Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(
-                                          styleController.cardBorderRadius / 2),
+                                          style.cardBorderRadius / 2),
                                       color: colors[500],
                                     ),
                                     child: Row(
@@ -941,7 +919,7 @@ class LawyerDetails extends StatelessWidget {
                                           child: Center(
                                               child: Text(
                                             el['name'],
-                                            style: styleController
+                                            style: style
                                                 .textMediumLightStyle,
                                           )),
                                         ),
@@ -968,16 +946,16 @@ class LawyerDetails extends StatelessWidget {
               .map(
                 (e) => Container(
                   padding: EdgeInsets.symmetric(
-                      horizontal: styleController.cardMargin),
+                      horizontal: style.cardMargin),
                   margin: EdgeInsets.symmetric(
-                      vertical: styleController.cardMargin / 4),
+                      vertical: style.cardMargin / 4),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     //background color of dropdown button
                     border: Border.all(color: colors[500]!, width: 1),
                     //border of dropdown button
                     borderRadius: BorderRadius.circular(
-                        styleController.cardBorderRadius /
+                        style.cardBorderRadius /
                             2), //border raiuds of dropdown button
                   ),
                   child: TextField(

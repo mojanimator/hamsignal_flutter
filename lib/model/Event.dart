@@ -1,4 +1,4 @@
-import 'package:dabel_adl/helper/helpers.dart';
+import 'package:hamsignal/helper/helpers.dart';
 
 class Event {
   final int id;

@@ -2,60 +2,58 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/AnimationController.dart';
-import 'package:dabel_adl/controller/DocumentController.dart';
-import 'package:dabel_adl/controller/FinderController.dart';
-import 'package:dabel_adl/controller/LegalController.dart';
-import 'package:dabel_adl/controller/LinkController.dart';
-import 'package:dabel_adl/controller/EventController.dart';
-import 'package:dabel_adl/controller/LatestController.dart';
-import 'package:dabel_adl/controller/LocationController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/IAPPurchase.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/helper/translations.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/page/Contents.dart';
-import 'package:dabel_adl/page/books.dart';
-import 'package:dabel_adl/page/conductor_page.dart';
-import 'package:dabel_adl/page/contracts.dart';
-import 'package:dabel_adl/page/documents.dart';
-import 'package:dabel_adl/page/finders.dart';
-import 'package:dabel_adl/page/legals.dart';
-import 'package:dabel_adl/page/locations.dart';
-import 'package:dabel_adl/page/menu_drawer.dart';
-import 'package:dabel_adl/page/shop.dart';
-import 'package:dabel_adl/page/support_page.dart';
-import 'package:dabel_adl/page/register_login_screen.dart';
-import 'package:dabel_adl/page/splash_screen.dart';
-import 'package:dabel_adl/page/user_profile.dart';
-import 'package:dabel_adl/widget/AppBar.dart';
-import 'package:dabel_adl/widget/banner_card.dart';
-import 'package:dabel_adl/widget/loader.dart';
-import 'package:dabel_adl/widget/shakeanimation.dart';
-import 'package:dabel_adl/widget/slide_menu.dart';
-import 'package:dabel_adl/widget/vitrin_content.dart';
-import 'package:dabel_adl/widget/vitrin_main.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/AdvController.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/controller/DocumentController.dart';
+import 'package:hamsignal/controller/LegalController.dart';
+import 'package:hamsignal/controller/LinkController.dart';
+import 'package:hamsignal/controller/EventController.dart';
+import 'package:hamsignal/controller/LocationController.dart';
+import 'package:hamsignal/controller/NewsController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/SignalController.dart';
+import 'package:hamsignal/controller/TicketController.dart';
+import 'package:hamsignal/controller/TransactionController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/translations.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/page/books.dart';
+import 'package:hamsignal/page/contracts.dart';
+import 'package:hamsignal/page/documents.dart';
+import 'package:hamsignal/page/legals.dart';
+import 'package:hamsignal/page/locations.dart';
+import 'package:hamsignal/page/menu_drawer.dart';
+import 'package:hamsignal/page/newses.dart';
+import 'package:hamsignal/page/shop.dart';
+import 'package:hamsignal/page/signals.dart';
+import 'package:hamsignal/page/support_page.dart';
+import 'package:hamsignal/page/register_login_screen.dart';
+import 'package:hamsignal/page/splash_screen.dart';
+import 'package:hamsignal/page/user_profile.dart';
+import 'package:hamsignal/widget/AppBar.dart';
+import 'package:hamsignal/widget/banner_card.dart';
+import 'package:hamsignal/widget/shakeanimation.dart';
+import 'package:hamsignal/widget/slide_menu.dart';
+import 'package:hamsignal/widget/vitrin_advs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:hamsignal/widget/vitrin_news.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'controller/BookController.dart';
-import 'controller/ContentController.dart';
 import 'controller/ContractController.dart';
 import 'controller/LawyerController.dart';
-import 'controller/LinkController.dart';
-import 'controller/LinkController.dart';
 import 'model/Category.dart';
 import 'page/lawyers.dart';
-import 'widget/vitrin_links.dart';
+import 'page/tutorials.dart';
 
 Uri? deepLink;
 StreamSubscription? _sub;
@@ -83,9 +81,12 @@ Future<void> initUniLinks() async {
 }
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await initUniLinks();
-  // runZonedGuarded<Future<Null>>(() async {
+  Helper.initPushPole();
+  MobileAds.instance.initialize();
+  // runZonedGuarded(() async {
   runApp(MyApp());
   // }, (error, stackTrace) async {
   //   // print(error);
@@ -95,14 +96,14 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
-  final styleController = Get.put(Style());
+  final style = Get.put(Style());
 
   // This widget is the root of your application.
 
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      styleController.setSize(context.size?.width);
+      style.setSize(context.size?.width);
     });
     // GetStorage box = GetStorage();
     // final translate = Get.put(MyTranslations());
@@ -111,7 +112,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
         onDispose: () {},
         title: Variables.LABEL,
-        color: styleController.primaryColor,
+        color: style.primaryColor,
 
         // title: 'label'.tr,
         debugShowCheckedModeBanner: false,
@@ -119,20 +120,39 @@ class MyApp extends StatelessWidget {
         translations: MyTranslations(),
         locale: const Locale('fa', 'IR'),
         fallbackLocale: const Locale('fa', 'IR'),
-        theme: styleController.theme,
+        theme: style.theme,
         home: MyHomePage());
   }
 }
 
 class MyHomePage extends StatelessWidget {
-  final styleController = Get.find<Style>();
+  final style = Get.find<Style>();
   final apiProvider = Get.put(ApiProvider());
   final helper = Get.put(Helper());
 
   final settingController = Get.put(SettingController());
-  final animationController = Get.put(MyAnimationController());
+  final userController = Get.put(UserController());
 
-  MyHomePage({Key? key, title}) : super(key: key) {}
+  final animationController = Get.put(MyAnimationController());
+  final signalController = Get.put(SignalController());
+  final lawyerController = Get.put(LawyerController());
+  final newsController = Get.put(NewsController());
+  final linkController = Get.put(LinkController());
+  final locationController = Get.put(LocationController());
+  final legalController = Get.put(LegalController());
+  final bookController = Get.put(BookController());
+  final documentController = Get.put(DocumentController());
+  final contractController = Get.put(ContractController());
+  final ticketController = Get.put(TicketController());
+  final transactionController = Get.put(TransactionController());
+ static RxBool ticketNotification=false.obs;
+  // Get.put(IAPPurchase(
+  // keys: settingController.keys,
+  // products: settingController.plans,
+  // plans: settingController.plans));
+  MyHomePage({Key? key, title}) : super(key: key) {
+    userController.getUser(refresh: true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,128 +160,123 @@ class MyHomePage extends StatelessWidget {
 
     return Container(
         decoration: BoxDecoration(
-          gradient: styleController.splashBackground,
+          gradient: style.splashBackground,
           image: DecorationImage(
               image: AssetImage("assets/images/texture.jpg"),
               repeat: ImageRepeat.repeat,
               fit: BoxFit.scaleDown,
               filterQuality: FilterQuality.medium,
               colorFilter: ColorFilter.mode(
-                  styleController.primaryColor.withOpacity(.1),
-                  BlendMode.saturation),
-              opacity: .05),
+                  style.primaryColor.withOpacity(.1), BlendMode.darken),
+              opacity: .15),
           // LinearGradient(
           //   begin: Alignment.topCenter,
           //   end: Alignment.bottomCenter,
           //   colors: <Color>[
-          //     styleController.primaryMaterial[50]!,
-          //     styleController.primaryMaterial[50]!,
-          //     styleController.primaryMaterial[200]!,
+          //     style.primaryMaterial[50]!,
+          //     style.primaryMaterial[50]!,
+          //     style.primaryMaterial[200]!,
           //   ],
           // ),
         ),
-        child: settingController.obx(
-            (setting) => Get.find<UserController>().obx((user) {
-                  Get.put(LawyerController());
-                  Get.put(ContentController());
-                  Get.put(LinkController());
-                  Get.put(LocationController());
-                  Get.put(LegalController());
-                  Get.put(BookController());
-                  Get.put(DocumentController());
-                  Get.put(ContractController());
-                  Get.put(FinderController());
+        child: userController.obx((user) {
+          if (user != null) settingController.getData();
+          ticketNotification.value=user!.ticketNotification;
+          return settingController.obx(
+            (setting) {
+              return Scaffold(
+                resizeToAvoidBottomInset: false,
+                backgroundColor: Colors.transparent,
+                extendBody: true,
+                // appBar: AppBar(title: Text('label'.tr)),
+                bottomNavigationBar: Obx(()=>
+                   ConvexAppBar.badge(
+                    {
+                      3: ! ticketNotification.value
+                          ? Center()
+                          : Stack(children: [
+                              Positioned(
+                                top: 0,
+                                left: 0,
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                                style.cardBorderRadius))),
+                                    padding: EdgeInsets.all(2),
+                                    child: Text(
+                                      ' + ',
+                                      style: style.textSmallLightStyle.copyWith(fontWeight: FontWeight.bold),
+                                    )),
+                              )
+                            ])
+                    },
 
-                  return Scaffold(
-                    resizeToAvoidBottomInset: false,
-                    backgroundColor: Colors.transparent,
-                    extendBody: true,
-                    // appBar: AppBar(title: Text('label'.tr)),
-                    bottomNavigationBar: ConvexAppBar.badge(
-                      {
-                        3: true
-                            ? Center()
-                            : Stack(children: [
-                                Positioned(
-                                  top: 0,
-                                  right: 0,
-                                  child: Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(styleController
-                                                  .cardBorderRadius))),
-                                      padding: EdgeInsets.all(2),
-                                      child: Text(
-                                        '3+',
-                                        style:
-                                            styleController.textSmallLightStyle,
-                                      )),
-                                )
-                              ])
-                      },
+                    backgroundColor: Colors.white,
+                    color: style.primaryMaterial[800]!.withOpacity(.9),
+                    activeColor: style.primaryColor,
+                    height: style.bottomNavigationBarHeight,
+                    // curveSize: 100,
+                    style: TabStyle.reactCircle,
+                    elevation: 5,
+                    // cornerRadius: 64,
+                    items: [
+                      TabItem(icon: Icons.person_sharp, title: 'profile'.tr),
+                      TabItem(icon: Icons.school, title: 'tutorial'.tr),
+                      TabItem(icon: Icons.home, title: 'label'.tr),
+                      TabItem(
+                          icon: Icons.headset_mic_rounded, title: 'support'.tr),
+                      TabItem(icon: Icons.shopping_cart, title: 'shop'.tr),
+                    ],
 
-                      backgroundColor: Colors.white,
-                      color:
-                          styleController.primaryMaterial[500]!.withOpacity(.9),
-                      activeColor: styleController.primaryMaterial[800],
-                      height: styleController.bottomNavigationBarHeight,
-                      // curveSize: 100,
-                      style: TabStyle.flip,
-                      elevation: 5,
-                      // cornerRadius: 64,
-                      items: [
-                        TabItem(icon: Icons.person_sharp, title: 'profile'.tr),
-                        TabItem(icon: Icons.search, title: 'search'.tr),
-                        TabItem(icon: Icons.home, title: 'label'.tr),
-                        TabItem(
-                            icon: Icons.headset_mic_rounded,
-                            title: 'support'.tr),
-                        TabItem(icon: Icons.shopping_cart, title: 'shop'.tr),
-                      ],
+                    initialActiveIndex: settingController.currentPageIndex,
+                    controller: settingController.bottomSheetController,
+                    //optional, default as 0
+                    onTap: (int i) {
+                      settingController.currentPageIndex = i;
 
-                      initialActiveIndex: settingController.currentPageIndex,
-                      controller: settingController.bottomSheetController,
-                      //optional, default as 0
-                      onTap: (int i) {
-                        settingController.currentPageIndex = i;
-                        animationController.closeDrawer();
-                      },
-                    ),
+                      animationController.closeDrawer();
+                    },
+                  ),
+                ),
 
-                    body: PageTransitionSwitcher(
-                      child: <Widget>[
-                        UserProfilePage(),
-                        FindersPage(),
-                        MainPage(),
-                        SupportPage(),
-                        ShopPage(),
-                      ][settingController.currentPageIndex],
-                      transitionBuilder: (
-                        Widget child,
-                        Animation<double> primaryAnimation,
-                        Animation<double> secondaryAnimation,
-                      ) {
-                        return FadeScaleTransition(
-                          animation: primaryAnimation,
+                body: PageTransitionSwitcher(
+                  child: <Widget>[
+                    UserProfilePage(),
+                    TutorialsPage(),
+                    MainPage(),
+                    SupportPage(),
+                    ShopPage(),
+                  ][settingController.currentPageIndex],
+                  transitionBuilder: (
+                    Widget child,
+                    Animation<double> primaryAnimation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return FadeScaleTransition(
+                      animation: primaryAnimation,
 
-                          // animation: Tween(begin: 0.0, end: 1.0).animate(
-                          // CurvedAnimation(
-                          //   parent: animationController.bottomNavigationBarController,
-                          //   curve: Curves.ease,
-                          // ),),
-                          // secondaryAnimation: secondaryAnimation,
-                          child: child,
-                        );
-                      },
-                    ),
-                  );
-                },
-                    onLoading: SplashScreen(
-                      isLoading: true,
-                    ),
-                    onEmpty: SplashScreen(),
-                    onError: (msg) => RegisterLoginScreen(error: msg)),
+                      // animation: Tween(begin: 0.0, end: 1.0).animate(
+                      // CurvedAnimation(
+                      //   parent: animationController.bottomNavigationBarController,
+                      //   curve: Curves.ease,
+                      // ),),
+                      // secondaryAnimation: secondaryAnimation,
+                      child: child,
+                    );
+                  },
+                ),
+              );
+            },
+            onError: (msg) => RegisterLoginScreen(error: msg),
+            onLoading: SplashScreen(
+              isLoading: true,
+            ),
+            onEmpty: SplashScreen(),
+          );
+        },
+            onError: (msg) => RegisterLoginScreen(error: msg),
             onLoading: SplashScreen(
               isLoading: true,
             ),
@@ -270,27 +285,43 @@ class MyHomePage extends StatelessWidget {
 }
 
 class MainPage extends StatelessWidget {
-  final styleController = Get.find<Style>();
+  final style = Get.find<Style>();
 
   final apiProvider = Get.find<ApiProvider>();
+  final userController = Get.find<UserController>();
   final animationController = Get.find<MyAnimationController>();
   final settingController = Get.find<SettingController>();
-  final contentController = Get.find<ContentController>();
+  final newsController = Get.find<NewsController>();
   final lawyerController = Get.find<LawyerController>();
   final linkController = Get.find<LinkController>();
-
+  late EdgeInsets marginLeft;
+  late EdgeInsets marginRight;
   GlobalKey<SideMenuState> _sideMenuKey =
       Get.put(GlobalKey<SideMenuState>(debugLabel: 'sideMenuKey'));
 
   MainPage() {
+    marginLeft = EdgeInsets.symmetric(
+      horizontal: style.cardMargin / 2,
+      vertical: style.cardMargin / 2,
+    ).copyWith(right: style.cardMargin / 4, bottom: style.cardMargin);
+    marginRight = EdgeInsets.symmetric(
+      horizontal: style.cardMargin / 2,
+      vertical: style.cardMargin / 2,
+    ).copyWith(left: style.cardMargin / 4, bottom: style.cardMargin);
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       settingController.resolveDeepLink(deepLink);
       deepLink = null;
       settingController.showUpdateDialogIfRequired();
 
+      //
       // Future.delayed(
       //   Duration(seconds: 2),
-      //   () => Get.to(ContentsPage( )),
+      // () => Get.to(NewsPage()),
+      // () => Get.to(SignalsPage(
+      //   category: 'boors'.tr,
+      //   colors: style.boorsMaterial,
+      // )),
       // );
     });
     // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -313,9 +344,9 @@ class MainPage extends StatelessWidget {
       inverse: true,
       closeIcon: Icon(
         Icons.close,
-        color: styleController.primaryColor,
+        color: style.primaryColor,
       ),
-      radius: BorderRadius.circular(styleController.cardBorderRadius),
+      radius: BorderRadius.circular(style.cardBorderRadius),
       closeDrawer: animationController.closeDrawer,
       menu: DrawerMenu(onTap: () {
         final _state = _sideMenuKey.currentState;
@@ -331,16 +362,15 @@ class MainPage extends StatelessWidget {
       background: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
-          gradient: styleController.mainGradientBackground,
+          gradient: style.mainGradientBackground,
           image: DecorationImage(
               image: AssetImage("assets/images/texture.jpg"),
               repeat: ImageRepeat.repeat,
               fit: BoxFit.scaleDown,
               filterQuality: FilterQuality.medium,
               colorFilter: ColorFilter.mode(
-                  styleController.secondaryColor.withOpacity(.2),
-                  BlendMode.colorBurn),
-              opacity: .05),
+                  style.secondaryColor.withOpacity(.2), BlendMode.darken),
+              opacity: .1),
         ),
         child: MyAppBar(
           child: RefreshIndicator(
@@ -349,220 +379,149 @@ class MainPage extends StatelessWidget {
               padding: EdgeInsets.zero,
               physics: BouncingScrollPhysics(),
               children: [
-                // blog vitrin
-                VitrinContent(
-                    margin: EdgeInsets.symmetric(
-                  horizontal: styleController.cardMargin /
-                      (styleController.isBigSize ? 2 : 1),
-                )),
-                LinkVitrin(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: styleController.cardMargin /
-                        (styleController.isBigSize ? 2 : 1),
-                    vertical: styleController.cardMargin / 2,
+                //advs vitrin
+                if (settingController.adv.type['native'] == null ||
+                    settingController.adv.advs.length == 0)
+                  VitrinNews(
+                      margin: EdgeInsets.symmetric(
+                    horizontal: style.cardMargin / (style.isBigSize ? 2 : 1),
+                  )),
+                if (!(settingController.adv.type['native'] == null ||
+                    settingController.adv.advs.length == 0))
+                  // blog vitrin
+                  VitrinAdv(
+                      margin: EdgeInsets.symmetric(
+                        horizontal:
+                            style.cardMargin / (style.isBigSize ? 2 : 1),
+                      ),
+                      failedWidget: VitrinNews(
+                          margin: EdgeInsets.symmetric(
+                        horizontal:
+                            style.cardMargin / (style.isBigSize ? 2 : 1),
+                      ))),
+                ShakeWidget(
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(style.cardBorderRadius)),
+                    ),
+                    shadowColor: style.primaryColor.withOpacity(.5),
+                    color: Colors.transparent,
+                    elevation: 20,
+                    margin: EdgeInsets.all(style.cardMargin),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage("assets/images/texture.jpg"),
+                            repeat: ImageRepeat.repeat,
+                            fit: BoxFit.scaleDown,
+                            filterQuality: FilterQuality.medium,
+                            colorFilter: ColorFilter.mode(
+                                style.primaryColor.withOpacity(.1),
+                                BlendMode.darken),
+                            opacity: .1),
+                        borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(style.cardBorderRadius)),
+                        gradient: style.cardGradientBackgroundReverse,
+                      ),
+                      child: Padding(
+                          padding: EdgeInsets.all(style.cardMargin),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (false)
+                                Padding(
+                                  padding: EdgeInsets.all(style.cardMargin),
+                                  child: Text(
+                                    'menu'.tr,
+                                    style: style.textHeaderStyle.copyWith(
+                                        color: style.primaryMaterial[900]),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                              if (false)
+                                Divider(
+                                  height: 1,
+                                  thickness: 3,
+                                  endIndent: Get.width / 2,
+                                  color: style.cardLinkColors[900],
+                                ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: BannerCard(
+                                        margin: marginLeft,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                                style.cardMargin * 2)),
+                                        background: 'back1.png',
+                                        title: '${"boors".tr}',
+                                        icon: 'boors.gif',
+                                        onClick: () {
+                                          if (userController.hasPlan(
+                                              goShop: true, message: true))
+                                            Get.to(SignalsPage(
+                                              category: 'boors'.tr,
+                                              colors: style.boorsMaterial,
+                                            ));
+                                        }),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: BannerCard(
+                                        margin: marginLeft,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                                style.cardMargin * 2)),
+                                        background: 'back2.png',
+                                        title: '${"crypto".tr}',
+                                        icon: 'crypto.gif',
+                                        onClick: () {
+                                          if (userController.hasPlan(
+                                              goShop: true, message: true))
+                                            Get.to(SignalsPage(
+                                              category: 'crypto'.tr,
+                                              colors: style.boorsMaterial,
+                                            ));
+                                        }),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: BannerCard(
+                                        margin: marginLeft,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                                style.cardMargin * 2)),
+                                        background: 'back5.png',
+                                        title: '${"forex".tr}',
+                                        icon: 'forex.gif',
+                                        onClick: () {
+                                          if (userController.hasPlan(
+                                              goShop: true, message: true))
+                                            Get.to(SignalsPage(
+                                              category: 'forex'.tr,
+                                              colors: style.boorsMaterial,
+                                            ));
+                                        }),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )),
+                    ),
                   ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: BannerCard(
-                          margin: EdgeInsets.symmetric(
-                            horizontal: styleController.cardMargin,
-                            vertical: styleController.cardMargin / 2,
-                          ).copyWith(
-                              right: styleController.cardMargin /
-                                  (true ? 2 : 1)),
-                          background: 'back7.png',
-                          title: 'news'.tr,
-                          // titleColor: styleController.primaryColor,
-                          icon: 'news.gif',
-                          onClick: () => Get.to(ContentsPage())),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-
-                    Expanded(
-                      child: BannerCard(
-                          margin: EdgeInsets.symmetric(
-                            horizontal: styleController.cardMargin,
-                            vertical: styleController.cardMargin / 2,
-                          ).copyWith(
-                              left:
-                                  styleController.cardMargin / (true ? 2 : 1)),
-                          background: 'back5.png',
-                          title:
-                              "${'lawyer'.tr}${true ? '\n' : '/'}${'expert'.tr}",
-                          icon: 'lawyer.gif',
-                          onClick: () => Get.to(LawyersPage())),
-                    ),
-                    if (true)
-                      Expanded(
-                        child: BannerCard(
-                            margin: EdgeInsets.symmetric(
-                              horizontal: styleController.cardMargin,
-                              vertical: styleController.cardMargin / 2,
-                            ).copyWith(
-                                right: styleController.cardMargin /
-                                    (true ? 2 : 1)),
-                            background: 'back1.png',
-                            title: 'search_legal_locations'.tr,
-                            icon: 'location.gif',
-                            onClick: () => Get.to(LocationsPage())),
-                      ),
-                  ],
-                ),
-                if (!true)
-                  BannerCard(
-                      margin: EdgeInsets.symmetric(
-                        horizontal: styleController.cardMargin,
-                        vertical: styleController.cardMargin / 2,
-                      ),
-                      background: 'back1.png',
-                      title: 'search_legal_locations'.tr,
-                      icon: 'location.gif',
-                      onClick: () => Get.to(LocationsPage())),
-                Row(
-                  children: [
-                    Expanded(
-                      child: BannerCard(
-                          margin: EdgeInsets.symmetric(
-                            horizontal: styleController.cardMargin,
-                            vertical: styleController.cardMargin / 2,
-                          ).copyWith(
-                              left:
-                                  styleController.cardMargin / (true ? 2 : 1)),
-                          background: 'back2.png',
-                          title:
-                              '${"dadkhast".tr}${true ? '\n' : '/'}${"layehe".tr}',
-                          icon: 'hammer.gif',
-                          onClick: () => Get.to(LegalsPage())),
-                    ),
-                    if (true)
-                      Expanded(
-                        child: BannerCard(
-                            margin: EdgeInsets.symmetric(
-                              horizontal: styleController.cardMargin,
-                              vertical: styleController.cardMargin / 2,
-                            ).copyWith(
-                                right: styleController.cardMargin /
-                                    (true ? 2 : 1)),
-                            background: 'back4.png',
-                            title: 'rules'.tr,
-                            icon: 'justice.gif',
-                            onClick: () => Get.to(BooksPage())),
-                      ),
-                  ],
-                ),
-                if (!true)
-                  BannerCard(
-                      margin: EdgeInsets.symmetric(
-                        horizontal: styleController.cardMargin,
-                        vertical: styleController.cardMargin / 2,
-                      ),
-                      background: 'back4.png',
-                      title: 'rules'.tr,
-                      icon: 'justice.gif',
-                      onClick: () => Get.to(BooksPage())),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: BannerCard(
-                          margin: EdgeInsets.symmetric(
-                            horizontal: styleController.cardMargin,
-                            vertical: styleController.cardMargin / 2,
-                          ).copyWith(
-                              left:
-                                  styleController.cardMargin / (true ? 2 : 1)),
-                          background: 'back5.png',
-                          title: '${"votes".tr}',
-                          icon: 'vote.gif',
-                          onClick: () => Get.to(DocumentsPage(
-                              colors: styleController.cardVotesColors,
-                              categoryType: CategoryRelate.Votes))),
-                    ),
-                    if (true)
-                      Expanded(
-                        child: BannerCard(
-                            margin: EdgeInsets.symmetric(
-                              horizontal: styleController.cardMargin,
-                              vertical: styleController.cardMargin / 2,
-                            ).copyWith(
-                                right: styleController.cardMargin /
-                                    (true ? 2 : 1)),
-                            background: 'back1.png',
-                            title: 'opinions'.tr,
-                            icon: 'vote.gif',
-                            onClick: () => Get.to(DocumentsPage(
-                                colors: styleController.cardOpinionsColors,
-                                categoryType: CategoryRelate.Opinions))),
-                      ),
-                  ],
-                ),
-                if (!true)
-                  BannerCard(
-                      margin: EdgeInsets.symmetric(
-                        horizontal: styleController.cardMargin,
-                        vertical: styleController.cardMargin / 2,
-                      ),
-                      background: 'back1.png',
-                      title: 'opinions'.tr,
-                      icon: 'vote.gif',
-                      onClick: () => Get.to(DocumentsPage(
-                          colors: styleController.cardOpinionsColors,
-                          categoryType: CategoryRelate.Opinions))),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: BannerCard(
-                          margin: EdgeInsets.symmetric(
-                            horizontal: styleController.cardMargin,
-                            vertical: styleController.cardMargin / 2,
-                          ).copyWith(
-                              left:
-                                  styleController.cardMargin / (true ? 2 : 1)),
-                          background: 'back2.png',
-                          title: '${"conventions".tr}',
-                          icon: 'convention.gif',
-                          onClick: () => Get.to(DocumentsPage(
-                              colors: styleController.cardConventionsColors,
-                              categoryType: CategoryRelate.Conventions))),
-                    ),
-                    if (true)
-                      Expanded(
-                        child: BannerCard(
-                            margin: EdgeInsets.symmetric(
-                              horizontal: styleController.cardMargin,
-                              vertical: styleController.cardMargin / 2,
-                            ).copyWith(
-                                right: styleController.cardMargin /
-                                    (true ? 2 : 1)),
-                            background: 'back4.png',
-                            title: 'contracts'.tr,
-                            icon: 'contract.gif',
-                            onClick: () => Get.to(ContractsPage())),
-                      ),
-                  ],
-                ),
-                if (!true)
-                  BannerCard(
-                      margin: EdgeInsets.symmetric(
-                        horizontal: styleController.cardMargin /
-                            (styleController.isBigSize ? 2 : 1),
-                        vertical: styleController.cardMargin / 2,
-                      ),
-                      background: 'back4.png',
-                      title: 'contracts'.tr,
-                      icon: 'contract.gif',
-                      onClick: () => Get.to(ContractsPage())),
 
                 //blogs vitrin
 
                 SizedBox(
-                  height: styleController.cardVitrinHeight / 2,
+                  height: style.cardVitrinHeight / 2,
                 )
               ],
             ),

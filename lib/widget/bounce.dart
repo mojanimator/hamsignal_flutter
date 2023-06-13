@@ -26,7 +26,7 @@ class _MyBounceState extends State<MyBounce>
     controller = AnimationController(
         vsync: this,
         duration: Duration(
-            milliseconds: 100 +
+            milliseconds: 200 +
                 Random(DateTime.now().microsecondsSinceEpoch).nextInt(100)));
     scaleAnimation =
         CurvedAnimation(parent: controller, curve: Curves.elasticInOut);

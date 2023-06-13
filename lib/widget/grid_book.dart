@@ -1,13 +1,13 @@
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dabel_adl/controller/BookController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/Book.dart';
-import 'package:dabel_adl/widget/shakeanimation.dart';
+import 'package:hamsignal/controller/BookController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/Book.dart';
+import 'package:hamsignal/widget/shakeanimation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,7 +16,7 @@ import '../page/lawyer_details.dart';
 
 class GridBook extends StatelessWidget {
   final BookController controller;
-  final Style styleController;
+  final Style style;
   final SettingController settingController;
   final UserController userController;
   late Rx<Book> data;
@@ -33,11 +33,11 @@ class GridBook extends StatelessWidget {
     required data,
     required this.controller,
     required this.settingController,
-    required this.styleController,
+    required this.style,
     required this.userController,
     required this.colors,
   }) {
-    titleStyle = styleController.textMediumStyle.copyWith(color: colors[900]);
+    titleStyle = style.textMediumStyle.copyWith(color: colors[900]);
     this.data = Rx<Book>(data);
 
     needBuy = !(this.data.value.price == '0.00' ||
@@ -50,35 +50,35 @@ class GridBook extends StatelessWidget {
     return Obx(
       () => ShakeWidget(
         child: Container(
-          // height: styleController.gridHeight,
+          // height: style.gridHeight,
           child: Card(
               elevation: 20,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(styleController.cardBorderRadius),
+                    top: Radius.circular(style.cardBorderRadius),
                     bottom:
-                        Radius.circular(styleController.cardBorderRadius / 4)),
+                        Radius.circular(style.cardBorderRadius / 4)),
               ),
               shadowColor: colors[500]?.withOpacity(.7),
               margin: EdgeInsets.symmetric(
-                  horizontal: styleController.cardMargin,
-                  vertical: styleController.cardMargin / 4),
+                  horizontal: style.cardMargin,
+                  vertical: style.cardMargin / 4),
               color: colors[50]?.withOpacity(1),
               child: ClipRRect(
                 borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(styleController.cardBorderRadius),
+                    top: Radius.circular(style.cardBorderRadius),
                     bottom:
-                        Radius.circular(styleController.cardBorderRadius / 4)),
+                        Radius.circular(style.cardBorderRadius / 4)),
                 child: Container(
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage("assets/images/back4.png"),
+                          image: AssetImage("assets/images/back.png"),
                           fit: BoxFit.cover)),
                   child: InkWell(
                     borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(styleController.cardBorderRadius),
+                        top: Radius.circular(style.cardBorderRadius),
                         bottom: Radius.circular(
-                            styleController.cardBorderRadius / 4)),
+                            style.cardBorderRadius / 4)),
                     splashColor: Colors.white,
                     onTap: () async {
                       if (data.value.download == '') {
@@ -106,7 +106,7 @@ class GridBook extends StatelessWidget {
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
                       child: Padding(
-                        padding: EdgeInsets.all(styleController.cardMargin / 4),
+                        padding: EdgeInsets.all(style.cardMargin / 4),
                         child: IntrinsicHeight(
                           child: Row(
                             children: [
@@ -117,8 +117,8 @@ class GridBook extends StatelessWidget {
                                   child: Center(
                                       child: Icon(
                                     Icons.download_for_offline_rounded,
-                                    color: colors[50],
-                                    size: styleController.imageHeight / 2,
+                                    color: colors[500],
+                                    size: style.imageHeight / 2,
                                   )),
                                 ),
                               ),
@@ -128,22 +128,22 @@ class GridBook extends StatelessWidget {
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
                                         horizontal:
-                                            styleController.cardMargin / 2),
+                                            style.cardMargin / 2),
                                     child: Card(
                                       margin: EdgeInsets.symmetric(
                                           vertical:
-                                              styleController.cardMargin / 4),
+                                              style.cardMargin / 4),
                                       color: colors[50],
                                       elevation: 10,
                                       shadowColor: colors[500]?.withOpacity(.5),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.all(
                                           Radius.circular(
-                                            styleController.cardBorderRadius,
+                                            style.cardBorderRadius,
                                           ),
                                         ).copyWith(
                                             topLeft: Radius.circular(
-                                          styleController.cardBorderRadius,
+                                          style.cardBorderRadius,
                                         )),
                                       ),
                                       child: Column(
@@ -152,25 +152,25 @@ class GridBook extends StatelessWidget {
                                         children: [
                                           Container(
                                             padding: EdgeInsets.all(
-                                                styleController.cardMargin),
+                                                style.cardMargin*2),
                                             decoration: BoxDecoration(
                                               borderRadius: BorderRadius.only(
                                                 topLeft: Radius.circular(
-                                                  styleController
+                                                  style
                                                       .cardBorderRadius,
                                                 ),
                                                 topRight: Radius.circular(
-                                                  styleController
+                                                  style
                                                           .cardBorderRadius /
                                                       2,
                                                 ),
                                               ),
-                                              color: colors[50],
+                                              color:Colors.white,
                                             ),
                                             child: Text(
                                               "${data.value.title}",
                                               textAlign: TextAlign.center,
-                                              style: styleController
+                                              style: style
                                                   .textMediumLightStyle
                                                   .copyWith(
                                                       color: colors[500],
@@ -180,14 +180,14 @@ class GridBook extends StatelessWidget {
                                           ),
                                           Container(
                                             padding: EdgeInsets.all(
-                                                styleController.cardMargin),
+                                                style.cardMargin),
                                             decoration: BoxDecoration(
                                               borderRadius: BorderRadius.vertical(
                                                   bottom: Radius.circular(
-                                                      styleController
+                                                      style
                                                               .cardBorderRadius /
                                                           4)),
-                                              color: colors[500],
+                                              color: colors[50],
                                             ),
                                             width: double.infinity,
                                             child: Center(
@@ -203,7 +203,7 @@ class GridBook extends StatelessWidget {
                                                         style:
                                                             titleStyle.copyWith(
                                                                 color:
-                                                                    colors[50]),
+                                                                    colors[500]),
                                                       ),
                                               ),
                                             ),

@@ -1,24 +1,36 @@
+import 'IAPPurchase.dart';
+
 class Variables {
   // static String DOMAIN = "http://192.168.44.2:8000";
 
-  static String DOMAIN = "http://dabeladl.com";
-  static String APIDOMAIN = "${DOMAIN}/api/v1";
-  static String APIDOMAIN2 = "${DOMAIN}/api/v2";
-  static String LINK_SEND_ERROR = "https://2sport.ir/api/error";
+  static String DOMAIN = "http://172.16.6.2:8000"; //find with fing application;
+
+  // static String DOMAIN = "https://qr-image-creator.com/hamsignal";
+  static String APIDOMAIN_V1 = "${DOMAIN}/api";
+  static String APIDOMAIN = "${DOMAIN}/api/v2";
+  static String LINK_SEND_ERROR =
+      "https://qr-image-creator.com/hamsignal/api/senderror";
 
   static String LINK_GET_USER_INFO = "${APIDOMAIN}/user/info";
-  static String LINK_USER_FORGET_PASSWORD = "${APIDOMAIN}/user/forgetUser";
-  static String LINK_USER_LOGIN = "${APIDOMAIN}/user/loginUser";
-  static String LINK_USER_REGISTER = "${APIDOMAIN}/user/registerUser";
   static String LINK_PRE_AUTH = "${APIDOMAIN}/user/preAuth";
+  static String LINK_USER_FORGET_PASSWORD = "${APIDOMAIN}/user/forget";
+  static String LINK_USER_LOGIN = "${APIDOMAIN}/user/login";
+  static String LINK_USER_REGISTER = "${APIDOMAIN}/user/register";
   static String LINK_GET_SETTINGS = "${APIDOMAIN}/settings";
 
-  static String NOIMAGE_LINK = "${DOMAIN}/img/noimage.png";
+  static String NO_IMAGE_LINK = "${DOMAIN}/img/noimage.png";
   static String LINK_POLICY = "${DOMAIN}/policy";
-  static String LINK_STORAGE = "${DOMAIN}/uploads";
+  static String LINK_STORAGE = "${DOMAIN}/storage";
+  static String LINK_NEWS_STORAGE = "${LINK_STORAGE}/news";
+  static String LINK_USERS_STORAGE = "${LINK_STORAGE}/users";
   static String LINK_GET_LINKS = "${APIDOMAIN}/link/search";
-  static String LINK_GET_MAIN = "${APIDOMAIN}/main/getMain";
-  static String LINK_GET_CONTENTS = "${APIDOMAIN}/news";
+  static String LINK_GET_NEWS = "${APIDOMAIN}/news/search";
+  static String LINK_GET_SIGNALS = "${APIDOMAIN}/signal/search";
+  static String LINK_SET_BOOKMARK = "${APIDOMAIN}/user/bookmark";
+  static String LINK_TELEGRAM_CONNECT = "${APIDOMAIN}/user/telegram/connect";
+  static String LINK_USER_CHANGE_PASSWORD = "${APIDOMAIN}/user/changepassword";
+  static String LINK_USER_UPDATE = "${APIDOMAIN}/user/update";
+  static String LINK_GET_TICKETS = "${APIDOMAIN}/ticket/search";
 
   static String LINK_GET_LAWYERS = "${APIDOMAIN}/lawyers";
   static String LINK_GET_LOCATIONS = "${APIDOMAIN}/location";
@@ -28,18 +40,23 @@ class Variables {
   static String LINK_GET_CONTRACTS = "${APIDOMAIN}/contract";
   static String LINK_BUY_CONTRACT = "${APIDOMAIN}/contract/buy";
   static String LINK_BUY_BOOK = "${APIDOMAIN}/book/buy";
-  static String LINK_SET_BOOKMARK = "${APIDOMAIN}/document/mark";
   static String LINK_GET_CATEGORIES = "${APIDOMAIN}/document/category";
   static String LINK_FINDER = "${APIDOMAIN}/finder";
-  static String LINK_SEND_CONTACT = "${APIDOMAIN}/main/sendContact";
-  static String LINK_UPDATE_PROFILE = "${APIDOMAIN}/profile/update";
-  static String LINK_UPDATE_PASSWORD = "${APIDOMAIN}/profile/password";
-  static String LINK_UPDATE_LAWYER_PROFILE = "${APIDOMAIN}/profile/updateLawye"
-      "rProfile";
-  static String LINK_BUY = "${APIDOMAIN2}/buy";
+
+  static String LINK_UPDATE_AVATAR = "${APIDOMAIN}/user/updateavatar";
+  static String LINK_UPDATE_EMAIL = "${APIDOMAIN}/user/updateemail";
+  static String LINK_UPDATE_PROFILE = "${APIDOMAIN}/user/update";
+  static String LINK_UPDATE_PASSWORD = "${APIDOMAIN}/user/changepassword";
+  static String LINK_BUY = "${APIDOMAIN}/payment/buy";
+  static String LINK_GET_TRANSACTIONS =
+      "${APIDOMAIN}/payment/transactions/search";
+  static String LINK_MAKE_PAYMENT = "${APIDOMAIN}/payment/create";
+
   static String LINK_UPGRADE_PLAN = "${APIDOMAIN}/upgrade";
-  static String LINK_CONFIRM_PAYMENT = "${APIDOMAIN2}/payment/confirm";
-  static String LINK_MAKE_PAYMENT = "${APIDOMAIN2}/payment/create";
+  static String LINK_CONFIRM_PAYMENT = "${APIDOMAIN}/payment/done";
+  static String LINK_ADV_CLICK = "${APIDOMAIN}/adv/click";
+  static String LINK_UPDATE_TICKET = "${APIDOMAIN}/ticket/update";
+  static String LINK_CREATE_TICKET_CHAT = "${APIDOMAIN}/ticket/chat/create";
 
   //
   static String LINK_PLAYER = "${DOMAIN}/player";
@@ -59,12 +76,7 @@ class Variables {
   static String LINK_GET_TOURNAMENTS = "${APIDOMAIN}/tournament/search";
   static String LINK_GET_USER = "${APIDOMAIN}/user/get";
 
-  static String LINK_EDIT_BLOGS = "${APIDOMAIN}/blog/edit";
-  static String LINK_EDIT_PLAYERS = "${APIDOMAIN}/player/edit";
   static String LINK_EDIT_LinkES = "${APIDOMAIN}/Link/edit";
-  static String LINK_EDIT_CLUBS = "${APIDOMAIN}/club/edit";
-  static String LINK_EDIT_SHOPS = "${APIDOMAIN}/shop/edit";
-  static String LINK_EDIT_PRODUCTS = "${APIDOMAIN}/product/edit";
 
   static String LINK_REMOVE_PRODUCT = "${APIDOMAIN}/product/remove";
 
@@ -76,14 +88,11 @@ class Variables {
   static String LINK_COUPON_CALCULATE = "${APIDOMAIN}/coupon/calculate";
   static String LINK_FIND_BLOG = "${APIDOMAIN}/blog/find";
 
-  static String LINK_CREATE_PLAYER = "${APIDOMAIN}/player/create";
   static String LINK_CREATE_Link = "${APIDOMAIN}/Link/create";
-  static String LINK_CREATE_CLUB = "${APIDOMAIN}/club/create";
-  static String LINK_CREATE_SHOP = "${APIDOMAIN}/shop/create";
-  static String LINK_CREATE_PRODUCT = "${APIDOMAIN}/product/create";
 
   static String LANG = 'fa';
-  static String LABEL = 'دبل عدل';
-  static String MARKET = 'bazaar'; //bank,myket,bazar,playstore
+  static String LABEL = 'هم سیگنال';
+  static String MARKET =
+      IAPPurchase.MARKET; // 'playstore'; //bank,myket,bazaar,playstore
 //bank,myket,bazar,playstore
 }

@@ -1,13 +1,13 @@
-import 'package:dabel_adl/controller/AnimationController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/widget/slide_menu.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/widget/slide_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 
 class MyAppBar extends StatefulWidget {
-  late final Style styleController;
+  late final Style style;
   late final Widget child;
   final GlobalKey<SideMenuState> sideMenuKey;
 
@@ -15,7 +15,7 @@ class MyAppBar extends StatefulWidget {
 
   MyAppBar({Key? key, required Widget this.child, required this.sideMenuKey}) {
     animationController = Get.find<MyAnimationController>();
-    styleController = Get.find<Style>();
+    style = Get.find<Style>();
   }
 
   @override
@@ -28,7 +28,7 @@ class _AppBarState extends State<MyAppBar>
         KeepAliveParentDataMixin,
         AutomaticKeepAliveClientMixin {
   bool isOpen = false;
-  late final Style styleController;
+  late final Style style;
 
   @override
   void dispose() async {
@@ -40,7 +40,7 @@ class _AppBarState extends State<MyAppBar>
   void initState() {
     isOpen = false;
     // print('init');
-    styleController = widget.styleController;
+    style = widget.style;
 
     super.initState();
   }
@@ -54,29 +54,31 @@ class _AppBarState extends State<MyAppBar>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: styleController.cardVitrinHeight,
+              height: style.cardVitrinHeight,
+
               decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage("assets/images/texture.jpg"),
+                    repeat: ImageRepeat.repeat,
+                    fit: BoxFit.scaleDown,
+                    filterQuality: FilterQuality.medium,
+                    colorFilter: ColorFilter.mode(
+                        style.primaryColor.withOpacity(.1), BlendMode.darken),
+                    opacity: .1),
                 boxShadow: [
                   BoxShadow(
-                    color: styleController.primaryColor.withOpacity(0.5),
+                    color: style.primaryColor.withOpacity(0.5),
                     spreadRadius: 3,
                     blurRadius: 10,
                     offset: Offset(0, 3), // changes position of shadow
                   ),
                 ],
                 borderRadius: BorderRadius.vertical(
-                    bottom:
-                        Radius.circular(styleController.cardBorderRadius * 4)),
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      styleController.primaryMaterial[700]!,
-                      styleController.primaryMaterial[500]!
-                    ]),
+                    bottom: Radius.circular(style.cardBorderRadius * 4)),
+                gradient: style.mainGradientBackground,
               ),
               child: Container(
-                padding: EdgeInsets.all(styleController.cardMargin),
+                padding: EdgeInsets.all(style.cardMargin),
               ),
             ),
             Center()
@@ -86,7 +88,7 @@ class _AppBarState extends State<MyAppBar>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: EdgeInsets.all(styleController.cardMargin),
+              padding: EdgeInsets.all(style.cardMargin),
               child: SafeArea(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,8 +98,8 @@ class _AppBarState extends State<MyAppBar>
                     IconButton(
                       splashColor: Colors.white,
                       icon: AnimatedIcon(
-                        size: widget.styleController.iconHeight,
-                        color: widget.styleController.secondaryColor,
+                        size: widget.style.iconHeight,
+                        color: widget.style.secondaryColor,
                         progress: widget.animationController.controller,
                         icon: AnimatedIcons.menu_arrow,
                       ),
@@ -114,7 +116,7 @@ class _AppBarState extends State<MyAppBar>
                     ),
                     Text(
                       'label'.tr,
-                      style: widget.styleController.textBigLightStyle,
+                      style: widget.style.textBigLightStyle,
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -128,7 +130,7 @@ class _AppBarState extends State<MyAppBar>
             left: 0,
             right: 0,
             bottom: 0,
-            top: styleController.iconHeight * 2,
+            top: style.iconHeight * 2,
             child: widget.child),
       ],
     );

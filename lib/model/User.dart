@@ -1,123 +1,79 @@
+import 'package:hamsignal/helper/variables.dart';
+
 class User {
   String id;
-  String mobile;
-  String fullName;
-  String email;
-  String tel;
-  String categories;
-  bool isLawyer;
-  String wallet;
   String avatar;
-  bool isLogin;
-  String expiredAt;
-  String dateNow;
-  String token;
-  String lawyerNumber;
-  String lawyerMelicard;
-  String lawyerBirthday;
-  String lawyerAddress;
-  bool lawyerSex;
-  String lawyerDocument;
-  String cv;
-  bool isExpert;
-  bool isShowLawyer;
-  bool isVerify;
-  bool isBlock;
-  String lawyerExpiredAt;
-  String loginAt;
-  String marketerCode;
-  String cityId;
+  String phone;
+  String username;
+  String fullName;
+  String telegramUsername;
+  String telegramId;
+  String email;
+  bool isVip;
+  bool phoneVerified;
+  bool emailVerified;
+  bool isActive;
+  String score;
+  String wallet;
+  String expiresAt;
+  String refId;
+  bool ticketNotification;
 
-  User(
-      {required this.id,
-      required this.cityId,
-      required this.fullName,
-      required this.mobile,
-      required this.email,
-      required this.tel,
-      required this.categories,
-      required this.isLawyer,
-      required this.wallet,
-      required this.avatar,
-      required this.isLogin,
-      required this.expiredAt,
-      required this.dateNow,
-      required this.lawyerNumber,
-      required this.lawyerMelicard,
-      required this.lawyerBirthday,
-      required this.lawyerAddress,
-      required this.lawyerSex,
-      required this.lawyerDocument,
-      required this.cv,
-      required this.isExpert,
-      required this.isShowLawyer,
-      required this.isVerify,
-      required this.isBlock,
-      required this.lawyerExpiredAt,
-      required this.loginAt,
-      required this.marketerCode,
-      required this.token});
+  User({
+    required this.id,
+    required this.avatar,
+    required this.phone,
+    required this.fullName,
+    required this.username,
+    required this.email,
+    required this.expiresAt,
+    required this.telegramUsername,
+    required this.telegramId,
+    required this.isVip,
+    required this.isActive,
+    required this.score,
+    required this.phoneVerified,
+    required this.emailVerified,
+    required this.refId,
+    required this.ticketNotification,
+    required this.wallet,
+  });
 
   User.fromJson(Map<String, dynamic> json)
-      : id = "${json["user_id"]}",
-        mobile = json["mobile"] ?? '',
-        cityId = json["city_id"] != null ? "${json["city_id"]}" : '',
+      : id = json["id"] ?? '',
+        username = json["username"] ?? '',
         fullName = json["fullname"] ?? '',
+        telegramUsername = json["telegram_username"] ?? '',
+        telegramId = json["telegram_id"] ?? '',
         email = json["email"] ?? '',
-        tel = json["tel"] ?? '',
-        categories = json["categories"] ?? '',
-        isLawyer = json["is_lawyer"] != null ? json["is_lawyer"] == 1 : false,
-        wallet = "${json["wallet"]}",
-        avatar = json["avatar"] ?? '',
-        isLogin = true,
-        expiredAt = json["expired_at"] ?? '',
-        dateNow = json["date_now"] ?? '',
-        token = json["auth_header"] ?? '',
-        lawyerNumber = json["lawyer_number"] ?? '',
-        lawyerMelicard = json["lawyer_melicard"] ?? '',
-        lawyerBirthday = json["lawyer_birthday"] ?? '',
-        lawyerAddress = json["lawyer_address"] ?? '',
-        lawyerSex =
-            json["lawyer_sex"] != null ? json["lawyer_sex"] == 1 : false,
-        lawyerDocument = json["lawyer_document"] ?? '',
-        cv = json["cv"] ?? '',
-        isExpert = json["is_expert"] != null ? json["is_expert"] == 1 : false,
-        isShowLawyer = json["is_show_lawyer"] != null
-            ? json["is_show_lawyer"] == 1
-            : false,
-        isVerify = json["is_verify"] != null ? json["is_verify"] == 1 : false,
-        isBlock = json["is_block"] != null ? json["is_block"] == 1 : false,
-        lawyerExpiredAt = json["lawyer_expired_at"] ?? '',
-        loginAt = json["login_at"] ?? '',
-        marketerCode = json[" marketer_code"] ?? '';
+        score = "${json["score"] ?? 0}",
+        wallet = "${json["wallet"] ?? 0}",
+        phone = json["phone"] ?? '',
+        isActive = json["is_active"] != null ? json["is_active"] == 1 : false,
+        isVip = json["vip"] != null ? json["vip"] == 1 : false,
+        avatar = "${Variables.LINK_USERS_STORAGE}/${json['id']}.jpg",
+        phoneVerified = json["phone_verified"] ?? false,
+        emailVerified = json["email_verified"] ?? false,
+        ticketNotification = json["ticket_notification"] ?? false,
+        refId = json["ref_id"] ?? '',
+        expiresAt = json["expires_at"] ?? '';
 
   User.nullUser()
       : id = '',
-        cityId = '',
+        username = '',
+        avatar = "",
         fullName = '',
-        mobile = '',
+        phone = '',
+        telegramUsername = '',
+        telegramId = '',
         email = '',
-        tel = '',
-        categories = '',
-        isLawyer = false,
+        score = '0',
         wallet = '0',
-        avatar = '',
-        isLogin = false,
-        expiredAt = '',
-        dateNow = '',
-        lawyerNumber = '',
-        lawyerMelicard = '',
-        lawyerBirthday = '',
-        lawyerAddress = '',
-        lawyerSex = false,
-        lawyerDocument = '',
-        cv = '',
-        isExpert = false,
-        isShowLawyer = false,
-        isVerify = false,
-        isBlock = false,
-        lawyerExpiredAt = '',
-        loginAt = '',
-        marketerCode = '',
-        token = '';
+        isVip = false,
+        refId = '',
+        ticketNotification = false,
+        phoneVerified = false,
+        emailVerified = false,
+        isActive = false,
+        expiresAt = '';
 }

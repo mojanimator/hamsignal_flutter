@@ -1,5 +1,5 @@
-import 'package:dabel_adl/controller/APIController.dart';
-import 'package:dabel_adl/controller/BookController.dart';
+import 'package:hamsignal/controller/APIController.dart';
+import 'package:hamsignal/controller/BookController.dart';
 import 'package:get/get.dart';
 
 class BookFilterController extends APIController<bool> {

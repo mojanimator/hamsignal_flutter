@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/helper/variables.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/variables.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,13 +11,16 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pushpole/pushpole.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 import 'package:share_plus/share_plus.dart';
+
+enum TYPE { BOORS, CRYPTO, FOREX }
 
 class Helper {
   static late GetStorage box;
 
-  late final Style styleController;
+  late final Style style;
   static late ApiProvider apiProvider;
 
   static PackageInfo? packageInfo;
@@ -27,7 +30,7 @@ class Helper {
   Helper() {
     box = GetStorage();
 
-    styleController = Get.find<Style>();
+    style = Get.find<Style>();
     apiProvider = ApiProvider();
     getAndroidInfo();
     getPackageInfo();
@@ -56,10 +59,10 @@ class Helper {
       '$msg',
       '',
       colorText: Colors.white,
-      padding: EdgeInsets.all(styleController.cardMargin / 2),
-      margin: EdgeInsets.all(styleController.cardMargin / 2),
+      padding: EdgeInsets.all(style.cardMargin / 2),
+      margin: EdgeInsets.all(style.cardMargin / 2),
       onTap: (snack) => Get.closeCurrentSnackbar(),
-      borderRadius: styleController.cardBorderRadius,
+      borderRadius: style.cardBorderRadius,
       icon: status == 'danger'
           ? Icon(
               Icons.dangerous_outlined,
@@ -92,7 +95,7 @@ class Helper {
           ? Colors.green
           : status == 'danger'
               ? Colors.red
-              : styleController.primaryColor,
+              : style.primaryColor,
     );
   }
 
@@ -148,6 +151,18 @@ class Helper {
 
     return await apiProvider.fetch(Variables.LINK_SEND_ERROR,
         param: params, method: 'post');
+  }
+
+  static Future<bool> initPushPole() async {
+    if (!await PushPole.isPushPoleInitialized()) await PushPole.initialize();
+    PushPole.isPushPoleInitialized().then((initialized) async {
+      if (initialized) {
+        // var id = await PushPole.getId();
+        PushPole.subscribe(Variables.LABEL);
+        return true;
+      }
+    });
+    return false;
   }
 }
 

@@ -1,21 +1,21 @@
-import 'package:dabel_adl/controller/AnimationController.dart';
-import 'package:dabel_adl/controller/EventController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/model/Event.dart';
-import 'package:dabel_adl/page/menu_drawer.dart';
-import 'package:dabel_adl/widget/AppBar.dart';
-import 'package:dabel_adl/widget/blinkanimation.dart';
-import 'package:dabel_adl/widget/loader.dart';
-import 'package:dabel_adl/widget/mini_card.dart';
-import 'package:dabel_adl/widget/slide_menu.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/controller/EventController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/model/Event.dart';
+import 'package:hamsignal/page/menu_drawer.dart';
+import 'package:hamsignal/widget/AppBar.dart';
+import 'package:hamsignal/widget/blinkanimation.dart';
+import 'package:hamsignal/widget/loader.dart';
+import 'package:hamsignal/widget/mini_card.dart';
+import 'package:hamsignal/widget/slide_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ConductorPage extends StatelessWidget {
   late EventController controller;
-  late Style styleController;
+  late Style style;
   late MaterialColor colors;
   late TabController tabController;
   late MyAnimationController animationController;
@@ -26,9 +26,9 @@ class ConductorPage extends StatelessWidget {
 
   ConductorPage({Key? key}) {
     controller = Get.find<EventController>();
-    styleController = Get.find<Style>();
+    style = Get.find<Style>();
     animationController = Get.find<MyAnimationController>();
-    colors = styleController.primaryMaterial;
+    colors = style.primaryMaterial;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       // refresh();
     });
@@ -42,9 +42,9 @@ class ConductorPage extends StatelessWidget {
         inverse: true,
         closeIcon: Icon(
           Icons.close,
-          color: styleController.primaryColor,
+          color: style.primaryColor,
         ),
-        radius: BorderRadius.circular(styleController.cardBorderRadius),
+        radius: BorderRadius.circular(style.cardBorderRadius),
         closeDrawer: animationController.closeDrawer,
         menu: DrawerMenu(onTap: () {
           final _state = _sideMenuKey.currentState;
@@ -60,7 +60,7 @@ class ConductorPage extends StatelessWidget {
         background: Colors.transparent,
         child: Container(
           decoration:
-              BoxDecoration(gradient: styleController.mainGradientBackground),
+              BoxDecoration(gradient: style.mainGradientBackground),
           child: MyAppBar(
               child: controller.obx((data) {
                 int index = 0;
@@ -82,11 +82,11 @@ class ConductorPage extends StatelessWidget {
                       Column(
                         children: [
                           SizedBox(
-                            height: styleController.cardMargin,
+                            height: style.cardMargin,
                           ),
                           Obx(
                             () => SizedBox(
-                              height: styleController.tabHeight,
+                              height: style.tabHeight,
                               child: TabBar(
                                 labelPadding: EdgeInsets.zero,
                                 indicatorPadding: EdgeInsets.zero,
@@ -97,7 +97,7 @@ class ConductorPage extends StatelessWidget {
                                 indicator: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(
-                                        styleController.cardBorderRadius / 2)),
+                                        style.cardBorderRadius / 2)),
                                 padding: EdgeInsets.zero,
                               ),
                             ),
@@ -112,11 +112,11 @@ class ConductorPage extends StatelessWidget {
                                     return Column(
                                       children: [
                                         SizedBox(
-                                          height: styleController.cardMargin * 3,
+                                          height: style.cardMargin * 3,
                                         ),
-                                        Text(dateTime[day] ?? '',style: styleController.textBigStyle.copyWith(color: colors[500]),),
+                                        Text(dateTime[day] ?? '',style: style.textBigStyle.copyWith(color: colors[500]),),
                                         Expanded(
-                                          child:data[day]==null?Center(child: Text('conductor_not_exists'.tr,style: styleController.textMediumStyle,),): RefreshIndicator(
+                                          child:data[day]==null?Center(child: Text('conductor_not_exists'.tr,style: style.textMediumStyle,),): RefreshIndicator(
                                             onRefresh: () => refresh(),
                                             child: ListView.builder(
                                               physics:
@@ -131,7 +131,7 @@ class ConductorPage extends StatelessWidget {
                                                 return MiniCard(
                                                   margin: EdgeInsets.symmetric(
                                                       horizontal:
-                                                          styleController
+                                                          style
                                                                   .cardMargin /
                                                               2,
                                                       vertical: 0),
@@ -144,8 +144,8 @@ class ConductorPage extends StatelessWidget {
                                                       .keys
                                                       .elementAt(index),
                                                   desc1: '',
-                                                  styleController:
-                                                      styleController,
+                                                  style:
+                                                      style,
                                                   child: Column(
                                                       crossAxisAlignment:
                                                           CrossAxisAlignment
@@ -182,21 +182,21 @@ class ConductorPage extends StatelessWidget {
                         children: [
                           Text(
                             'check_network'.tr,
-                            style: styleController.textHeaderLightStyle,
+                            style: style.textHeaderLightStyle,
                           ),
-                          SizedBox(height: styleController.cardMargin),
+                          SizedBox(height: style.cardMargin),
                           TextButton(
                               onPressed: () => refresh(),
-                              style: styleController
-                                  .buttonStyle(backgroundColor:styleController.primaryColor),
+                              style: style
+                                  .buttonStyle(backgroundColor:style.primaryColor),
                               child: Padding(
                                 padding: EdgeInsets.symmetric(
-                                  vertical: styleController.cardMargin / 2,
-                                  horizontal: styleController.cardMargin,
+                                  vertical: style.cardMargin / 2,
+                                  horizontal: style.cardMargin,
                                 ),
                                 child: Text(
                                   'retry'.tr,
-                                  style: styleController.textHeaderLightStyle,
+                                  style: style.textHeaderLightStyle,
                                 ),
                               )),
                         ],
@@ -219,10 +219,10 @@ class ConductorPage extends StatelessWidget {
             child: FittedBox(
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                    horizontal: styleController.cardMargin),
+                    horizontal: style.cardMargin),
                 child: Text(
                   day,
-                  style: styleController.textMediumStyle.copyWith(
+                  style: style.textMediumStyle.copyWith(
                       color: keys.elementAt(controller.currentTabIndex.value) ==
                               day
                           ? colors[500]
@@ -245,7 +245,7 @@ class ConductorPage extends StatelessWidget {
         children: [
           Divider(),
           if(e.title=='...')
-    Text('conductor_not_exists'.tr,style: styleController.textMediumStyle,),
+    Text('conductor_not_exists'.tr,style: style.textMediumStyle,),
     if(e.title!='...')
           IntrinsicHeight(
             child: Column(
@@ -258,14 +258,14 @@ class ConductorPage extends StatelessWidget {
                     if (e.team1 != '')
                       Text(
                         e.team1,
-                        style: styleController.textMediumStyle.copyWith(
+                        style: style.textMediumStyle.copyWith(
                             color: colors[600], fontWeight: FontWeight.bold),
                       ),
                     IntrinsicHeight(
                       child: Row(
                         children: [
                           Text(e.score1,
-                              style: styleController.textSmallStyle
+                              style: style.textSmallStyle
                                   .copyWith(color: colors[500])),
                           !e.status.contains('progressing'.tr)
                               ? e.score2 == '' && e.score1 == ''
@@ -274,12 +274,12 @@ class ConductorPage extends StatelessWidget {
                                               e.time.split('|').length > 1
                                           ? e.time.split('|')[1]
                                           : e.time,
-                                      style: styleController.textSmallStyle
+                                      style: style.textSmallStyle
                                           .copyWith(color: colors[500]))
                                   : VerticalDivider()
                               : liveBlinker(),
                           Text(e.score2,
-                              style: styleController.textSmallStyle
+                              style: style.textSmallStyle
                                   .copyWith(color: colors[500])),
                         ],
                       ),
@@ -287,7 +287,7 @@ class ConductorPage extends StatelessWidget {
                     if (e.team2 != '')
                       Text(
                         e.team2,
-                        style: styleController.textMediumStyle.copyWith(
+                        style: style.textMediumStyle.copyWith(
                             color: colors[600], fontWeight: FontWeight.bold),
                       ),
                   ],
@@ -300,18 +300,18 @@ class ConductorPage extends StatelessWidget {
                             e.time != '' && e.time.split('|').length > 1
                                 ? e.time.split('|')[1]
                                 : e.time,
-                            style: styleController.textSmallStyle
+                            style: style.textSmallStyle
                                 .copyWith(color: colors[500]))
                         : !e.status.contains('progressing'.tr)
                             ? e.status == '' && e.source != ''
                                 ? Text(
                                     e.source,
-                                    style: styleController.textSmallStyle
+                                    style: style.textSmallStyle
                                         .copyWith(color: colors[200]),
                                   )
                                 : Text(
                                     e.status,
-                                    style: styleController.textSmallStyle
+                                    style: style.textSmallStyle
                                         .copyWith(color: colors[200]),
                                   )
                             : Center(),
@@ -328,11 +328,11 @@ class ConductorPage extends StatelessWidget {
   liveBlinker() {
     return Container(
         margin:
-            EdgeInsets.symmetric(horizontal: styleController.cardMargin / 2),
+            EdgeInsets.symmetric(horizontal: style.cardMargin / 2),
         child: BlinkAnimation(
             repeat: true,
             child: Container(
-              padding: EdgeInsets.all(styleController.cardMargin / 4),
+              padding: EdgeInsets.all(style.cardMargin / 4),
               decoration:
                   BoxDecoration(color: Colors.green, shape: BoxShape.circle),
             )),

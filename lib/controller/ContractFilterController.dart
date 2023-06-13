@@ -1,5 +1,5 @@
-import 'package:dabel_adl/controller/APIController.dart';
-import 'package:dabel_adl/controller/ContractController.dart';
+import 'package:hamsignal/controller/APIController.dart';
+import 'package:hamsignal/controller/ContractController.dart';
 import 'package:get/get.dart';
 
 class ContractFilterController extends APIController<bool> {

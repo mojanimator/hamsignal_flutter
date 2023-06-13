@@ -1,5 +1,5 @@
-import 'package:dabel_adl/controller/APIController.dart';
-import 'package:dabel_adl/controller/LawyerController.dart';
+import 'package:hamsignal/controller/APIController.dart';
+import 'package:hamsignal/controller/LawyerController.dart';
 import 'package:get/get.dart';
 
 class LawyerFilterController extends APIController<bool> {
@@ -132,7 +132,10 @@ class LawyerFilterController extends APIController<bool> {
 
     if (filter == {}) {
     } else {
-      for (var key in filter.keys) filters[key] = filter[key];
+      for (var key in filter.keys) {
+        filters[key] = filter[key];
+      }
+      ;
     }
   }
 }

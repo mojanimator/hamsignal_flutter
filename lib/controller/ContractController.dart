@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/ContractFilterController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/Contract.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/ContractFilterController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/Contract.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -71,7 +71,7 @@ class ContractController extends GetxController
     if (doc != null)
       return "${Variables.LINK_STORAGE}/${doc['type_id']}/${doc['id']}.jpg";
     else
-      return Variables.NOIMAGE_LINK;
+      return Variables.NO_IMAGE_LINK;
   }
 
   String getProvince(pId) {
@@ -191,7 +191,7 @@ class ContractController extends GetxController
           msg: 'buy_problem'.tr,
           status: parsedJson['type'] == 'success' ? 'success' : 'danger');
     if (parsedJson['wallet'] != null) {
-      userController.user?.wallet = parsedJson['wallet'];
+      userController.user?.score = parsedJson['wallet'];
       return true;
     }
     return false;

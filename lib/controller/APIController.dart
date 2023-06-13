@@ -8,5 +8,7 @@ abstract class APIController<T> extends GetxController with StateMixin<T> {
 
   toggleFilter(String type, {idx}) {}
 
-  getFilterSelected(String type, {idx}) {}
+  getFilterSelected(String type, {idx}) {
+
+  }
 }

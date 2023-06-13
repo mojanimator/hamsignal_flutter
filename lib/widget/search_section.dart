@@ -1,25 +1,25 @@
-import 'package:dabel_adl/controller/AnimationController.dart';
-import 'package:dabel_adl/controller/BookController.dart';
-import 'package:dabel_adl/controller/ContractController.dart';
-import 'package:dabel_adl/controller/DocumentController.dart';
-import 'package:dabel_adl/controller/FinderController.dart';
-import 'package:dabel_adl/controller/LawyerController.dart';
-import 'package:dabel_adl/controller/LegalController.dart';
-import 'package:dabel_adl/controller/LinkController.dart';
-import 'package:dabel_adl/controller/LocationController.dart';
-import 'package:dabel_adl/helper/styles.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/controller/BookController.dart';
+import 'package:hamsignal/controller/ContractController.dart';
+import 'package:hamsignal/controller/DocumentController.dart';
+import 'package:hamsignal/controller/LawyerController.dart';
+import 'package:hamsignal/controller/LegalController.dart';
+import 'package:hamsignal/controller/LinkController.dart';
+import 'package:hamsignal/controller/LocationController.dart';
+import 'package:hamsignal/controller/SignalController.dart';
+import 'package:hamsignal/helper/styles.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controller/ContentController.dart';
+import '../controller/NewsController.dart';
 
 class SearchSection extends StatelessWidget {
   TextEditingController textController = TextEditingController();
   dynamic controller;
 
   MyAnimationController animationController = Get.find<MyAnimationController>();
-  Style styleController = Get.find<Style>();
+  Style style = Get.find<Style>();
 
   Widget filterSection;
   String hintText;
@@ -37,8 +37,7 @@ class SearchSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         child: Padding(
-            padding: EdgeInsets.all(styleController.cardMargin / 2)
-                .copyWith(bottom: 0),
+            padding: EdgeInsets.all(style.cardMargin / 2).copyWith(bottom: 0),
             child: Column(
               children: [
                 Stack(
@@ -46,20 +45,19 @@ class SearchSection extends StatelessWidget {
                     //filters section
                     Card(
                       margin: EdgeInsets.only(
-                        top: styleController.cardMargin * 2,
-                        left: styleController.cardMargin / 2,
-                        right: styleController.cardMargin / 2,
+                        top: style.cardMargin * 2,
+                        left: style.cardMargin / 2,
+                        right: style.cardMargin / 2,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            styleController.cardBorderRadius),
+                        borderRadius:
+                            BorderRadius.circular(style.cardBorderRadius),
                       ),
                       color: Colors.white.withOpacity(.95),
                       child: SizeTransition(
                         sizeFactor: animationController.animation_height_filter,
                         child: Container(
-                          padding:
-                              EdgeInsets.only(top: styleController.tabHeight),
+                          padding: EdgeInsets.only(top: style.tabHeight),
                           child: filterSection,
                         ),
                       ),
@@ -67,8 +65,8 @@ class SearchSection extends StatelessWidget {
                     //main section
                     Card(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            styleController.cardBorderRadius),
+                        borderRadius:
+                            BorderRadius.circular(style.cardBorderRadius),
                       ),
                       child: ListTile(
                           leading: Row(
@@ -83,19 +81,18 @@ class SearchSection extends StatelessWidget {
                                         (states) {
                                           return states.contains(
                                                   MaterialState.pressed)
-                                              ? styleController.secondaryColor
+                                              ? style.secondaryColor
                                               : null;
                                         },
                                       ),
                                       backgroundColor:
                                           MaterialStateProperty.all(
-                                              styleController.primaryColor),
+                                              style.primaryColor),
                                       shape: MaterialStateProperty.all(
                                           RoundedRectangleBorder(
                                         borderRadius: BorderRadius.horizontal(
                                             right: Radius.circular(
-                                                styleController
-                                                    .cardBorderRadius)),
+                                                style.cardMargin * 2)),
                                       ))),
                                   onPressed: () {
                                     animationController.toggleFilterSearch();
@@ -104,11 +101,11 @@ class SearchSection extends StatelessWidget {
                                       color: Colors.white),
                                   label: Text(
                                     'filter'.tr,
-                                    style: styleController.textMediumLightStyle,
+                                    style: style.textMediumLightStyle,
                                   )),
                               VerticalDivider(
-                                indent: styleController.cardMargin / 2,
-                                endIndent: styleController.cardMargin / 2,
+                                indent: style.cardMargin / 2,
+                                endIndent: style.cardMargin / 2,
                               ),
                               IconButton(
                                   onPressed: () => controller
@@ -127,6 +124,7 @@ class SearchSection extends StatelessWidget {
                             // onEditingComplete: () {
                             //   controller.getData(param: {'page': 'clear'});
                             // },
+
                             onChanged: (str) {
                               controller.filterController.filters['search'] =
                                   str;
@@ -138,7 +136,7 @@ class SearchSection extends StatelessWidget {
                           trailing: FadeTransition(
                             opacity: animationController.fadeShowController,
                             child: IconButton(
-                              splashColor: styleController.secondaryColor,
+                              splashColor: style.secondaryColor,
                               icon: Icon(Icons.close),
                               onPressed: () {
                                 textController.clear();
@@ -160,7 +158,7 @@ class SearchSection extends StatelessWidget {
                 SelectedFiltersSection(
                     controller: controller,
                     animationController: animationController,
-                    styleController: styleController),
+                    style: style),
               ],
             )));
   }
@@ -170,12 +168,12 @@ class SelectedFiltersSection extends StatelessWidget {
   final controller;
 
   late dynamic filters;
-  Style styleController;
+  Style style;
   MyAnimationController animationController;
 
   SelectedFiltersSection(
       {required this.controller,
-      required this.styleController,
+      required this.style,
       required this.animationController}) {
     animationController.toggleFilterSearch(open: false);
   }
@@ -192,10 +190,11 @@ class SelectedFiltersSection extends StatelessWidget {
                 type != 'panel' &&
                 filters[type] != '' &&
                 filters[type] != null)
-            .toList().reversed;
+            .toList()
+            .reversed;
         return Container(
           height: filters.length > 0 ? 48 : 0,
-          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
+          margin: EdgeInsets.only(top: style.cardMargin / 2),
           child: ListView(
             shrinkWrap: false,
             scrollDirection: Axis.horizontal,
@@ -204,8 +203,8 @@ class SelectedFiltersSection extends StatelessWidget {
         );
       });
 
-    if (controller is ContentController)
-      return Get.find<ContentController>().filterController.obx((data) {
+    if (controller is SignalController)
+      return Get.find<SignalController>().filterController.obx((data) {
         filters = controller.filterController.filters;
         filters = controller.filterController.filters.keys
             .where((type) =>
@@ -213,187 +212,15 @@ class SelectedFiltersSection extends StatelessWidget {
                 type != 'search' &&
                 type != 'type' &&
                 type != 'panel' &&
+                type != 'category' &&
                 filters[type] != '' &&
                 filters[type] != null)
-            .toList().reversed;
+            .toList()
+            .reversed;
 
         return Container(
           height: filters.length > 0 ? 48 : 0,
-          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
-          child: ListView(
-            shrinkWrap: false,
-            scrollDirection: Axis.horizontal,
-            children: filters.map<Widget>((key) => makeWidget(key)).toList(),
-          ),
-        );
-      });
-
-    if (controller is LawyerController)
-      return Get.find<LawyerController>().filterController.obx((data) {
-        filters = controller.filterController.filters;
-        filters = controller.filterController.filters.keys
-            .where((type) =>
-                type != 'page' &&
-                type != 'search' &&
-                type != 'target' &&
-                type != 'city_id' &&
-                type != 'province_id' &&
-                type != 'panel' &&
-                filters[type] != '' &&
-                filters[type] != null)
-            .toList().reversed;
-
-        return Container(
-          height: filters.length > 0 ? 48 : 0,
-          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
-          child: ListView(
-            shrinkWrap: false,
-            scrollDirection: Axis.horizontal,
-            children: filters.map<Widget>((key) => makeWidget(key)).toList(),
-          ),
-        );
-      });
-    if (controller is LocationController)
-      return Get.find<LocationController>().filterController.obx((data) {
-        filters = controller.filterController.filters;
-        filters = controller.filterController.filters.keys
-            .where((type) =>
-                type != 'page' &&
-                type != 'search' &&
-                type != 'target' &&
-                type != 'panel' &&
-                filters[type] != '' &&
-                filters[type] != null)
-            .toList().reversed;
-
-        return Container(
-          height: filters.length > 0 ? 48 : 0,
-          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
-          child: ListView(
-            shrinkWrap: false,
-            scrollDirection: Axis.horizontal,
-            children: filters.map<Widget>((key) => makeWidget(key)).toList(),
-          ),
-        );
-      });
-    if (controller is DocumentController)
-      return Get.find<DocumentController>().filterController.obx((data) {
-        filters = controller.filterController.filters;
-        filters = controller.filterController.filters.keys
-            .where((type) =>
-                type != 'page' &&
-                type != 'search' &&
-                type != 'target' &&
-                type != 'city_id' &&
-                type != 'province_id' &&
-                type != 'document_type' &&
-                type != 'panel' &&
-                filters[type] != '' &&
-                filters[type] != null)
-            .toList().reversed;
-
-        return Container(
-          height: filters.length > 0 ? 48 : 0,
-          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
-          child: ListView(
-            shrinkWrap: false,
-            scrollDirection: Axis.horizontal,
-            children: filters.map<Widget>((key) => makeWidget(key)).toList(),
-          ),
-        );
-      });
-    if (controller is FinderController)
-      return Get.find<FinderController>().filterController.obx((data) {
-        filters = controller.filterController.filters;
-        filters = controller.filterController.filters.keys
-            .where((type) =>
-                type != 'page' &&
-                type != 'search' &&
-                type != 'target' &&
-                type != 'paginate' &&
-                type != 'finder' &&
-                type != 'document_type' &&
-                filters[type] != '' &&
-                filters[type] != null)
-            .toList().reversed;
-
-        return Container(
-          height: filters.length > 0 ? 48 : 0,
-          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
-          child: ListView(
-            shrinkWrap: false,
-            scrollDirection: Axis.horizontal,
-            children: filters.map<Widget>((key) => makeWidget(key)).toList(),
-          ),
-        );
-      });
-    if (controller is LegalController)
-      return Get.find<LegalController>().filterController.obx((data) {
-        filters = controller.filterController.filters;
-        filters = controller.filterController.filters.keys
-            .where((type) =>
-                type != 'page' &&
-                type != 'search' &&
-                type != 'target' &&
-                type != 'paginate' &&
-                type != 'finder' &&
-                filters[type] != '' &&
-                filters[type] != null)
-            .toList().reversed;
-
-        return Container(
-          height: filters.length > 0 ? 48 : 0,
-          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
-          child: ListView(
-            shrinkWrap: false,
-            scrollDirection: Axis.horizontal,
-            children: filters.map<Widget>((key) => makeWidget(key)).toList(),
-          ),
-        );
-      });
-
-    if (controller is ContractController)
-      return Get.find<ContractController>().filterController.obx((data) {
-        filters = controller.filterController.filters;
-        filters = controller.filterController.filters.keys
-            .where((type) =>
-                type != 'page' &&
-                type != 'search' &&
-                type != 'target' &&
-                type != 'paginate' &&
-                type != 'finder' &&
-                filters[type] != '' &&
-                filters[type] != null)
-            .toList().reversed;
-
-        return Container(
-          height: filters.length > 0 ? 48 : 0,
-          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
-          child: ListView(
-            shrinkWrap: false,
-            scrollDirection: Axis.horizontal,
-            children: filters.map<Widget>((key) => makeWidget(key)).toList(),
-          ),
-        );
-      });
-
-    if (controller is BookController)
-      return Get.find<BookController>().filterController.obx((data) {
-        filters = controller.filterController.filters;
-        filters = controller.filterController.filters.keys
-            .where((type) =>
-                type != 'page' &&
-                type != 'search' &&
-                type != 'target' &&
-                type != 'paginate' &&
-                type != 'finder' &&
-                filters[type] != '' &&
-                filters[type] != null)
-            .toList().reversed;
-
-        return Container(
-          height: filters.length > 0 ? 48 : 0,
-          margin: EdgeInsets.only(top: styleController.cardMargin / 2),
+          margin: EdgeInsets.only(top: style.cardMargin / 2),
           child: ListView(
             shrinkWrap: false,
             scrollDirection: Axis.horizontal,
@@ -408,19 +235,18 @@ class SelectedFiltersSection extends StatelessWidget {
   Widget makeWidget(String type) {
     return Container(
       margin: EdgeInsets.symmetric(
-          horizontal: styleController.cardMargin / 4,
-          vertical: styleController.cardMargin / 4),
-      padding: EdgeInsets.symmetric(horizontal: styleController.cardMargin / 2),
+          horizontal: style.cardMargin / 4, vertical: style.cardMargin / 4),
+      padding: EdgeInsets.symmetric(horizontal: style.cardMargin / 2),
       decoration: BoxDecoration(
           color: Colors.white.withOpacity(.95),
-          borderRadius: BorderRadius.all(
-              Radius.circular(styleController.cardBorderRadius / 4))),
+          borderRadius:
+              BorderRadius.all(Radius.circular(style.cardBorderRadius / 4))),
       child: Row(
         children: [
           Text(
             type.tr + ' | ' + controller.filterController.getFilterName(type),
-            style: styleController.textSmallStyle.copyWith(
-                color: styleController.primaryColor,
+            style: style.textSmallStyle.copyWith(
+                color: style.primaryColor,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Shabnam'),
           ),
@@ -432,7 +258,7 @@ class SelectedFiltersSection extends StatelessWidget {
                 },
                 icon: Icon(
                   Icons.clear_rounded,
-                  color: styleController.primaryColor,
+                  color: style.primaryColor,
                 )),
           )
         ],

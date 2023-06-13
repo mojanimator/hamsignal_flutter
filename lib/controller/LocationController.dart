@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/LocationFilterController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/Location.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/LocationFilterController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/Location.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -70,7 +70,7 @@ class LocationController extends GetxController
     if (doc != null)
       return "${Variables.LINK_STORAGE}/${doc['type_id']}/${doc['id']}.jpg";
     else
-      return Variables.NOIMAGE_LINK;
+      return Variables.NO_IMAGE_LINK;
   }
 
   String getProvince(pId) {

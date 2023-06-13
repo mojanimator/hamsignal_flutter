@@ -1,7 +1,7 @@
-import 'package:dabel_adl/controller/AnimationController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/widget/filter_widgets.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/widget/filter_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,7 +13,7 @@ class BookFilterSection extends StatelessWidget {
 
   final MyAnimationController animationController =
       Get.find<MyAnimationController>();
-  final Style styleController = Get.find<Style>();
+  final Style style = Get.find<Style>();
   final SettingController settingController = Get.find<SettingController>();
 
   BookFilterSection({required this.controller}) {
@@ -31,21 +31,21 @@ class BookFilterSection extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  height: styleController.cardMargin * 2,
+                  height: style.cardMargin * 2,
                 ),
 
                 Center(
                   child: MyDropdownButton(
-                      styleController: styleController,
+                      style: style,
                       controller: controller.filterController,
                       type: 'categoryId',
                       children: controller.categories,
                       margin: EdgeInsets.symmetric(
-                          horizontal: styleController.cardMargin,
-                          vertical: styleController.cardMargin / 4)),
+                          horizontal: style.cardMargin,
+                          vertical: style.cardMargin / 4)),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(styleController.cardMargin),
+                  padding: EdgeInsets.all(style.cardMargin),
                   child: Row(
                     children: [
                       Expanded(
@@ -54,23 +54,23 @@ class BookFilterSection extends StatelessWidget {
                             style: ButtonStyle(
                                 padding: MaterialStateProperty.all(
                                     EdgeInsets.symmetric(
-                                        vertical: styleController.cardMargin)),
+                                        vertical: style.cardMargin)),
                                 elevation: MaterialStateProperty.all(10),
                                 overlayColor: MaterialStateProperty.resolveWith(
                                   (states) {
                                     return states
                                             .contains(MaterialState.pressed)
-                                        ? styleController.secondaryColor
+                                        ? style.secondaryColor
                                         : null;
                                   },
                                 ),
                                 backgroundColor: MaterialStateProperty.all(
-                                    styleController.primaryColor),
+                                    style.primaryColor),
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                   borderRadius: BorderRadius.horizontal(
                                       right: Radius.circular(
-                                          styleController.cardBorderRadius *
+                                          style.cardBorderRadius *
                                               2)),
                                 ))),
                             onPressed: () {
@@ -79,7 +79,7 @@ class BookFilterSection extends StatelessWidget {
                             icon: Icon(Icons.search, color: Colors.white),
                             label: Text(
                               'search'.tr,
-                              style: styleController.textMediumLightStyle,
+                              style: style.textMediumLightStyle,
                             )),
                       ),
                       Expanded(
@@ -88,23 +88,23 @@ class BookFilterSection extends StatelessWidget {
                             style: ButtonStyle(
                                 padding: MaterialStateProperty.all(
                                     EdgeInsets.symmetric(
-                                        vertical: styleController.cardMargin)),
+                                        vertical: style.cardMargin)),
                                 elevation: MaterialStateProperty.all(10),
                                 overlayColor: MaterialStateProperty.resolveWith(
                                   (states) {
                                     return states
                                             .contains(MaterialState.pressed)
-                                        ? styleController.secondaryColor
+                                        ? style.secondaryColor
                                         : null;
                                   },
                                 ),
                                 backgroundColor: MaterialStateProperty.all(
-                                    styleController.primaryColor),
+                                    style.primaryColor),
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                   borderRadius: BorderRadius.horizontal(
                                       left: Radius.circular(
-                                          styleController.cardBorderRadius *
+                                          style.cardBorderRadius *
                                               2)),
                                 ))),
                             onPressed: () {
@@ -118,13 +118,13 @@ class BookFilterSection extends StatelessWidget {
                 ),
                 // TabBar(
                 //     indicatorWeight: 2,
-                //     unselectedLabelColor: styleController.primaryColor,
+                //     unselectedLabelColor: style.primaryColor,
                 //     overlayColor:
-                //         MaterialStateProperty.all(styleController.primaryColor),
-                //     unselectedLabelStyle: styleController.textMediumStyle
+                //         MaterialStateProperty.all(style.primaryColor),
+                //     unselectedLabelStyle: style.textMediumStyle
                 //         .copyWith(fontFamily: 'Shabnam'),
                 //     labelColor: Colors.white,
-                //     indicator: BoxDecoration(color: styleController.primaryColor),
+                //     indicator: BoxDecoration(color: style.primaryColor),
                 //     controller: tabController.controller,
                 //     tabs: [
                 //       Tab(

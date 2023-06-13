@@ -2,42 +2,46 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/ContentController.dart';
-import 'package:dabel_adl/controller/LinkController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/IAPPurchase.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/App.dart';
-import 'package:dabel_adl/model/Club.dart';
-import 'package:dabel_adl/model/Link.dart';
-import 'package:dabel_adl/model/Player.dart';
-import 'package:dabel_adl/model/Product.dart';
-import 'package:dabel_adl/model/Shop.dart';
-import 'package:dabel_adl/page/contact_us.dart';
+import 'package:flutter/services.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/NewsController.dart';
+import 'package:hamsignal/controller/LinkController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/IAPPurchase.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/App.dart';
+import 'package:hamsignal/model/Link.dart';
+import 'package:hamsignal/model/Product.dart';
+import 'package:hamsignal/page/contact_us.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hamsignal/page/news_details.dart';
+import 'package:hamsignal/page/newses.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import '../model/Content.dart';
-import '../page/content_details.dart';
-import '../page/contents.dart';
+import '../model/News.dart';
+import '../model/adv.dart';
 import 'APIController.dart';
 import 'AnimationController.dart';
 
 class SettingController extends APIController<Map<String, dynamic>>
     with GetSingleTickerProviderStateMixin {
-  late List<dynamic> shops;
-  late List<dynamic> days;
-  late List<dynamic> years;
-  late List<dynamic> prices;
-  late List<dynamic> plans;
+  List shops = [];
+  List days = [];
+  List years = [];
+  List prices = [];
+  List plans = [];
+  List products = [];
+  List admins = [];
+  List<Link> links = [];
+  late Adv adv;
+  List ticketStatuses = [];
   late Map<String, dynamic> _keys;
   String? payment;
 
@@ -74,8 +78,8 @@ class SettingController extends APIController<Map<String, dynamic>>
   }
 
   late List<dynamic> categories;
-  late List<dynamic> provinces;
-  late List<dynamic> counties;
+  late Map<String, dynamic> types;
+
   late Map<String, dynamic> dates;
   late Map<String, dynamic> _docTypes;
   late int _appVersion;
@@ -108,11 +112,12 @@ class SettingController extends APIController<Map<String, dynamic>>
     _appLink = value;
   }
 
-  late final ApiProvider apiProvider;
-  late final UserController userController;
-  late final Style styleController;
+  late ApiProvider apiProvider;
+  late UserController userController;
+  late LinkController linkController;
+  late Style style;
 
-  int _currentPageIndex = 2;
+  int _currentPageIndex = 1;
 
   int get currentPageIndex => _currentPageIndex;
 
@@ -126,7 +131,7 @@ class SettingController extends APIController<Map<String, dynamic>>
   SettingController() {
     apiProvider = Get.find<ApiProvider>();
 
-    styleController = Get.find<Style>();
+    style = Get.find<Style>();
 
     bottomSheetController =
         TabController(length: 5, initialIndex: currentPageIndex, vsync: this);
@@ -137,38 +142,54 @@ class SettingController extends APIController<Map<String, dynamic>>
 
   @override
   onInit() async {
-    await getData(params: {'market': Variables.MARKET});
+    // await getData();
     super.onInit();
   }
 
-  Future<Map<String, dynamic>?> getData({Map<String, dynamic>? params}) async {
+  Future<Map<String, dynamic>?> getData(
+      {Map<String, dynamic> params = const {}}) async {
+    await Helper.getPackageInfo();
+    userController = Get.find<UserController>();
+
+    params = {
+      ...params,
+      ...{
+        'market': Variables.MARKET,
+        'package': Helper.packageInfo?.packageName,
+        'version': Helper.packageInfo?.buildNumber,
+      }
+    };
+
     change(null, status: RxStatus.loading());
     final parsedJson = await apiProvider.fetch(Variables.LINK_GET_SETTINGS,
-        param: params, tryReminded: ApiProvider.maxRetry);
+        param: params,
+        ACCESS_TOKEN: userController.ACCESS_TOKEN,
+        tryReminded: ApiProvider.maxRetry);
     // print(parsedJson);
-    if (parsedJson == null) {
+    if (parsedJson == null || parsedJson['error'] != null) {
       change(null, status: RxStatus.empty());
       return null;
     } else {
       data = parsedJson;
+      admins = _data['admins'];
+      types = _data['types'];
       keys = _data['keys'];
-      prices = _data['prices'];
       plans = _data['plans'];
-      provinces = _data['provinces'];
-      counties = _data['counties'];
+      products = _data['products'];
       categories = _data['categories'];
-      dates = _data['dates'];
-      payment = _data['payment'];
+      ticketStatuses = _data['ticket_statuses'];
+
+      adv = Adv.fromJson(_data['adv']);
+      links =
+          (_data['links'] ?? []).map<Link>((e) => Link.fromJson(e)).toList();
+
       appInfo = App.fromJson(
           _data['app_info'] ?? {}, await PackageInfo.fromPlatform());
 
       Variables.LINK_SEND_ERROR = appInfo.errorLink != ''
           ? appInfo.errorLink
           : Variables.LINK_SEND_ERROR;
-      if (!Get.isRegistered<UserController>())
-        userController = Get.put(UserController());
-      else
-        Get.find<IAPPurchase>().init();
+      Get.put(IAPPurchase(plans: plans, keys: keys, products: products));
       change(_data, status: RxStatus.success());
       return _data;
     }
@@ -191,7 +212,7 @@ class SettingController extends APIController<Map<String, dynamic>>
           scheme: 'mailto',
           path: appInfo.emailLink,
           query:
-              'subject=${'message'.tr} ${'from'.tr} ${'user'.tr} ${userController.user?.mobile}&body=', //add subject and body here
+              'subject=${'message'.tr} ${'from'.tr} ${'user'.tr} ${userController.user?.phone}&body=', //add subject and body here
         );
         if (await canLaunchUrl(uri))
           launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -228,6 +249,11 @@ class SettingController extends APIController<Map<String, dynamic>>
       case 'contact_us':
         Get.dialog(ContactUsPage(), barrierDismissible: true);
         break;
+      default:
+        if (await canLaunchUrl(Uri.parse(appInfo.eitaaLink)))
+          launchUrl(Uri.parse(appInfo.eitaaLink),
+              mode: LaunchMode.externalApplication);
+        break;
     }
   }
 
@@ -250,16 +276,11 @@ class SettingController extends APIController<Map<String, dynamic>>
   }
 
   String province(dynamic province_id) {
-    var t = provinces
-        .firstWhereOrNull((element) => "${element['id']}" == "$province_id");
-
-    return t == null ? '' : t['title'];
+    return '';
   }
 
   String county(dynamic county_id) {
-    var t = counties
-        .firstWhereOrNull((element) => "${element['id']}" == "$county_id");
-    return t == null ? '' : t['title'];
+    return '';
   }
 
   Future<bool> sendActivationCode({required String phone}) async {
@@ -291,24 +312,6 @@ class SettingController extends APIController<Map<String, dynamic>>
     if (cropRatio[s] == .75) return CropAspectRatioPreset.ratio3x4;
 
     return CropAspectRatioPreset.original;
-  }
-
-  Future<dynamic>? calculateCoupon(
-      {required Map<String, String> params}) async {
-    final parsedJson = await apiProvider.fetch(Variables.LINK_COUPON_CALCULATE,
-        param: params,
-        ACCESS_TOKEN: userController.ACCESS_TOKEN,
-        method: 'post');
-
-    if (parsedJson != null && parsedJson['errors'] != null) {
-      helper.showToast(
-          msg: parsedJson['errors']?[parsedJson['errors'].keys.elementAt(0)]
-              ?[0],
-          status: 'danger');
-      return null;
-    }
-    // print(parsedJson);
-    return parsedJson;
   }
 
   String expireDays(int timestamp) {
@@ -385,17 +388,17 @@ class SettingController extends APIController<Map<String, dynamic>>
                 elevation: 5,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(
-                        Radius.circular(styleController.cardBorderRadius))),
+                        Radius.circular(style.cardBorderRadius))),
                 child: Padding(
-                  padding: EdgeInsets.all(styleController.cardMargin),
+                  padding: EdgeInsets.all(style.cardMargin),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(
-                        padding: EdgeInsets.all(styleController.cardMargin),
+                        padding: EdgeInsets.all(style.cardMargin),
                         child: Text(
                           'new_version_exists'.tr,
-                          style: styleController.textBigStyle.copyWith(
+                          style: style.textBigStyle.copyWith(
                               color: Colors.green, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -405,14 +408,13 @@ class SettingController extends APIController<Map<String, dynamic>>
                             child: TextButton(
                               style: ButtonStyle(
                                   padding: MaterialStateProperty.all(
-                                      EdgeInsets.all(
-                                          styleController.cardMargin / 2)),
+                                      EdgeInsets.all(style.cardMargin / 2)),
                                   overlayColor:
                                       MaterialStateProperty.resolveWith(
                                     (states) {
                                       return states
                                               .contains(MaterialState.pressed)
-                                          ? styleController.secondaryColor
+                                          ? style.secondaryColor
                                           : null;
                                     },
                                   ),
@@ -422,7 +424,7 @@ class SettingController extends APIController<Map<String, dynamic>>
                                       RoundedRectangleBorder(
                                     borderRadius: BorderRadius.all(
                                       Radius.circular(
-                                          styleController.cardBorderRadius / 2),
+                                          style.cardBorderRadius / 2),
                                     ),
                                   ))),
                               onPressed: () async {
@@ -438,10 +440,9 @@ class SettingController extends APIController<Map<String, dynamic>>
                                   Icon(Icons.check, color: Colors.white),
                                   Text(
                                     'download'.tr,
-                                    style: styleController.textMediumStyle
-                                        .copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
+                                    style: style.textMediumStyle.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
@@ -468,8 +469,8 @@ class SettingController extends APIController<Map<String, dynamic>>
     if (path.length == 1) {
       var model = path[0];
       switch (model) {
-        case 'contents':
-          Get.to(ContentsPage());
+        case 'News':
+          Get.to(NewsPage());
           break;
       }
     } else if (path.length >= 2) {
@@ -481,9 +482,9 @@ class SettingController extends APIController<Map<String, dynamic>>
         id = path[3];
       }
       switch (model) {
-        case 'content':
-          Content? tmp = await Get.find<ContentController>().find({'id': id});
-          if (tmp != null) Get.to(ContentDetails(data: tmp));
+        case 'News':
+          News? tmp = await Get.find<NewsController>().find({'id': id});
+          if (tmp != null) Get.to(NewsDetails(data: tmp));
           break;
       }
     }
@@ -503,6 +504,12 @@ class SettingController extends APIController<Map<String, dynamic>>
     var t = categories
         .firstWhereOrNull((element) => "${element['id']}" == "$category_id");
     return t == null ? '' : t['title'];
+  }
+
+  copyToClipboard(String text) {
+    if (text == '') return;
+    Clipboard.setData(new ClipboardData(text: text));
+    helper.showToast(msg: 'copy_success'.tr, status: 'success');
   }
 
   @override

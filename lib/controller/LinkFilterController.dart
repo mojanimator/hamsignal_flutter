@@ -1,5 +1,5 @@
-import 'package:dabel_adl/controller/APIController.dart';
-import 'package:dabel_adl/controller/LinkController.dart';
+import 'package:hamsignal/controller/APIController.dart';
+import 'package:hamsignal/controller/LinkController.dart';
 import 'package:get/get.dart';
 
 class LinkFilterController extends APIController<bool> {

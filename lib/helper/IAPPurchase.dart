@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:dabel_adl/helper/styles.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:hamsignal/helper/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -11,17 +12,20 @@ import '../controller/APIProvider.dart';
 import '../controller/SettingController.dart';
 import '../controller/UserController.dart';
 import '../model/Product.dart';
+import '../widget/my_text_field.dart';
 import 'helpers.dart';
 import 'variables.dart';
 
 class IAPPurchase {
+  static String MARKET = 'bazaar';
   bool bazaarConnected = false;
   bool myketConnected = false;
+  TextEditingController textCouponCtrl = TextEditingController();
 
   late ApiProvider apiProvider;
   late Helper helper;
   late UserController userController;
-  late Style styleController;
+  late Style style;
   List<ProductItem> products = [];
   List plans = [];
   List<PurchaseInfo> allPurchases = <PurchaseInfo>[];
@@ -40,7 +44,7 @@ class IAPPurchase {
     helper = Get.find<Helper>();
     userController = Get.find<UserController>();
     settingController = Get.find<SettingController>();
-    styleController = Get.find<Style>();
+    style = Get.find<Style>();
     this.plans = plans;
     this.products = products.map<ProductItem>((e) {
       return ProductItem(
@@ -98,7 +102,8 @@ class IAPPurchase {
       ...(params ?? {}),
       'name': userController.user?.fullName,
       'package': settingController.appInfo.packageName,
-      'phone': userController.user?.mobile
+      'phone': userController.user?.phone,
+      'app_version': settingController.appInfo.buildNumber
     };
 
     var res = await makePayment(params: params);
@@ -111,10 +116,11 @@ class IAPPurchase {
     } else if (res['market'] == null || res['market'] == 'bank') {
       Get.back();
       //idpay
-      Uri url = Uri.parse(res['res']);
-
+      Uri url = Uri.tryParse(res['url']) ?? Uri.http('');
+      helper.showToast(
+          msg: res['message'] ?? 'check_network'.tr, status: res['status']);
       if (await canLaunchUrl(url)) {
-        helper.showToast(msg: 'pay_in_browser'.tr, status: 'success');
+        // helper.showToast(msg: 'pay_in_browser'.tr, status: 'success');
         launchUrl(url, mode: LaunchMode.externalApplication);
       }
     } else if (res['market'] == 'bazaar') {
@@ -126,9 +132,8 @@ class IAPPurchase {
       if (res2 != null && res2['status'] != 'success')
         helper.showToast(msg: res2['msg'], status: 'danger');
       if (res2 != null && res2['status'] == 'success') {
+        userController.getUser(refresh: true);
         helper.showToast(msg: res2['msg'], status: 'success');
-        userController.user = null;
-        userController.getUser();
       }
       // else if (res['url'] != null)
       // settingController.resolveDeepLink(Uri.parse(res['url']));
@@ -197,15 +202,18 @@ class IAPPurchase {
 
       params['info'] = purchaseInfo.originalJson;
       params['pay_id'] = purchaseInfo.purchaseToken;
+      params['token'] = purchaseInfo?.purchaseToken;
       params['market'] = Variables.MARKET;
-
+      params['order_id'] = purchaseInfo?.orderId;
+      params['app_version'] = "${settingController.appInfo.buildNumber}";
       var result2 = {};
       if (consume == true ||
-          (!params['consumable'] && userController.user?.expiredAt == null)) {
+          (!params['consumable'] && userController.user?.expiresAt == null)) {
         params['consumable'] = params['consumable'] ? 1 : 0;
         // print("***_addBazaarPurchaseToServer");
         // print(params);
         result2 = await _addPurchaseToServer(params: params);
+        // print(params);
 
         if (result2['status'] == 'success')
           return {
@@ -216,7 +224,7 @@ class IAPPurchase {
 
       return {
         'status': 'danger',
-        'msg': result2['msg'] ?? "${'purchase_failed'.tr}"
+        'msg': result2['msg'] ?? result2['message'] ?? "${'purchase_failed'.tr}"
       };
     } on PlatformException catch (e) {
       // print('!!!!! bazaar platform exception:');
@@ -325,7 +333,7 @@ class IAPPurchase {
     if (bazaarConnected) {
       try {
         allPurchases.addAll(await FlutterPoolakey.getAllPurchasedProducts());
-        print("****consume before purchases ${allPurchases.length}");
+        // print("****consume before purchases ${allPurchases.length}");
         for (PurchaseInfo purchase in allPurchases) {
           Map<String, dynamic> info = json.decode(purchase.payload);
           // print(purchase.originalJson);
@@ -337,7 +345,7 @@ class IAPPurchase {
                     .firstWhereOrNull((e) => e.id == purchase.productId)
                     ?.name ??
                 '',
-            'phone': userController.user?.mobile,
+            'phone': userController.user?.phone,
             'telegram_id': null,
             'app_id': settingController.appInfo.packageName,
             'sku': purchase.productId,
@@ -348,14 +356,8 @@ class IAPPurchase {
           }, purchaseInfo: purchase);
 
           if (res2 != null && res2['status'] == 'success') {
-            helper.showToast(msg: res2['msg'], status: 'success');
-            await Future.delayed(
-                Duration(
-                  seconds: 2,
-                ), () async {
-              userController.user = null;
-              await userController.getUser();
-            });
+            await userController.getUser(refresh: true);
+            helper.showToast(msg: 'purchase_success'.tr, status: 'success');
           }
         }
         allPurchases.clear();
@@ -363,13 +365,13 @@ class IAPPurchase {
         allPurchases.addAll(await FlutterPoolakey.getAllSubscribedProducts());
         // print("****consume before subscribes ${allPurchases.length}");
         for (PurchaseInfo purchase in allPurchases) {
-          if (userController.user?.expiredAt != null &&
-              userController.user?.expiredAt != 0) break; //user have active sub
+          if (userController.user?.expiresAt != null &&
+              userController.user?.expiresAt != 0) break; //user have active sub
           Map<String, dynamic> info = json.decode(purchase.payload);
-          purchaseBazaar(params: {
+          var res = await purchaseBazaar(params: {
             'consumable': false,
             'user_id': userController.user?.id,
-            'phone': userController.user?.mobile,
+            'phone': userController.user?.phone,
             'telegram_id': null,
             'app_id': settingController.appInfo.packageName,
             'type': purchase.productId,
@@ -378,12 +380,15 @@ class IAPPurchase {
             'market': info['market'],
             'amount': info['amount'],
           }, purchaseInfo: purchase);
+          if (res != null && res['status'] == 'success') {
+            userController.getUser(refresh: true);
+            helper.showToast(msg: res['msg'], status: 'success');
+          }
           await Future.delayed(
               Duration(
                 seconds: 2,
               ), () async {
-            userController.user = null;
-            await userController.getUser();
+            await userController.getUser(refresh: true);
           });
         }
       } catch (e) {
@@ -491,17 +496,17 @@ class IAPPurchase {
             String message = "📌اطلاعات پرداخت\n" +
                 "👤 ${product.name}\n" +
                 "📦 " +
-                "${product.price}"
-                    " تومان "
+                "${product.price}".asPrice() +
+                " تومان "
                     "\n"
                     "      صفحه پرداخت در ${Variables.MARKET == 'bazaar' ? 'کافه بازار' : Variables.MARKET == 'myket' ? 'مایکت' : 'مرورگر'} باز خواهد شد.\n";
             return Center(
               child: Container(
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                        styleController.isBigSize ? 16 : 8),
+                    borderRadius:
+                        BorderRadius.circular(style.isBigSize ? 16 : 8),
                     color: Colors.white),
-                padding: EdgeInsets.all(styleController.isBigSize ? 32 : 16),
+                padding: EdgeInsets.all(style.isBigSize ? 32 : 16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -511,12 +516,12 @@ class IAPPurchase {
                           visible: loading.value,
                           child: Center(
                               child: LinearProgressIndicator(
-                            backgroundColor: styleController.primaryColor,
+                            backgroundColor: style.primaryColor,
                           ))),
                     ),
                     Text(
                       message,
-                      style: styleController.textMediumStyle,
+                      style: style.textMediumStyle,
                       textDirection: Variables.LANG == 'fa'
                           ? TextDirection.rtl
                           : TextDirection.ltr,
@@ -525,7 +530,7 @@ class IAPPurchase {
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
-                            style: styleController.buttonStyle(
+                            style: style.buttonStyle(
                               padding: EdgeInsets.all(4),
                               shape: RoundedRectangleBorder(
                                   borderRadius:
@@ -546,24 +551,23 @@ class IAPPurchase {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
                                   'pay'.tr,
-                                  style: styleController.textMediumLightStyle,
+                                  style: style.textMediumLightStyle,
                                 ),
                               ),
                             ),
                           ),
                         ),
                         SizedBox(
-                          width: styleController.isBigSize ? 16 : 8,
+                          width: style.isBigSize ? 16 : 8,
                         ),
                         Expanded(
                           child: ElevatedButton.icon(
-                            style: styleController.buttonStyle(
+                            style: style.buttonStyle(
                                 padding: EdgeInsets.all(4),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.all(
                                         Radius.circular(10.0))),
-                                backgroundColor:
-                                    styleController.primaryMaterial[200]),
+                                backgroundColor: style.primaryMaterial[200]),
                             onPressed: () async {
                               Get.back();
                             },
@@ -577,7 +581,7 @@ class IAPPurchase {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
                                   'cancel'.tr,
-                                  style: styleController.textMediumLightStyle,
+                                  style: style.textMediumLightStyle,
                                 ),
                               ),
                             ),
@@ -597,24 +601,25 @@ class IAPPurchase {
 
   Widget showPlanDialog({required item}) {
     Rx<bool> loading = false.obs;
+    String oldPrice = "${item['price']}";
+    String price = "${item['price']}";
     return Material(
       color: Colors.transparent,
       child: StatefulBuilder(
         builder:
             (BuildContext context, void Function(void Function()) setState) {
-          String message = "📌اطلاعات پرداخت\n" +
-              "👤 ${item['title']}\n" +
+          Rx<String> message = RxString("📌اطلاعات پرداخت\n" +
+              "👤 ${item['name']}\n" +
               "📦 " +
-              "${item['price']}"
-                  " تومان "
-                  "از کیف پول شما کسر خواهد شد";
+              "${price}".asPrice() +
+              " تومان "
+                  "از کیف پول شما کسر خواهد شد");
           return Center(
             child: Container(
               decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(styleController.cardMargin),
+                  borderRadius: BorderRadius.circular(style.cardMargin),
                   color: Colors.white),
-              padding: EdgeInsets.all(styleController.cardMargin),
+              padding: EdgeInsets.all(style.cardMargin),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -624,24 +629,75 @@ class IAPPurchase {
                         visible: loading.value,
                         child: Center(
                             child: LinearProgressIndicator(
-                          backgroundColor: styleController.primaryColor,
+                          backgroundColor: style.primaryColor,
                         ))),
                   ),
-                  Text(
-                    message,
-                    style: styleController.textMediumStyle,
-                    textDirection: Variables.LANG == 'fa'
-                        ? TextDirection.rtl
-                        : TextDirection.ltr,
+                  Obx(
+                    () => Text(
+                      message.value,
+                      style: style.textMediumStyle,
+                      textDirection: Variables.LANG == 'fa'
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
+                    ),
                   ),
                   SizedBox(
-                    height: styleController.cardMargin * 2,
+                    height: style.cardMargin * 2,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                          flex: 3,
+                          child: MyTextField(
+                            controller: textCouponCtrl,
+                            hintText: 'coupon'.tr,
+                          )),
+                      Expanded(
+                        flex: 1,
+                        child: Obx(
+                          () => TextButton(
+                              onPressed: () async {
+                                loading.value = true;
+                                Map res = (await userController.calculateCoupon(
+                                        params: {
+                                          'coupon': textCouponCtrl.text
+                                        })) ??
+                                    {};
+
+                                if (res[item['key']] != null)
+                                  price = "${res[item['key']]}";
+                                else
+                                  price = oldPrice;
+                                message.value = "📌اطلاعات پرداخت\n" +
+                                    "👤 ${item['name']}\n" +
+                                    "📦 " +
+                                    "${price}".asPrice() +
+                                    " تومان "
+                                        "از کیف پول شما کسر خواهد شد";
+
+                                loading.value = false;
+                              },
+                              style: style.buttonStyle(),
+                              child: loading.value
+                                  ? CupertinoActivityIndicator(
+                                      color: Colors.white,
+                                    )
+                                  : Text(
+                                      'append'.tr,
+                                      style: style.textMediumLightStyle,
+                                    )),
+                        ),
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: style.cardMargin * 2,
                   ),
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          style: styleController.buttonStyle(
+                          style: style.buttonStyle(
                             padding: EdgeInsets.all(4),
                             shape: RoundedRectangleBorder(
                                 borderRadius:
@@ -649,22 +705,27 @@ class IAPPurchase {
                           ),
                           onPressed: () async {
                             loading.value = true;
-                            var res = await buyPlan(item);
-                            Get.back();
+                            var res = await userController.buy({
+                              'plan': item['key'],
+                              'type': 'plan',
+                              'coupon': textCouponCtrl.text
+                            });
+
                             if (res != null &&
                                 res['type'] != null &&
                                 res['type'] == 'upgraded') {
+                              Get.back();
+
+                              // userController.user?.wallet=res['wallet'];
+                              await userController.getUser(refresh: true);
                               helper.showToast(
                                   msg: res['message'] ?? 'done_successfully'.tr,
                                   status: 'success');
-                              userController.getUser(
-                                  refresh: true, withLawyer: true);
-                            }
-                           else if (res == null || res['message'] != null) {
+                            } else if (res == null || res['message'] != null) {
                               helper.showToast(
-                                  msg: res?['message'] ?? 'buy_problem'.tr, status: 'danger');
+                                  msg: res?['message'] ?? 'buy_problem'.tr,
+                                  status: 'danger');
                             }
-
 
                             loading.value = false;
                           },
@@ -678,24 +739,23 @@ class IAPPurchase {
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
                                 'pay'.tr,
-                                style: styleController.textMediumLightStyle,
+                                style: style.textMediumLightStyle,
                               ),
                             ),
                           ),
                         ),
                       ),
                       SizedBox(
-                        width: styleController.cardMargin,
+                        width: style.cardMargin,
                       ),
                       Expanded(
                         child: ElevatedButton.icon(
-                          style: styleController.buttonStyle(
+                          style: style.buttonStyle(
                               padding: EdgeInsets.all(4),
                               shape: RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(10.0))),
-                              backgroundColor:
-                                  styleController.primaryMaterial[200]),
+                              backgroundColor: style.primaryMaterial[200]),
                           onPressed: () async {
                             Get.back();
                           },
@@ -709,7 +769,7 @@ class IAPPurchase {
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
                                 'cancel'.tr,
-                                style: styleController.textMediumLightStyle,
+                                style: style.textMediumLightStyle,
                               ),
                             ),
                           ),
@@ -725,23 +785,4 @@ class IAPPurchase {
       ),
     );
   }
-
-  Future  buyPlan(item) async {
-    final parsedJson = await apiProvider.fetch(Variables.LINK_UPGRADE_PLAN,
-        param: {'plan_id': item['id']},
-        ACCESS_TOKEN: userController.ACCESS_TOKEN,
-        method: 'post');
-
-
-    return parsedJson;
-  }
-
-// Future<Map<String, dynamic>?> buyProduct(Map<String, dynamic> params) async {
-//   final parsedJson = await apiProvider.fetch(Variables.LINK_BUY,
-//       param: {...params},
-//       ACCESS_TOKEN: userController.ACCESS_TOKEN,
-//       method: 'post');
-//
-//   return parsedJson;
-// }
 }

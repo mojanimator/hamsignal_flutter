@@ -1,10 +1,10 @@
-import 'package:dabel_adl/controller/AnimationController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/page/lawyer_details.dart';
-import 'package:dabel_adl/widget/search_section.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/page/lawyer_details.dart';
+import 'package:hamsignal/widget/search_section.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,7 +24,7 @@ import '../widget/loader.dart';
 class ContractsPage extends StatelessWidget {
   late ContractController controller;
   late MyAnimationController animationController;
-  late Style styleController;
+  late Style style;
   late SettingController settingController;
   late UserController userController;
   ScrollController scrollController = ScrollController();
@@ -34,8 +34,8 @@ class ContractsPage extends StatelessWidget {
     controller = Get.find<ContractController>();
     settingController = Get.find<SettingController>();
     userController = Get.find<UserController>();
-    styleController = Get.find<Style>();
-    colors = styleController.cardContractColors;
+    style = Get.find<Style>();
+    colors = style.cardVotesColors;
     animationController = Get.find<MyAnimationController>();
     controller.filterController.set(initFilter ?? {});
     controller.getData(param: {'page': 'clear'});
@@ -73,7 +73,7 @@ class ContractsPage extends StatelessWidget {
       body: RefreshIndicator(
         onRefresh: () => controller.getData(param: {'page': 'clear'}),
         child: Container(
-          decoration: BoxDecoration(gradient: styleController.splashBackground),
+          decoration: BoxDecoration(gradient: style.splashBackground),
           child: SafeArea(
             child: Column(
               children: [
@@ -86,7 +86,7 @@ class ContractsPage extends StatelessWidget {
                 ),
                 Expanded(
                   child: controller.obx((data) {
-                    if (styleController.gridLength < 2)
+                    if (style.gridLength < 2)
                       return Column(
                         children: [
                           Expanded(
@@ -101,7 +101,7 @@ class ContractsPage extends StatelessWidget {
                                   data: data[index],
                                   controller: controller,
                                   settingController: settingController,
-                                  styleController: styleController,
+                                  style: style,
                                   userController: userController,
                                   colors: colors,
                                 );
@@ -122,14 +122,14 @@ class ContractsPage extends StatelessWidget {
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount:
-                                          styleController.gridLength,
+                                          style.gridLength,
                                       childAspectRatio: 1.5),
                               itemBuilder: (BuildContext context, int index) {
                                 return GridContract(
                                   data: data[index],
                                   controller: controller,
                                   settingController: settingController,
-                                  styleController: styleController,
+                                  style: style,
                                   userController: userController,
                                   colors: colors,
                                 );
@@ -143,7 +143,7 @@ class ContractsPage extends StatelessWidget {
                       onEmpty: Center(
                         child: Text(
                           "no_result".tr,
-                          style: styleController.textBigLightStyle,
+                          style: style.textBigLightStyle,
                         ),
                       ),
                       onLoading: Loader()),

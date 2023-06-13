@@ -1,12 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dabel_adl/controller/LinkController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/model/Link.dart';
-import 'package:dabel_adl/widget/MyNetWorkImage.dart';
-import 'package:dabel_adl/widget/banner_card.dart';
-import 'package:dabel_adl/widget/loader.dart';
-import 'package:dabel_adl/widget/shakeanimation.dart';
+import 'package:hamsignal/controller/LinkController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/model/Link.dart';
+import 'package:hamsignal/widget/MyNetWorkImage.dart';
+import 'package:hamsignal/widget/banner_card.dart';
+import 'package:hamsignal/widget/loader.dart';
+import 'package:hamsignal/widget/shakeanimation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,7 +14,7 @@ import 'package:get/get.dart';
 import 'ScrollingText.dart';
 
 class LinkVitrin extends StatelessWidget {
-  late Style styleController;
+  late Style style;
   late LinkController linkController;
   late SettingController settingController;
   late MaterialColor colors;
@@ -25,13 +25,13 @@ class LinkVitrin extends StatelessWidget {
   LinkVitrin({EdgeInsets? margin, MaterialColor? colors}) {
     this.margin = margin ??
         EdgeInsets.symmetric(
-          vertical: styleController.cardMargin / 8,
-          horizontal: styleController.cardMargin,
+          vertical: style.cardMargin / 8,
+          horizontal: style.cardMargin,
         );
-    styleController = Get.find<Style>();
+    style = Get.find<Style>();
     settingController = Get.find<SettingController>();
     linkController = Get.find<LinkController>();
-    this.colors = colors ?? styleController.primaryMaterial;
+    this.colors = colors ?? style.primaryMaterial;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       _dividerWidth.value = (_key.currentContext?.size?.width ?? 0) / 2;
@@ -44,7 +44,7 @@ class LinkVitrin extends StatelessWidget {
       //           transition: Transition.circularReveal,
       //           duration: Duration(milliseconds: 500)));
       //   //   var data=await LatestController().find({'id':'20','type':'cl'});
-      //   // Get.to(ClubDetails(data: data, colors: styleController.cardClubColors));
+      //   // Get.to(ClubDetails(data: data, colors: style.cardClubColors));
     });
   }
 
@@ -58,22 +58,22 @@ class LinkVitrin extends StatelessWidget {
           child: Card(
             shape: RoundedRectangleBorder(
               borderRadius:
-                  BorderRadius.circular(styleController.cardBorderRadius),
+                  BorderRadius.circular(style.cardBorderRadius),
             ),
-            shadowColor: styleController.primaryColor.withOpacity(.3),
-            color: styleController.secondaryColor,
+            shadowColor: style.primaryColor.withOpacity(.3),
+            color: style.secondaryColor,
             elevation: 20,
             margin: margin,
             child: Padding(
-                padding: EdgeInsets.all(styleController.cardMargin),
+                padding: EdgeInsets.all(style.cardMargin),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: EdgeInsets.all(styleController.cardMargin / 2),
+                      padding: EdgeInsets.all(style.cardMargin / 2),
                       child: Text(
-                        'links'.tr,
-                        style: styleController.textHeaderStyle
+                        'pishkhan'.tr,
+                        style: style.textHeaderStyle
                             .copyWith(color: colors[900]),
                         textAlign: TextAlign.right,
                       ),
@@ -87,25 +87,28 @@ class LinkVitrin extends StatelessWidget {
                       ),
                     ),
                     BannerCard(
-                      margin: EdgeInsets.all(  styleController.cardMargin ),
+                      margin: EdgeInsets.symmetric(
+                          vertical: style.cardMargin),
                       onClick: () => linkController.launchUrl(first),
-                      background: 'back6.png',
-                      titleColor: styleController.primaryColor,
+                      background: 'back.png',
+                      titleColor: style.primaryColor,
                       title: first.name,
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(style.cardMargin * 2)),
                       icon: linkController.getIconLink(first.id),
                     ),
                     if (false)
                       Card(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              styleController.cardBorderRadius / 2),
+                              style.cardBorderRadius / 2),
                         ),
                         child: ListTile(
                           contentPadding:
-                              EdgeInsets.all(styleController.cardMargin),
+                              EdgeInsets.all(style.cardMargin),
                           onTap: () => linkController.launchUrl(data[0]),
                           leading: MyNetWorkImage(
-                            width: styleController.cardVitrinHeight / 2,
+                            width: style.cardVitrinHeight / 2,
                             url: linkController.getIconLink(data[0].id),
                             loadingWidgetBuilder: (double) =>
                                 CupertinoActivityIndicator(),
@@ -114,7 +117,7 @@ class LinkVitrin extends StatelessWidget {
                           title: Text(
                             first.name,
                             maxLines: 2,
-                            style: styleController.textMediumStyle,
+                            style: style.textMediumStyle,
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -124,13 +127,14 @@ class LinkVitrin extends StatelessWidget {
                         physics: NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          mainAxisSpacing: styleController.cardMargin/2,
-                            crossAxisCount: styleController.linksGridCount,
-                            childAspectRatio: styleController.linksRatio),
+                            mainAxisSpacing: style.cardMargin,
+                            crossAxisSpacing: style.cardMargin,
+                            crossAxisCount: style.linksGridCount,
+                            childAspectRatio: style.linksRatio),
                         children: renderItems(data)),
                     // Center(
                     //   child: Wrap(
-                    //       // spacing: styleController.cardMargin / 4,
+                    //       // spacing: style.cardMargin / 4,
                     //       crossAxisAlignment: WrapCrossAlignment.center,
                     //       alignment: WrapAlignment.center,
                     //       children: renderItems(data)),
@@ -150,15 +154,18 @@ class LinkVitrin extends StatelessWidget {
     return (data ?? []).map<Widget>((link) {
       return BannerCard(
         onClick: () => linkController.launchUrl(link),
-        background: 'back6.png',
-        titleColor: styleController.primaryColor,
+        background: 'back.png',
+        titleColor: style.primaryColor,
         title: link.name,
+        margin: EdgeInsets.zero,
+        borderRadius:
+            BorderRadius.all(Radius.circular(style.cardMargin * 2)),
         icon: linkController.getIconLink(link.id),
       );
       return Card(
         shape: RoundedRectangleBorder(
           borderRadius:
-              BorderRadius.circular(styleController.cardBorderRadius / 2),
+              BorderRadius.circular(style.cardBorderRadius / 2),
         ),
         child: TextButton(
           onPressed: () {
@@ -167,7 +174,7 @@ class LinkVitrin extends StatelessWidget {
           child: Column(
             children: [
               MyNetWorkImage(
-                height: styleController.iconHeight,
+                height: style.iconHeight,
                 url: linkController.getIconLink(link.id),
                 loadingWidgetBuilder: (double) => CupertinoActivityIndicator(),
                 fit: BoxFit.contain,
@@ -187,10 +194,10 @@ class LinkVitrin extends StatelessWidget {
               // ),
               // Expanded(child: ScrollingText(text: link.name, reverse: false)),
               Padding(
-                padding: EdgeInsets.all(styleController.cardMargin / 2),
+                padding: EdgeInsets.all(style.cardMargin / 2),
                 child: Text(
                   link.name,
-                  style: styleController.textSmallStyle,
+                  style: style.textSmallStyle,
                   textAlign: TextAlign.center,
                 ),
               ),

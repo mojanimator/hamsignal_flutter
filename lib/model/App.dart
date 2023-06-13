@@ -1,4 +1,5 @@
-import 'package:dabel_adl/helper/variables.dart';
+import 'package:get/get.dart';
+import 'package:hamsignal/helper/variables.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class App {
@@ -12,6 +13,7 @@ class App {
   final String instagramLink;
   final String siteLink;
   final String emailLink;
+  final String eitaaLink;
   final String marketLink;
   final List questions;
   String whatsappLink;
@@ -30,6 +32,7 @@ class App {
     this.instagramLink = '',
     this.siteLink = '',
     this.emailLink = '',
+    this.eitaaLink = '',
     this.whatsappLink = '',
     this.marketLink = '',
     this.versionUpdate,
@@ -43,8 +46,9 @@ class App {
   factory App.fromJson(Map<String, dynamic> json, PackageInfo packageInfo) {
     // print(packageInfo.version); //1.0.0
     // print(packageInfo.appName); // دبل اسپورت
-    // print(packageInfo.packageName); //ir.dabeladl.app
+    // print(packageInfo.packageName); //com.varta.hamsignal
     // print( json['links']?['market']); //
+
     return App(
         needUpdate: int.tryParse("${json['version']}") == null
             ? false
@@ -64,10 +68,14 @@ class App {
         appLink: json['links']?['app'] ?? '',
         errorLink: json['links']?['error'] ?? '',
         siteLink: json['links']?['site'] ?? '',
+        eitaaLink: json['links']?['eitaa'] ?? '',
         commentsLink: json['links']?['comment'] ?? '',
         telegramLink: json['links']?['telegram'] ?? '',
         instagramLink: json['links']?['instagram'] ?? '',
         marketLink: json['links']?['market']?[Variables.MARKET] ?? '',
-        questions: json['questions'] ?? []);
+        questions: (json['questions']??[]).map((e) {
+          e['visible'] = false.obs;
+          return e;
+        }).toList());
   }
 }

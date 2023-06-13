@@ -3,16 +3,18 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/User.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pushpole/pushpole.dart';
 import 'package:shamsi_date/shamsi_date.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../helper/IAPPurchase.dart';
 import '../model/Category.dart';
@@ -22,7 +24,7 @@ import 'UserFilterController.dart';
 class UserController extends GetxController
     with StateMixin<User>, GetTickerProviderStateMixin {
   late final box = GetStorage();
-  late final _ACCESS_TOKEN;
+  var _ACCESS_TOKEN;
 
   late final Helper helper;
   late final SettingController settingController;
@@ -88,11 +90,7 @@ class UserController extends GetxController
   @override
   void onInit() async {
     // ACCESS_TOKEN = '';
-    await getUser(refresh: true);
-    Get.put(IAPPurchase(
-        keys: settingController.keys,
-        products: settingController.prices,
-        plans: settingController.plans));
+    // await getUser(refresh: true);
 
     super.onInit();
   }
@@ -116,7 +114,7 @@ class UserController extends GetxController
   }) async {
     return await apiProvider.fetch(Variables.LINK_PRE_AUTH,
         param: {
-          'auth_mobile': phone,
+          'phone': phone,
         },
         method: 'post',
         tryReminded: ApiProvider.maxRetry);
@@ -129,8 +127,9 @@ class UserController extends GetxController
     await Helper.getPackageInfo();
     final parsedJson = await apiProvider
         .fetch(Variables.LINK_USER_LOGIN, method: 'post', param: {
-      'auth_mobile': phone,
-      'auth_login_password': password,
+      'phone': phone,
+      'password': password,
+      'push_id': await PushPole.getId(),
       'app_version':
           "${Helper.packageInfo?.version}|${Helper.packageInfo?.buildNumber}"
     });
@@ -149,9 +148,11 @@ class UserController extends GetxController
       // user = User.fromJson(parsedJson);
       ACCESS_TOKEN = parsedJson['auth_header'];
       Helper.localStorage(key: 'USER', write: jsonEncode(parsedJson));
+      Helper.localStorage(
+          key: 'ACCESS_TOKEN', write: parsedJson['auth_header']);
       helper.showToast(
           msg: parsedJson['message'] ?? 'welcome'.tr, status: 'success');
-      user = await getUser(refresh: true, withLawyer: true);
+      user = await getUser();
       // await getUser();
       change(user, status: RxStatus.success());
       return user;
@@ -161,46 +162,61 @@ class UserController extends GetxController
   Future<dynamic> register({
     required String phone,
     required String code,
+    required String email,
     required String fullname,
+    required String username,
     required String password,
+    required String passwordVerify,
     required String inviter,
-    required bool isLawyer,
   }) async {
     await Helper.getPackageInfo();
     var params = {
       'app_version':
           "${Helper.packageInfo?.version}|${Helper.packageInfo?.buildNumber}",
-      'auth_mobile': phone,
-      'auth_code': code,
-      'auth_fullname': fullname,
-      'auth_password': password,
+      'phone': phone,
+      'phone_verify': code,
+      'fullname': fullname,
+      'username': username,
+      'email': email,
+      'password': password,
+      'password_verify': passwordVerify,
       'marketer_code': inviter,
+      'push_id': await PushPole.getId(),
     };
-    if (isLawyer) params["is_lawyer"] = "1";
 
     final parsedJson = await apiProvider.fetch(Variables.LINK_USER_REGISTER,
         param: params, method: 'post');
 // print(parsedJson);
+
     if (parsedJson == null) {
       User u = User.nullUser();
       change(null, status: RxStatus.empty());
       return null;
-    } else if (parsedJson['auth_header'] == null) {
+    } else if (parsedJson['error'] != null) {
+      helper.showToast(
+          msg: (parsedJson['error'] is String)
+              ? parsedJson['error']
+              : parsedJson['error']?[parsedJson['error'].keys.elementAt(0)]?[0],
+          status: 'danger');
+      return {'status': 'error'};
+    } else if (parsedJson['token'] == null) {
       User u = User.nullUser();
       // change(null, status: RxStatus.error('verify_error'.tr));
       helper.showToast(msg: 'verify_error'.tr, status: 'danger');
       return parsedJson;
     } else {
       user = User.fromJson(parsedJson);
-      ACCESS_TOKEN = parsedJson['auth_header'];
+      ACCESS_TOKEN = parsedJson['token'];
       Helper.localStorage(key: 'USER', write: jsonEncode(parsedJson));
       // await getUser();
+      helper.showToast(
+          msg: parsedJson['message'] ?? 'welcome'.tr, status: 'success');
       change(user, status: RxStatus.success());
       return user;
     }
   }
 
-  Future<User?> getUser({refresh = false, withLawyer = true}) async {
+  Future<User?> getUser({refresh = false}) async {
     if (user != null && !refresh) {
       change(user, status: RxStatus.success());
       await filterController.initFilters();
@@ -219,9 +235,7 @@ class UserController extends GetxController
       return user;
     }
     final parsedJson = await apiProvider.fetch(Variables.LINK_GET_USER_INFO,
-        ACCESS_TOKEN: ACCESS_TOKEN,
-        method: 'post',
-        param: {'with_lawyer': withLawyer});
+        ACCESS_TOKEN: ACCESS_TOKEN, method: 'get', param: {});
 
     if (parsedJson == null) {
       //internet error
@@ -242,39 +256,43 @@ class UserController extends GetxController
     }
   }
 
-  Future<bool> edit(
-      {required Map<String, dynamic> params, String? type}) async {
+  Future edit({required Map<String, dynamic> params, String? type}) async {
     final parsedJson = await apiProvider.fetch(
-        type == 'password'
-            ? Variables.LINK_UPDATE_PASSWORD
-            : type == 'lawyer'
-                ? Variables.LINK_UPDATE_LAWYER_PROFILE
-                : Variables.LINK_UPDATE_PROFILE,
-        param: params,
-        ACCESS_TOKEN: ACCESS_TOKEN,
-        method: 'post');
-    if (parsedJson != null && parsedJson['error'] != null) {
+            type == 'password'
+                ? Variables.LINK_UPDATE_PASSWORD
+                : type == 'avatar'
+                    ? Variables.LINK_UPDATE_AVATAR
+                    : type == 'email'
+                        ? Variables.LINK_UPDATE_EMAIL
+                        : Variables.LINK_UPDATE_PROFILE,
+            param: params,
+            ACCESS_TOKEN: ACCESS_TOKEN,
+            method: 'post') ??
+        {};
+    if (parsedJson['error'] != null) {
       helper.showToast(
           msg: (parsedJson['error'] is String)
               ? parsedJson['error']
               : parsedJson['error']?[parsedJson['error'].keys.elementAt(0)]?[0],
           status: 'danger');
-      return false;
+      return {'status': 'error'};
     }
-    if (parsedJson != null && parsedJson['errors'] != null) {
+    if (parsedJson['errors'] != null) {
       helper.showToast(
           msg: parsedJson['errors']?[parsedJson['errors'].keys.elementAt(0)]
               ?[0],
           status: 'danger');
-      return false;
+      return {'status': 'error'};
     }
-    if (parsedJson != null && parsedJson['message'] != null) {
+    if (parsedJson['message'] != null) {
       helper.showToast(
           msg: parsedJson['message'], status: parsedJson['status']);
-      return parsedJson['status'] != null && parsedJson['status'] == true;
+      return parsedJson['status'] != null && parsedJson['status'] == 'success'
+          ? parsedJson
+          : {'status': 'error'};
     }
 
-    return true;
+    return {'status': 'error'};
   }
 
   void logout() {
@@ -285,12 +303,13 @@ class UserController extends GetxController
 
   bool hasPlan({bool goShop = false, bool message = false}) {
     DateTime? dt =
-        user?.expiredAt != null ? DateTime.tryParse(user!.expiredAt!) : null;
+        user?.expiresAt != null ? DateTime.tryParse(user!.expiresAt!) : null;
 
     bool res = ACCESS_TOKEN == '' ||
         dt == null ||
         ((dt.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch) <=
             0);
+
     if (res) {
       if (goShop) Get.to(ShopPage());
       if (message)
@@ -302,30 +321,15 @@ class UserController extends GetxController
 
   recoverPassword({required String phone}) async {
     return await apiProvider.fetch(Variables.LINK_USER_FORGET_PASSWORD,
-        param: {'auth_mobile': phone}, method: 'post');
+        param: {'phone': phone}, method: 'post');
   }
 
-  Future<dynamic> mark({required Map<String, String> params}) {
-    return apiProvider.fetch(Variables.LINK_SET_BOOKMARK,
+  Future<dynamic> mark({required Map<String, String> params}) async {
+    final res = await apiProvider.fetch(Variables.LINK_SET_BOOKMARK,
         method: 'post', ACCESS_TOKEN: ACCESS_TOKEN, param: params);
-  }
-
-  Future<bool> sendContact({required Map<String, dynamic> params}) async {
-    final res = await apiProvider.fetch(Variables.LINK_SEND_CONTACT,
-        method: 'post', ACCESS_TOKEN: ACCESS_TOKEN, param: params);
-
-    if (res != null && res['error'] != null && res['error'].keys.length > 0) {
-      helper.showToast(
-          msg: res['error'][res['error'].keys.toList()[0]][0],
-          status: 'danger');
-      return false;
-    }
-
-    if (res != null && res['status'] != null) {
-      helper.showToast(msg: res['message'], status: res['status']);
-      return res['status'] == 'success';
-    }
-    return true;
+    if (res != null && res['message'] != null)
+      helper.showToast(msg: res['message'], status: 'success');
+    return res;
   }
 
 // Future<bool> sendActivationCode({required String phone}) async {
@@ -333,23 +337,49 @@ class UserController extends GetxController
 // }
 
   List categories() {
-    return settingController.categories
-        .where((element) => element['related'] == CategoryRelate.Lawyer)
-        .map<Map>((e) => {
-              ...e,
-              ...{
-                'selected': user != null &&
-                        user!.categories.split(', ').contains(e['title'])
-                    ? true
-                    : false
-              }
-            })
-        .toList();
+    return settingController.categories.toList();
   }
 
   String category(String? category_id) {
     var t = categories()
         .firstWhereOrNull((element) => element['id'] == category_id);
     return t == null ? '' : t['title'];
+  }
+
+  Future<bool> getTelegramConnectLink() async {
+    final res = await apiProvider.fetch(Variables.LINK_TELEGRAM_CONNECT,
+        method: 'post', ACCESS_TOKEN: ACCESS_TOKEN);
+
+    if (res == null || res['status'] != null && res['status'] != 'success')
+      return false;
+    if (res['status'] != null &&
+        res['status'] == 'success' &&
+        res['url'] != null) {
+      if (await canLaunchUrlString(res['url']))
+        launchUrlString(res['url'], mode: LaunchMode.externalApplication);
+    }
+
+    return true;
+  }
+
+  Future buy(Map<String, String> params) async {
+    final parsedJson = await apiProvider.fetch(Variables.LINK_BUY,
+        param: params, ACCESS_TOKEN: ACCESS_TOKEN, method: 'post');
+    return parsedJson;
+  }
+
+  Future<dynamic>? calculateCoupon(
+      {required Map<String, String> params}) async {
+    final parsedJson = await apiProvider.fetch(Variables.LINK_COUPON_CALCULATE,
+        param: params, ACCESS_TOKEN: ACCESS_TOKEN, method: 'post');
+
+    if (parsedJson == null || parsedJson['error'] != null) {
+      helper.showToast(
+          msg: parsedJson?['error'] ?? 'request_error'.tr, status: 'danger');
+      return {};
+    }
+    helper.showToast(msg: 'coupon_accepted'.tr, status: 'success');
+    // print(parsedJson);
+    return parsedJson;
   }
 }

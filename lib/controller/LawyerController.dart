@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/LawyerFilterController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/Lawyer.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/LawyerFilterController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/Lawyer.dart';
 import 'package:get/get.dart';
 
 import '../model/Category.dart';
@@ -56,7 +56,7 @@ class LawyerController extends GetxController with StateMixin<List<Lawyer>> {
     if (doc != null)
       return "${Variables.LINK_STORAGE}/${doc['type_id']}/${doc['id']}.jpg";
     else
-      return Variables.NOIMAGE_LINK;
+      return Variables.NO_IMAGE_LINK;
   }
 
   String getProvince(pId) {

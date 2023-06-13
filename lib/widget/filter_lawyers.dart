@@ -1,7 +1,7 @@
-import 'package:dabel_adl/controller/AnimationController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/widget/filter_widgets.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/widget/filter_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,7 +13,7 @@ class LawyerFilterSection extends StatelessWidget {
 
   final MyAnimationController animationController =
       Get.find<MyAnimationController>();
-  final Style styleController = Get.find<Style>();
+  final Style style = Get.find<Style>();
   final SettingController settingController = Get.find<SettingController>();
 
   LawyerFilterSection({required this.controller}) {
@@ -31,27 +31,28 @@ class LawyerFilterSection extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  height: styleController.cardMargin * 2,
+                  height: style.cardMargin * 2,
                 ),
+                if(false)
                 Center(
                   child: MyToggleButtons(
                     type: 'target',
                     controller: controller.filterController,
-                    styleController: styleController,
+                    style: style,
                     children: [
 
                       Container(
-                          padding: EdgeInsets.all(styleController.cardMargin),
+                          padding: EdgeInsets.all(style.cardMargin),
                           child: Text('lawyer'.tr)),
                       Container(
-                          padding: EdgeInsets.all(styleController.cardMargin),
+                          padding: EdgeInsets.all(style.cardMargin),
                           child: Text('expert'.tr))
                     ],
                   ),
                 ),
                 Center(
                   child: MyDropdownButton(
-                      styleController: styleController,
+                      style: style,
                       controller: controller.filterController,
                       type: 'category_id',
                       children: controller.categories
@@ -62,49 +63,20 @@ class LawyerFilterSection extends StatelessWidget {
                                   controller.filterController.filters['target'])
                           .toList(),
                       margin: EdgeInsets.symmetric(
-                          horizontal: styleController.cardMargin,
-                          vertical: styleController.cardMargin / 4)),
+                          horizontal: style.cardMargin,
+                          vertical: style.cardMargin / 4)),
                 ),
                 Center(
                   child: Row(
                     children: [
-                      Expanded(
-                        child: MyDropdownButton(
-                          styleController: styleController,
-                          controller: controller.filterController,
-                          type: 'province',
-                          children: settingController.provinces,
-                          margin: EdgeInsets.only(
-                              left: styleController.cardMargin / 4,
-                              right: styleController.cardMargin,
-                              bottom: styleController.cardMargin / 4,
-                              top: styleController.cardMargin / 4),
-                        ),
-                      ),
-                      Expanded(
-                        child: MyDropdownButton(
-                          styleController: styleController,
-                          controller: controller.filterController,
-                          type: 'county',
-                          children: settingController.counties
-                              .where((e) =>
-                                  e['province_id'] ==
-                                  controller
-                                      .filterController.filters['province_id'])
-                              .toList(),
-                          margin: EdgeInsets.only(
-                              left: styleController.cardMargin,
-                              right: styleController.cardMargin / 4,
-                              bottom: styleController.cardMargin / 4,
-                              top: styleController.cardMargin / 4),
-                        ),
-                      ),
+
+
                     ],
                   ),
                 ),
 
                 Padding(
-                  padding: EdgeInsets.all(styleController.cardMargin),
+                  padding: EdgeInsets.all(style.cardMargin),
                   child: Row(
                     children: [
                       Expanded(
@@ -113,23 +85,23 @@ class LawyerFilterSection extends StatelessWidget {
                             style: ButtonStyle(
                                 padding: MaterialStateProperty.all(
                                     EdgeInsets.symmetric(
-                                        vertical: styleController.cardMargin)),
+                                        vertical: style.cardMargin)),
                                 elevation: MaterialStateProperty.all(10),
                                 overlayColor: MaterialStateProperty.resolveWith(
                                   (states) {
                                     return states
                                             .contains(MaterialState.pressed)
-                                        ? styleController.secondaryColor
+                                        ? style.secondaryColor
                                         : null;
                                   },
                                 ),
                                 backgroundColor: MaterialStateProperty.all(
-                                    styleController.primaryColor),
+                                    style.primaryColor),
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                   borderRadius: BorderRadius.horizontal(
                                       right: Radius.circular(
-                                          styleController.cardBorderRadius *
+                                          style.cardBorderRadius *
                                               2)),
                                 ))),
                             onPressed: () {
@@ -138,7 +110,7 @@ class LawyerFilterSection extends StatelessWidget {
                             icon: Icon(Icons.search, color: Colors.white),
                             label: Text(
                               'search'.tr,
-                              style: styleController.textMediumLightStyle,
+                              style: style.textMediumLightStyle,
                             )),
                       ),
                       Expanded(
@@ -147,23 +119,23 @@ class LawyerFilterSection extends StatelessWidget {
                             style: ButtonStyle(
                                 padding: MaterialStateProperty.all(
                                     EdgeInsets.symmetric(
-                                        vertical: styleController.cardMargin)),
+                                        vertical: style.cardMargin)),
                                 elevation: MaterialStateProperty.all(10),
                                 overlayColor: MaterialStateProperty.resolveWith(
                                   (states) {
                                     return states
                                             .contains(MaterialState.pressed)
-                                        ? styleController.secondaryColor
+                                        ? style.secondaryColor
                                         : null;
                                   },
                                 ),
                                 backgroundColor: MaterialStateProperty.all(
-                                    styleController.primaryColor),
+                                    style.primaryColor),
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                   borderRadius: BorderRadius.horizontal(
                                       left: Radius.circular(
-                                          styleController.cardBorderRadius *
+                                          style.cardBorderRadius *
                                               2)),
                                 ))),
                             onPressed: () {
@@ -177,13 +149,13 @@ class LawyerFilterSection extends StatelessWidget {
                 ),
                 // TabBar(
                 //     indicatorWeight: 2,
-                //     unselectedLabelColor: styleController.primaryColor,
+                //     unselectedLabelColor: style.primaryColor,
                 //     overlayColor:
-                //         MaterialStateProperty.all(styleController.primaryColor),
-                //     unselectedLabelStyle: styleController.textMediumStyle
+                //         MaterialStateProperty.all(style.primaryColor),
+                //     unselectedLabelStyle: style.textMediumStyle
                 //         .copyWith(fontFamily: 'Shabnam'),
                 //     labelColor: Colors.white,
-                //     indicator: BoxDecoration(color: styleController.primaryColor),
+                //     indicator: BoxDecoration(color: style.primaryColor),
                 //     controller: tabController.controller,
                 //     tabs: [
                 //       Tab(

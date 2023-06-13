@@ -2,16 +2,17 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/model/User.dart';
-import 'package:dabel_adl/widget/blinkanimation.dart';
-import 'package:dabel_adl/widget/filter_widgets.dart';
-import 'package:dabel_adl/widget/mini_card.dart';
-import 'package:dabel_adl/widget/my_text_field.dart';
-import 'package:dabel_adl/widget/shakeanimation.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/model/User.dart';
+import 'package:hamsignal/page/shop.dart';
+import 'package:hamsignal/widget/blinkanimation.dart';
+import 'package:hamsignal/widget/filter_widgets.dart';
+import 'package:hamsignal/widget/mini_card.dart';
+import 'package:hamsignal/widget/my_text_field.dart';
+import 'package:hamsignal/widget/shakeanimation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -22,13 +23,13 @@ import 'package:path/path.dart' as p;
 import '../controller/AnimationController.dart';
 import '../controller/UserFilterController.dart';
 import '../widget/MyProfileImage.dart';
-import 'contents.dart';
+import 'transactions.dart';
 
 class UserProfilePage extends StatelessWidget {
   late final UserController userController;
   late final SettingController settingController;
 
-  late final Style styleController;
+  late final Style style;
 
   late Rx<User> user;
   Rx<List<dynamic>> counties = Rx<List<dynamic>>([]);
@@ -60,30 +61,22 @@ class UserProfilePage extends StatelessWidget {
     userController = Get.find<UserController>();
     settingController = Get.find<SettingController>();
     helper = Get.find<Helper>();
-    styleController = Get.find<Style>();
-    colors = styleController.primaryMaterial;
+    style = Get.find<Style>();
+    colors = style.primaryMaterial;
     user = Rx<User>(userController.user ?? User.nullUser());
     userInfo = userController.userInfo;
     userRef = userController.userRef ?? {};
-    title1Style = styleController.textBigStyle;
-    title2Style = styleController.textMediumStyle;
+    title1Style = style.textBigStyle;
+    title2Style = style.textMediumStyle;
     filterController = userController.filterController;
 
     // WidgetsBinding.instance.addPostFrameCallback((_) => Future.delayed(
     //     Duration(seconds: 1),
-    //     () => Get.to(
-    //         ProductsPage(initFilter: {
-    //           'user': user.id,
-    //           'panel': '1',
-    //         }),
+    //     () => Get.to(TransactionsPage( ),
     //         transition: Transition.topLevel,
-    //         duration: Duration(milliseconds: 400))));
+    //         duration: Duration(milliseconds: 100))));
 
     //         // showEditDialog({'username': user.username}));
-
-    counties.value = settingController.counties
-        .where((e) => e['province_id'] == filterController.filters['province'])
-        .toList();
 
     profileWidget = MyProfileImage(
       controller: filterController,
@@ -99,7 +92,7 @@ class UserProfilePage extends StatelessWidget {
         edit({
           'avatar': MultipartFile(value,
               filename: path.split('/')[path.split('/').length - 1])
-        }, type: 'user');
+        }, type: 'avatar');
       },
     );
     documentWidget = MyProfileImage(
@@ -124,16 +117,12 @@ class UserProfilePage extends StatelessWidget {
     childScrollPhysics = Rx<ScrollPhysics>(userController.childScrollPhysics);
 
     filterController.textNameCtrl.text = user.value.fullName;
+    filterController.textUsernameCtrl.text = user.value.username;
     filterController.textEmailCtrl.text = user.value.email;
     filterController.textPaswOldCtrl.text = '';
     filterController.textPaswCtrl.text = '';
     filterController.textPaswConfCtrl.text = '';
-    filterController.textPaswConfCtrl.text = '';
-    filterController.textTelCtrl.text = user.value.tel;
-    filterController.textMelliCodeCtrl.text = user.value.lawyerMelicard;
-    filterController.textLawyerCodeCtrl.text = user.value.lawyerNumber;
-    filterController.textLawyerAddressCtrl.text = user.value.lawyerAddress;
-    filterController.textLawyerBioCtrl.text = user.value.cv;
+    filterController.textTelCtrl.text = user.value.phone;
 
     userController.parentScrollController =
         userController.parentScrollController;
@@ -142,13 +131,6 @@ class UserProfilePage extends StatelessWidget {
     userController.parentScrollPhysics = userController.parentScrollPhysics;
 
     userController.parentScrollController.addListener(() {
-      // print("------");
-      // print(parentScrollController.offset);
-      // print(parentScrollController.position.maxScrollExtent);
-      // print(parentScrollController.position.minScrollExtent);
-      // print("*****");
-      // print(childScrollController.offset);
-      // print(childScrollController.position.maxScrollExtent);
       if (userController.parentScrollController.offset >
               userController.parentScrollController.position.maxScrollExtent &&
           userController.childScrollController.position.maxScrollExtent > 0 &&
@@ -176,36 +158,19 @@ class UserProfilePage extends StatelessWidget {
     });
     DateTime now = DateTime.now();
     DateTime expireDaysDateTime =
-        user.value?.expiredAt != null && user.value?.expiredAt != ''
-            ? DateTime.tryParse(user.value!.expiredAt) ?? now
+        user.value?.expiresAt != null && user.value?.expiresAt != ''
+            ? DateTime.tryParse(user.value!.expiresAt) ?? now
             : now;
 
     expireDays.value = expireDaysDateTime.difference(now).inDays;
-    statusText.value = user.value.isBlock
+    statusText.value = !user.value.isActive
         ? 'blocked'.tr
-        : expireDays.value > 0
-            ? "${expireDays.value} ${'day'.tr}"
-            : expireDays.value <= 0
-                ? 'expired'.tr
-                : 'inactive'.tr;
+        : "${expireDays.value > 0 ? expireDays.value : 0} ${'day'.tr}";
+    // : expireDays.value <  0
+    //     ? 'expired'.tr
+    //     : 'inactive'.tr;
 
-    expireDaysDateTime =
-        user.value?.lawyerExpiredAt != null && user.value?.lawyerExpiredAt != ''
-            ? DateTime.tryParse(user.value!.lawyerExpiredAt) ?? now
-            : now;
-
-    expireDaysLawyer.value = expireDaysDateTime.difference(now).inDays;
-    statusTextLawyer.value = user.value.isBlock
-        ? 'blocked'.tr
-        : expireDaysLawyer.value > 0 && (user.value?.isShowLawyer ?? false)
-            ? "${expireDaysLawyer.value} ${'day'.tr}"
-            : expireDaysLawyer.value > 0 &&
-                    (!(user.value?.isShowLawyer ?? false))
-                ? "${'in_queue'.tr}"
-                : expireDaysLawyer.value <= 0 &&
-                        (user.value?.isShowLawyer ?? false)
-                    ? 'expired'.tr
-                    : 'inactive'.tr;
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {});
   }
 
   @override
@@ -217,42 +182,9 @@ class UserProfilePage extends StatelessWidget {
         },
         child: Container(
           decoration: BoxDecoration(
-            gradient: styleController.splashBackground,
+            gradient: style.splashBackground,
           ),
           child: Scaffold(
-            // bottomSheet: SizeTransition(
-            //   sizeFactor: animationController.bottomNavigationBarController,
-            //   child: Column(
-            //     mainAxisSize: MainAxisSize.min,
-            //     children: [
-            //       TextButton(
-            //           style: styleController.buttonStyle(
-            //
-            //             padding: EdgeInsets.symmetric(
-            //                 vertical: styleController.cardMargin * 3 / 2),
-            //             radius: BorderRadius.vertical(
-            //               top: Radius.circular(
-            //                   styleController.cardBorderRadius / 2),
-            //             ),
-            //           ),
-            //           onPressed: () async {
-            //             loading.value = true;
-            //
-            //             loading.value = false;
-            //           },
-            //           child: Center(
-            //             child: Text(
-            //               "${'edit'.tr}",
-            //               style: styleController.textMediumLightStyle
-            //                   .copyWith(fontWeight: FontWeight.bold),
-            //             ),
-            //           )),
-            //       SizedBox(
-            //         height: styleController.bottomNavigationBarHeight,
-            //       )
-            //     ],
-            //   ),
-            // ),
             body: ShakeWidget(
               child: Stack(
                 fit: StackFit.expand,
@@ -266,15 +198,14 @@ class UserProfilePage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Container(
-                            height: Get.height / 3 +
-                                styleController.cardBorderRadius * 2,
-                            decoration: BoxDecoration(
-                                gradient: styleController.splashBackground),
+                            height: Get.height / 3 + style.cardBorderRadius * 2,
+                            decoration:
+                                BoxDecoration(gradient: style.splashBackground),
                             child: Container(
                               decoration: BoxDecoration(
                                 image: DecorationImage(
                                     image: AssetImage(
-                                        'assets/images/icon-light.png'),
+                                        'assets/images/icon-dark.png'),
                                     fit: BoxFit.cover,
                                     filterQuality: FilterQuality.low),
                               ),
@@ -302,7 +233,7 @@ class UserProfilePage extends StatelessWidget {
                     slivers: [
                       SliverToBoxAdapter(
                         child: Container(
-                          height: styleController.topOffset,
+                          height: style.topOffset,
                         ),
                       ),
                       SliverFillRemaining(
@@ -311,12 +242,12 @@ class UserProfilePage extends StatelessWidget {
                               color: Colors.white,
                               borderRadius: BorderRadius.only(
                                   topRight: Radius.circular(
-                                      styleController.cardBorderRadius * 2),
+                                      style.cardBorderRadius * 2),
                                   topLeft: Radius.circular(
-                                      styleController.cardBorderRadius * 2))),
+                                      style.cardBorderRadius * 2))),
                           margin: EdgeInsets.zero,
                           child: Transform.translate(
-                            offset: Offset(0, -styleController.imageHeight / 2),
+                            offset: Offset(0, -style.imageHeight / 2),
                             child: Column(
                               key: PageStorageKey<String>('profile'),
                               children: <Widget>[
@@ -325,476 +256,43 @@ class UserProfilePage extends StatelessWidget {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
                                   children: [
-                                    profileWidget,
                                     //profile image
+                                    Padding(
+                                      padding: EdgeInsets.all(style.cardMargin),
+                                      child: profileWidget,
+                                    ),
+
                                     Expanded(
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
                                         child: Padding(
-                                          padding: EdgeInsets.all(
-                                              styleController.cardMargin),
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: style.cardMargin),
                                           child: IntrinsicHeight(
                                             child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
                                               children: [
-                                                Text(
-                                                  "${'balance'.tr}",
-                                                  style: styleController
-                                                      .textHeaderStyle
-                                                      .copyWith(
-                                                          color: colors[600]),
-                                                ),
-                                                VerticalDivider(),
-                                                TextButton(
-                                                  onPressed: () => refresh(),
-                                                  style: styleController
-                                                      .buttonStyle(
-                                                    radius: BorderRadius
-                                                        .circular(styleController
-                                                                .cardBorderRadius /
-                                                            2),
-                                                    backgroundColor:
-                                                        styleController
-                                                            .primaryMaterial[50],
-                                                    padding: EdgeInsets.symmetric(
-                                                        horizontal:
-                                                            styleController
-                                                                    .cardMargin /
-                                                                2,
-                                                        vertical: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                  ),
-                                                  child: Row(
-                                                    children: [
-                                                      Text(
-                                                        " ${user.value.wallet.asPrice()}  ${'currency'.tr}  ",
-                                                        style: styleController
-                                                            .textHeaderStyle
-                                                            .copyWith(
-                                                                color: colors[
-                                                                    600]),
-                                                      ),
-                                                      loading.value
-                                                          ? CupertinoActivityIndicator(
-                                                              color:
-                                                                  colors[600])
-                                                          : Icon(
-                                                              Icons.refresh,
-                                                              color:
-                                                                  colors[600],
-                                                            )
-                                                    ],
-                                                  ),
-                                                ),
-                                                //charge wallet
-                                                VerticalDivider(),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    settingController
-                                                        .currentPageIndex = 4;
-                                                    settingController
-                                                        .bottomSheetController
-                                                        .animateTo(4);
-                                                  },
-                                                  style: styleController
-                                                      .buttonStyle(
-                                                    radius: BorderRadius
-                                                        .circular(styleController
-                                                                .cardBorderRadius /
-                                                            2),
-                                                    backgroundColor:
-                                                        styleController
-                                                            .primaryMaterial[50],
-                                                    padding: EdgeInsets.symmetric(
-                                                        horizontal:
-                                                            styleController
-                                                                    .cardMargin /
-                                                                2,
-                                                        vertical: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                  ),
-                                                  child: Row(
-                                                    children: [
-                                                      Text(
-                                                        "  ${'charge'.tr}  ",
-                                                        style: styleController
-                                                            .textHeaderStyle
-                                                            .copyWith(
-                                                                color: colors[
-                                                                    600]),
-                                                      ),
-                                                      Icon(
-                                                        Icons
-                                                            .account_balance_wallet,
-                                                        color: colors[600],
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                      color: colors[50],
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(
-                                            styleController.cardMargin),
-                                        bottom: Radius.circular(
-                                            styleController.cardMargin / 4),
-                                      )),
-                                  margin: EdgeInsets.symmetric(
-                                      horizontal: styleController.cardMargin),
-                                  child: TabBar(
-                                    controller:
-                                        userController.tabControllerProfile,
-                                    tabs: userController.profileTabs,
-                                    labelColor: colors[50],
-                                    indicatorWeight: 2,
-                                    indicator: BoxDecoration(
-                                        color: colors[500],
-                                        borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(
-                                              styleController.cardMargin),
-                                          bottom: Radius.circular(
-                                              styleController.cardMargin / 4),
-                                        )),
-                                    indicatorColor: colors[500],
-                                    unselectedLabelColor: colors[500],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    physics: childScrollPhysics.value,
-                                    controller:
-                                        userController.childScrollController,
-                                    child: Column(
-                                      children: [
-                                        //user info
-
-                                        Visibility(
-                                          visible: userController
-                                                  .tabControllerProfile.index ==
-                                              0,
-                                          child: MiniCard(
-                                            title: 'user_info'.tr,
-                                            styleController: styleController,
-                                            desc1: '',
-                                            child: Container(
-                                              child: Padding(
-                                                  padding: EdgeInsets.all(
-                                                      styleController
-                                                              .cardMargin /
-                                                          4),
-                                                  child: Column(
-                                                    children: [
-                                                      Padding(
-                                                        padding: EdgeInsets.symmetric(
-                                                        vertical:    styleController
-                                                                .cardMargin /
-                                                                4),
-                                                        child: TextButton(
-                                                          style: styleController
-                                                              .buttonStyle(
-                                                            padding: EdgeInsets.all(
-                                                                styleController
-                                                                    .cardMargin *
-                                                                    2),
-                                                            radius: BorderRadius.all(
-                                                              Radius.circular(
-                                                                  styleController
-                                                                      .cardMargin),
-                                                            ),
-                                                            backgroundColor:
-                                                            styleController
-                                                                .primaryMaterial[
-                                                            50]!
-                                                                .withOpacity(.3),
-                                                          ),
-                                                          onPressed: () {
-                                                            settingController.currentPageIndex=4;
-                                                            settingController
-                                                                .bottomSheetController
-                                                                .animateTo(4);
-                                                          },
-                                                          child: Row(
-                                                              mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceAround,
-                                                              children: [
-                                                                IntrinsicHeight(
-                                                                    child: Row(
-                                                                        children: [
-                                                                          Text(
-                                                                            'status'.tr,
-                                                                            style: styleController
-                                                                                .textMediumStyle,
-                                                                          ),
-                                                                          VerticalDivider(),
-                                                                          BlinkAnimation(
-                                                                            child:
-                                                                            Container(
-                                                                              padding: EdgeInsets.symmetric(
-                                                                                  horizontal:
-                                                                                  styleController.cardMargin),
-                                                                              decoration: BoxDecoration(
-                                                                                  color: styleController
-                                                                                      .primaryMaterial[
-                                                                                  100]!
-                                                                                      .withOpacity(
-                                                                                      .2),
-                                                                                  borderRadius:
-                                                                                  BorderRadius.all(Radius.circular(styleController.cardMargin))),
-                                                                              child: Text(
-                                                                                  statusText
-                                                                                      .value,
-                                                                                  style: styleController
-                                                                                      .textMediumStyle),
-                                                                            ),
-                                                                          )
-                                                                        ])),
-                                                                IntrinsicHeight(
-                                                                    child: Text(statusText
-                                                                        .value ==
-                                                                        'expired'
-                                                                            .tr
-                                                                        ? 'click_for_pay'
-                                                                        .tr
-                                                                        : '')),
-                                                              ]),
-                                                        ),
-                                                      ),
-                                                      MyTextField(
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        margin: EdgeInsets.symmetric(
-                                                            vertical:
-                                                                styleController
-                                                                        .cardMargin /
-                                                                    4),
-                                                        icon: Icons.person,
-                                                        controller:
-                                                            filterController
-                                                                .textNameCtrl,
-                                                        hintText:
-                                                            "${'name'.tr} ${'family'.tr}",
-                                                        keyboardType:
-                                                            TextInputType.name,
-                                                      ),
-                                                      MyTextField(
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        margin: EdgeInsets.symmetric(
-                                                            vertical:
-                                                                styleController
-                                                                        .cardMargin /
-                                                                    4),
-                                                        icon: Icons
-                                                            .alternate_email,
-                                                        controller:
-                                                            filterController
-                                                                .textEmailCtrl,
-                                                        hintText:
-                                                            "${'email'.tr}",
-                                                        keyboardType:
-                                                            TextInputType
-                                                                .emailAddress,
-                                                      ),
-                                                      TextButton(
-                                                          style: styleController
-                                                              .buttonStyle(
-                                                            backgroundColor:
-                                                                styleController
-                                                                        .primaryMaterial[
-                                                                    500],
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    vertical:
-                                                                        styleController.cardMargin *
-                                                                            2),
-                                                            radius: BorderRadius
-                                                                .vertical(
-                                                              bottom: Radius.circular(
-                                                                  styleController
-                                                                          .cardBorderRadius /
-                                                                      2),
-                                                            ),
-                                                          ),
-                                                          onPressed: () async {
-                                                            edit({},
-                                                                type: 'user');
-                                                          },
-                                                          child: Center(
-                                                            child: Text(
-                                                              "${'edit'.tr}",
-                                                              style: styleController
-                                                                  .textMediumLightStyle
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold),
-                                                            ),
-                                                          )),
-                                                    ],
-                                                  )),
-                                            ),
-                                          ),
-                                        ),
-
-                                        //change password
-                                        Visibility(
-                                          visible: userController
-                                                  .tabControllerProfile.index ==
-                                              0,
-                                          child: MiniCard(
-                                            title: 'password_change'.tr,
-                                            styleController: styleController,
-                                            desc1: '',
-                                            child: Container(
-                                              child: Padding(
-                                                  padding: EdgeInsets.all(
-                                                      styleController
-                                                              .cardMargin /
-                                                          4),
-                                                  child: Column(
-                                                    children: [
-                                                      MyTextField(
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        margin: EdgeInsets.symmetric(
-                                                            vertical:
-                                                                styleController
-                                                                        .cardMargin /
-                                                                    4),
-                                                        icon: Icons.password,
-                                                        controller:
-                                                            filterController
-                                                                .textPaswOldCtrl,
-                                                        hintText:
-                                                            'password_old'.tr,
-                                                        keyboardType:
-                                                            TextInputType.text,
-                                                        obscure: true,
-                                                      ),
-                                                      MyTextField(
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        margin: EdgeInsets.symmetric(
-                                                            vertical:
-                                                                styleController
-                                                                        .cardMargin /
-                                                                    4),
-                                                        icon: Icons
-                                                            .password_outlined,
-                                                        controller:
-                                                            filterController
-                                                                .textPaswCtrl,
-                                                        hintText:
-                                                            "${'password_new'.tr}",
-                                                        keyboardType:
-                                                            TextInputType.text,
-                                                        obscure: true,
-                                                      ),
-                                                      MyTextField(
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        margin: EdgeInsets.symmetric(
-                                                            vertical:
-                                                                styleController
-                                                                        .cardMargin /
-                                                                    4),
-                                                        icon: Icons
-                                                            .password_outlined,
-                                                        controller:
-                                                            filterController
-                                                                .textPaswConfCtrl,
-                                                        hintText:
-                                                            "${'password_rep'.tr}",
-                                                        keyboardType:
-                                                            TextInputType.text,
-                                                        obscure: true,
-                                                      ),
-                                                      TextButton(
-                                                          style: styleController
-                                                              .buttonStyle(
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    vertical:
-                                                                        styleController.cardMargin *
-                                                                            2),
-                                                            radius: BorderRadius
-                                                                .vertical(
-                                                              bottom: Radius.circular(
-                                                                  styleController
-                                                                          .cardBorderRadius /
-                                                                      2),
-                                                            ),
-                                                          ),
-                                                          onPressed: () async {
-                                                            edit({},
-                                                                type:
-                                                                    'password');
-                                                          },
-                                                          child: Center(
-                                                            child: Text(
-                                                              "${'edit'.tr}",
-                                                              style: styleController
-                                                                  .textMediumLightStyle
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold),
-                                                            ),
-                                                          )),
-                                                    ],
-                                                  )),
-                                            ),
-                                          ),
-                                        ),
-                                        // lawyer info
-                                        Visibility(
-                                          visible: userController
-                                                  .tabControllerProfile.index ==
-                                              1,
-                                          child: MiniCard(
-                                            disabled: !user.value.isLawyer,
-                                            title: 'user_lawyer_info'.tr,
-                                            styleController: styleController,
-                                            desc1: '',
-                                            child: Container(
-                                              padding: EdgeInsets.all(
-                                                  styleController.cardMargin /
-                                                      4),
-                                              child: Column(
-                                                children: [
-                                                  // lawyer status
-                                                  TextButton(
-                                                    style: styleController
-                                                        .buttonStyle(
+                                                //status
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                      vertical:
+                                                          style.cardMargin / 4),
+                                                  child: TextButton(
+                                                    style: style.buttonStyle(
                                                       padding: EdgeInsets.all(
-                                                          styleController
-                                                                  .cardMargin *
-                                                              2),
+                                                          style.cardMargin * 2),
                                                       radius: BorderRadius.all(
                                                         Radius.circular(
-                                                            styleController
-                                                                .cardMargin),
+                                                            style.cardMargin),
                                                       ),
                                                       backgroundColor:
-                                                          styleController
-                                                              .primaryMaterial[
-                                                                  50]!
-                                                              .withOpacity(.3),
+                                                          Colors.white,
                                                     ),
-                                                    onPressed: () { settingController.currentPageIndex=4;settingController
-                                                        .bottomSheetController
-                                                        .animateTo(4);},
+                                                    onPressed: () =>
+                                                        Get.to(ShopPage(
+                                                      filter: 'user',
+                                                    )),
                                                     child: Row(
                                                         mainAxisAlignment:
                                                             MainAxisAlignment
@@ -803,9 +301,16 @@ class UserProfilePage extends StatelessWidget {
                                                           IntrinsicHeight(
                                                               child: Row(
                                                                   children: [
+                                                                    Icon(
+                                                                      Icons
+                                                                          .person,
+                                                                      color:
+                                                                      colors[600],
+                                                                    ),
+                                                                if (false)
                                                                 Text(
-                                                                  'status'.tr,
-                                                                  style: styleController
+                                                                  'sub'.tr,
+                                                                  style: style
                                                                       .textMediumStyle,
                                                                 ),
                                                                 VerticalDivider(),
@@ -814,478 +319,782 @@ class UserProfilePage extends StatelessWidget {
                                                                       Container(
                                                                     padding: EdgeInsets.symmetric(
                                                                         horizontal:
-                                                                            styleController.cardMargin),
+                                                                            style.cardMargin /
+                                                                                2),
                                                                     decoration: BoxDecoration(
-                                                                        color: styleController
-                                                                            .primaryMaterial[
-                                                                                100]!
-                                                                            .withOpacity(
-                                                                                .2),
                                                                         borderRadius:
-                                                                            BorderRadius.all(Radius.circular(styleController.cardMargin))),
+                                                                            BorderRadius.all(Radius.circular(style.cardMargin))),
                                                                     child: Text(
-                                                                        statusTextLawyer
+                                                                        statusText
                                                                             .value,
-                                                                        style: styleController
+                                                                        style: style
                                                                             .textMediumStyle),
                                                                   ),
-                                                                )
+                                                                ),
                                                               ])),
-                                                          IntrinsicHeight(
-                                                              child: Text(statusTextLawyer
-                                                                          .value ==
-                                                                      'expired'
-                                                                          .tr
-                                                                  ? 'click_for_pay'
-                                                                      .tr
-                                                                  : '')),
+                                                          if (false)
+                                                            IntrinsicHeight(
+                                                                child: Text(statusText
+                                                                            .value ==
+                                                                        'expired'
+                                                                            .tr
+                                                                    ? 'click_for_pay'
+                                                                        .tr
+                                                                    : '')),
                                                         ]),
                                                   ),
-                                                  SizedBox(
-                                                    height: styleController
-                                                        .cardMargin,
-                                                  ),
-                                                  //document image
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceAround,
-                                                    children: [
-                                                      documentWidget,
-                                                      Center(
-                                                        child: Text(
-                                                          'lawyer_document'.tr,
-                                                          style: styleController
-                                                              .textMediumStyle,
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                  //sex
-                                                  MyToggleButtons(
-                                                    type: 'sex',
-                                                    controller:
-                                                        filterController,
-                                                    styleController:
-                                                        styleController,
-                                                    children: [
-                                                      Container(
-                                                          padding: EdgeInsets.all(
-                                                              styleController
-                                                                  .cardMargin),
-                                                          child:
-                                                              Text('man'.tr)),
-                                                      Container(
-                                                          padding: EdgeInsets.all(
-                                                              styleController
-                                                                  .cardMargin),
-                                                          child:
-                                                              Text('woman'.tr))
-                                                    ],
-                                                  ),
-                                                  MyToggleButtons(
-                                                    type: 'lawyer/expert',
-                                                    controller:
-                                                        filterController,
-                                                    styleController:
-                                                        styleController,
-                                                    children: [
-                                                      Container(
-                                                          padding: EdgeInsets.all(
-                                                              styleController
-                                                                  .cardMargin),
+                                                ),
+                                                //wallet
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                      vertical:
+                                                          style.cardMargin / 4),
+                                                  child: TextButton(
+                                                    style: style.buttonStyle(
+                                                      padding: EdgeInsets.all(
+                                                          style.cardMargin * 2),
+                                                      radius: BorderRadius.all(
+                                                        Radius.circular(
+                                                            style.cardMargin),
+                                                      ),
+                                                      backgroundColor:
+                                                          Colors.white,
+                                                    ),
+                                                    onPressed: () => refresh(),
+                                                    child: Row(
+                                                      children: [
+                                                        loading.value
+                                                            ? CupertinoActivityIndicator(
+                                                                color:
+                                                                    colors[600])
+                                                            : Icon(
+                                                                Icons
+                                                                    .account_balance_wallet,
+                                                                color:
+                                                                    colors[600],
+                                                              ),
+                                                        VerticalDivider(),
+                                                        BlinkAnimation(
                                                           child: Text(
-                                                              'lawyer'.tr)),
-                                                      Container(
-                                                          padding: EdgeInsets.all(
-                                                              styleController
-                                                                  .cardMargin),
-                                                          child:
-                                                              Text('expert'.tr))
-                                                    ],
+                                                            " ${user.value.wallet.asPrice()} ${'currency'.tr} ",
+                                                            style: style
+                                                                .textHeaderStyle
+                                                                .copyWith(
+                                                                    color: colors[
+                                                                        600]),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
-                                                  MyTextField(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    margin: EdgeInsets.symmetric(
-                                                        vertical: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                    icon: Icons.person,
-                                                    controller: filterController
-                                                        .textNameCtrl,
-                                                    hintText:
-                                                        "${'name'.tr} ${'family'.tr}",
-                                                    keyboardType:
-                                                        TextInputType.name,
-                                                  ),
-                                                  MyTextField(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    margin: EdgeInsets.symmetric(
-                                                        vertical: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                    icon: Icons.alternate_email,
-                                                    controller: filterController
-                                                        .textEmailCtrl,
-                                                    hintText: "${'email'.tr}",
-                                                    keyboardType: TextInputType
-                                                        .emailAddress,
-                                                  ),
-                                                  //tel
-                                                  MyTextField(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    margin: EdgeInsets.symmetric(
-                                                        vertical: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                    icon: Icons.phone,
-                                                    controller: filterController
-                                                        .textTelCtrl,
-                                                    hintText: "${'tel'.tr}",
-                                                    keyboardType:
-                                                        TextInputType.number,
-                                                  ),
-                                                  //code
-                                                  MyTextField(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    margin: EdgeInsets.symmetric(
-                                                        vertical: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                    icon: Icons
-                                                        .account_box_rounded,
-                                                    controller: filterController
-                                                        .textLawyerCodeCtrl,
-                                                    hintText:
-                                                        "${'lawyer_code'.tr}",
-                                                    keyboardType:
-                                                        TextInputType.text,
-                                                  ),
-                                                  //melli
-                                                  MyTextField(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    margin: EdgeInsets.symmetric(
-                                                        vertical: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                    icon: Icons.credit_card,
-                                                    controller: filterController
-                                                        .textMelliCodeCtrl,
-                                                    hintText:
-                                                        "${'code_melli'.tr}",
-                                                    keyboardType:
-                                                        TextInputType.number,
-                                                  ),
-                                                  MyDropdownButton(
-                                                    onChanged: (idx) {
-                                                      counties.value = settingController
-                                                          .counties
-                                                          .where((e) =>
-                                                              e['province_id'] ==
-                                                              filterController
-                                                                      .filters[
-                                                                  'province'])
-                                                          .toList();
-                                                    },
-                                                    styleController:
-                                                        styleController,
-                                                    controller: userController
-                                                        .filterController,
-                                                    type: 'province',
-                                                    children: settingController
-                                                        .provinces,
-                                                    margin: EdgeInsets.only(
-                                                        left: styleController
-                                                                .cardMargin /
-                                                            4,
-                                                        right: styleController
-                                                            .cardMargin,
-                                                        bottom: styleController
-                                                                .cardMargin /
-                                                            4,
-                                                        top: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                  ),
-                                                  MyDropdownButton(
-                                                    styleController:
-                                                        styleController,
-                                                    controller:
-                                                        filterController,
-                                                    type: 'county',
-                                                    children: counties.value,
-                                                    margin: EdgeInsets.only(
-                                                        left: styleController
-                                                                .cardMargin /
-                                                            4,
-                                                        right: styleController
-                                                            .cardMargin,
-                                                        bottom: styleController
-                                                                .cardMargin /
-                                                            4,
-                                                        top: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                  ),
+                                                ),
 
-                                                  MyDatePicker(
-                                                      beforeData:
-                                                          DateTime.tryParse(user
-                                                              .value
-                                                              .lawyerBirthday),
-                                                      children:
-                                                          settingController
-                                                              .dates,
-                                                      controller: userController
-                                                          .filterController,
-                                                      styleController:
-                                                          styleController,
-                                                      onChanged: (date) {}),
-
-                                                  MyMultiSelect(
-                                                      onChanged: (data) {
-                                                        userController
-                                                                .filterController
-                                                                .filters[
-                                                            'categories'] = data;
-                                                      },
-                                                      children: userController
-                                                              .filterController
-                                                              .filters[
-                                                          'categories'],
-                                                      controller: userController
-                                                          .filterController,
-                                                      styleController:
-                                                          styleController,
-                                                      colors: colors),
-
-                                                  MyTextField(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    margin: EdgeInsets.symmetric(
-                                                        vertical: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                    icon: Icons
-                                                        .home_repair_service_sharp,
-                                                    controller: filterController
-                                                        .textLawyerAddressCtrl,
-                                                    hintText: "${'address'.tr}",
-                                                    keyboardType:
-                                                        TextInputType.text,
-                                                    minLines: 3,
-                                                  ),
-                                                  MyTextField(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    margin: EdgeInsets.symmetric(
-                                                        vertical: styleController
-                                                                .cardMargin /
-                                                            4),
-                                                    icon: Icons
-                                                        .account_box_rounded,
-                                                    controller: filterController
-                                                        .textLawyerBioCtrl,
-                                                    hintText: "${'cv'.tr}",
-                                                    keyboardType:
-                                                        TextInputType.text,
-                                                    minLines: 3,
-                                                  ),
-                                                  TextButton(
-                                                      style: styleController
-                                                          .buttonStyle(
-                                                        padding: EdgeInsets.symmetric(
-                                                            vertical:
-                                                                styleController
-                                                                        .cardMargin *
-                                                                    2),
-                                                        radius: BorderRadius
-                                                            .vertical(
-                                                          bottom: Radius.circular(
-                                                              styleController
-                                                                      .cardBorderRadius /
-                                                                  2),
+                                                if (false)
+                                                  Padding(
+                                                    padding: EdgeInsets.symmetric(
+                                                        vertical:
+                                                            style.cardMargin /
+                                                                4,
+                                                        horizontal:
+                                                            style.cardMargin *
+                                                                2),
+                                                    child: IntrinsicHeight(
+                                                        child: Row(children: [
+                                                      Text(
+                                                        'score'.tr,
+                                                        style: style
+                                                            .textMediumStyle,
+                                                      ),
+                                                      BlinkAnimation(
+                                                        child: Container(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal: style
+                                                                      .cardMargin),
+                                                          decoration: BoxDecoration(
+                                                              borderRadius: BorderRadius
+                                                                  .all(Radius
+                                                                      .circular(
+                                                                          style
+                                                                              .cardMargin))),
+                                                          child: Text(
+                                                              "${user.value.score}",
+                                                              style: style
+                                                                  .textMediumStyle),
                                                         ),
                                                       ),
-                                                      onPressed: () async {
-                                                        edit({},
-                                                            type: 'lawyer');
-                                                      },
-                                                      child: Center(
-                                                        child: Text(
-                                                          "${'edit'.tr}",
-                                                          style: styleController
-                                                              .textMediumLightStyle
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold),
-                                                        ),
-                                                      ))
-                                                ],
-                                              ),
+                                                    ])),
+                                                  ),
+                                                // VerticalDivider(),
+
+                                                //charge wallet
+                                              ],
                                             ),
                                           ),
                                         ),
-                                        //exit
-                                        Container(
-                                          margin: EdgeInsets.symmetric(
-                                            horizontal:
-                                                styleController.cardMargin,
-                                            vertical:
-                                                styleController.cardMargin / 2,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                //fullname username
+                                Wrap(
+                                  runSpacing: style.cardMargin,
+                                  spacing: style.cardMargin,
+                                  runAlignment: WrapAlignment.spaceAround,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: style.primaryMaterial[50]!
+                                              .withOpacity(.3),
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                                style.cardBorderRadius / 2),
+                                          )),
+                                      child: Padding(
+                                        padding:
+                                            EdgeInsets.all(style.cardMargin),
+                                        child: IntrinsicWidth(
+                                          child: IntrinsicHeight(
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  'name'.tr,
+                                                  style: style.textMediumStyle,
+                                                ),
+                                                VerticalDivider(),
+                                                Text(
+                                                  user.value.fullName,
+                                                  style: style.textMediumStyle,
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Expanded(
-                                                child: TextButton.icon(
-                                                    style: styleController
-                                                        .buttonStyle(
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: style.primaryMaterial[50]!
+                                              .withOpacity(.3),
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                                style.cardBorderRadius / 2),
+                                          )),
+                                      child: Padding(
+                                        padding:
+                                            EdgeInsets.all(style.cardMargin),
+                                        child: IntrinsicWidth(
+                                          child: IntrinsicHeight(
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  'username'.tr,
+                                                  style: style.textMediumStyle,
+                                                ),
+                                                VerticalDivider(),
+                                                Text(
+                                                  user.value.username,
+                                                  style: style.textMediumStyle,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Expanded(
+                                    child: ListView(
+                                  children: [
+                                    ListTile(
+                                      title: Text(
+                                        'user_info'.tr,
+                                        style: style.textMediumStyle,
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: style.cardMargin * 4),
+                                      onTap: () => Get.dialog(
+                                          Obx(
+                                            () => Center(
+                                              child: MiniCard(
+                                                scrollable: true,
+                                                loading: loading,
+                                                shrink: true,
+                                                titlePadding: EdgeInsets.all(
+                                                    style.cardMargin),
+                                                title: 'user_info'.tr,
+                                                style: style,
+                                                desc1: '',
+                                                child: Container(
+                                                  child: Padding(
+                                                      padding: EdgeInsets.all(
+                                                          style.cardMargin / 4),
+                                                      child: Column(
+                                                        children: [
+                                                          MyTextField(
                                                             backgroundColor:
-                                                                Colors.red,
-                                                            splashColor: Colors
-                                                                .white
-                                                                .withOpacity(
-                                                                    .5)),
-                                                    onPressed: () => Get.dialog(
-                                                          Center(
-                                                            child: Material(
-                                                              color: Colors
-                                                                  .transparent,
-                                                              child: Card(
-                                                                shape:
-                                                                    RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius.circular(
-                                                                          styleController
-                                                                              .cardBorderRadius),
+                                                                Colors.white,
+                                                            margin: EdgeInsets
+                                                                .symmetric(
+                                                                    vertical:
+                                                                        style.cardMargin /
+                                                                            4),
+                                                            icon: Icons.person,
+                                                            controller:
+                                                                filterController
+                                                                    .textNameCtrl,
+                                                            hintText:
+                                                                "${'name'.tr} ${'family'.tr}",
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .name,
+                                                          ),
+                                                          MyTextField(
+                                                            backgroundColor:
+                                                                Colors.white,
+                                                            margin: EdgeInsets
+                                                                .symmetric(
+                                                                    vertical:
+                                                                        style.cardMargin /
+                                                                            4),
+                                                            icon: Icons
+                                                                .account_box_rounded,
+                                                            controller:
+                                                                filterController
+                                                                    .textUsernameCtrl,
+                                                            hintText:
+                                                                "${'username'.tr}",
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .name,
+                                                          ),
+                                                          IntrinsicHeight(
+                                                            child: Row(
+                                                              children: [
+                                                                Expanded(
+                                                                  child:
+                                                                      MyTextField(
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .white,
+                                                                    margin: EdgeInsets.symmetric(
+                                                                        vertical:
+                                                                            style.cardMargin /
+                                                                                4),
+                                                                    icon: Icons
+                                                                        .alternate_email,
+                                                                    controller:
+                                                                        filterController
+                                                                            .textEmailCtrl,
+                                                                    hintText:
+                                                                        "${'email'.tr}",
+                                                                    keyboardType:
+                                                                        TextInputType
+                                                                            .emailAddress,
+                                                                  ),
                                                                 ),
-                                                                shadowColor:
-                                                                    styleController
-                                                                        .primaryColor
-                                                                        .withOpacity(
-                                                                            .3),
-                                                                color: Colors
-                                                                    .white,
-                                                                // colors[100]?.withOpacity(.8),
-                                                                margin: EdgeInsets.all(
-                                                                    styleController
-                                                                        .cardMargin),
-                                                                child: Padding(
-                                                                  padding: EdgeInsets.all(
-                                                                      styleController
-                                                                          .cardMargin),
-                                                                  child: Column(
+                                                                TextButton(
+                                                                  onPressed: () => !user
+                                                                              .value
+                                                                              .emailVerified ||
+                                                                          user.value.email !=
+                                                                              filterController
+                                                                                  .textEmailCtrl.text
+                                                                      ? edit({},
+                                                                          type:
+                                                                              'email')
+                                                                      : null,
+                                                                  style: style.buttonStyle(
+                                                                      backgroundColor: user
+                                                                              .value
+                                                                              .emailVerified
+                                                                          ? Colors
+                                                                              .green
+                                                                          : Colors
+                                                                              .red),
+                                                                  child: Text(
+                                                                      user.value.emailVerified
+                                                                          ? 'verified'
+                                                                              .tr
+                                                                          : 'unverified'
+                                                                              .tr,
+                                                                      style: style
+                                                                          .textTinyLightStyle),
+                                                                )
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            height: style
+                                                                .cardMargin,
+                                                          ),
+                                                          TextButton(
+                                                              style: style
+                                                                  .buttonStyle(
+                                                                backgroundColor:
+                                                                    style.primaryMaterial[
+                                                                        500],
+                                                                padding: EdgeInsets
+                                                                    .symmetric(
+                                                                        vertical:
+                                                                            style.cardMargin *
+                                                                                2),
+                                                                radius:
+                                                                    BorderRadius
+                                                                        .vertical(
+                                                                  bottom: Radius
+                                                                      .circular(
+                                                                          style.cardBorderRadius /
+                                                                              2),
+                                                                ),
+                                                              ),
+                                                              onPressed:
+                                                                  () async {
+                                                                edit({},
+                                                                    type:
+                                                                        'user');
+                                                              },
+                                                              child: Center(
+                                                                child: Text(
+                                                                  "${'edit'.tr}",
+                                                                  style: style
+                                                                      .textMediumLightStyle
+                                                                      .copyWith(
+                                                                          fontWeight:
+                                                                              FontWeight.bold),
+                                                                ),
+                                                              )),
+                                                        ],
+                                                      )),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          barrierDismissible: true),
+                                    ),
+
+                                    Divider(
+                                        color: style.primaryColor,
+                                        endIndent: style.cardMargin * 3,
+                                        indent: style.cardMargin * 3),
+
+                                    ListTile(
+                                      title: Text(
+                                        'wallet_charge'.tr,
+                                        style: style.textMediumStyle,
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: style.cardMargin * 4),
+                                      onTap: () => Get.dialog(
+                                          ShopPage(
+                                            filter: 'charge',
+                                          ),
+                                          barrierDismissible: true),
+                                    ),
+                                    Divider(
+                                        color: style.primaryColor,
+                                        endIndent: style.cardMargin * 3,
+                                        indent: style.cardMargin * 3),
+
+                                    ListTile(
+                                      title: Text(
+                                        'buy_plan'.tr,
+                                        style: style.textMediumStyle,
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: style.cardMargin * 4),
+                                      onTap: () => Get.dialog(
+                                          ShopPage(
+                                            filter: 'all',
+                                          ),
+                                          barrierDismissible: true),
+                                    ),
+                                    Divider(
+                                        color: style.primaryColor,
+                                        endIndent: style.cardMargin * 3,
+                                        indent: style.cardMargin * 3),
+                                    ListTile(
+                                      title: Text(
+                                        'transactions_history'.tr,
+                                        style: style.textMediumStyle,
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: style.cardMargin * 4),
+                                      onTap: () => Get.dialog(
+                                          TransactionsPage(),
+                                          barrierDismissible: true),
+                                    ),
+                                    Divider(
+                                        color: style.primaryColor,
+                                        endIndent: style.cardMargin * 3,
+                                        indent: style.cardMargin * 3),
+                                    ListTile(
+                                      title: Text(
+                                        'telegram_connect'.tr,
+                                        style: style.textMediumStyle,
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: style.cardMargin * 4),
+                                      onTap: () => Get.dialog(
+                                          Center(
+                                            child: MiniCard(
+                                              scrollable: true,
+                                              loading: loading,
+                                              shrink: true,
+                                              titlePadding: EdgeInsets.all(
+                                                  style.cardMargin),
+                                              title: 'telegram_connect'.tr,
+                                              style: style,
+                                              desc1: '',
+                                              child: Container(
+                                                child: Padding(
+                                                    padding: EdgeInsets.all(
+                                                        style.cardMargin / 2),
+                                                    child: Column(
+                                                      children: [
+                                                        Padding(
+                                                          padding: EdgeInsets
+                                                              .all(style
+                                                                  .cardMargin),
+                                                          child: Text(
+                                                            'open_telegram_and_start'
+                                                                .tr,
+                                                            style: style
+                                                                .textMediumStyle,
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          height:
+                                                              style.cardMargin,
+                                                        ),
+                                                        TextButton(
+                                                            style: style
+                                                                .buttonStyle(
+                                                              backgroundColor:
+                                                                  style.primaryMaterial[
+                                                                      500],
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      vertical:
+                                                                          style.cardMargin *
+                                                                              2),
+                                                              radius:
+                                                                  BorderRadius
+                                                                      .vertical(
+                                                                bottom: Radius
+                                                                    .circular(
+                                                                        style.cardBorderRadius /
+                                                                            2),
+                                                              ),
+                                                            ),
+                                                            onPressed: () =>
+                                                                userController
+                                                                    .getTelegramConnectLink(),
+                                                            child: Center(
+                                                              child: Text(
+                                                                "${'telegram_connect'.tr}",
+                                                                style: style
+                                                                    .textMediumLightStyle
+                                                                    .copyWith(
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                              ),
+                                                            )),
+                                                      ],
+                                                    )),
+                                              ),
+                                            ),
+                                          ),
+                                          barrierDismissible: true),
+                                    ),
+                                    Divider(
+                                        color: style.primaryColor,
+                                        endIndent: style.cardMargin * 3,
+                                        indent: style.cardMargin * 3),
+
+                                    //change password
+                                    ListTile(
+                                      title: Text(
+                                        'password_change'.tr,
+                                        style: style.textMediumStyle,
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: style.cardMargin * 4),
+                                      onTap: () => Get.dialog(
+                                          Center(
+                                            child: MiniCard(
+                                              scrollable: true,
+                                              loading: loading,
+                                              shrink: true,
+                                              titlePadding: EdgeInsets.all(
+                                                  style.cardMargin),
+                                              title: 'password_change'.tr,
+                                              style: style,
+                                              desc1: '',
+                                              child: Container(
+                                                child: Padding(
+                                                    padding: EdgeInsets.all(
+                                                        style.cardMargin / 2),
+                                                    child: Column(
+                                                      children: [
+                                                        if (false)
+                                                          MyTextField(
+                                                            backgroundColor:
+                                                                Colors.white,
+                                                            margin: EdgeInsets
+                                                                .symmetric(
+                                                                    vertical:
+                                                                        style.cardMargin /
+                                                                            4),
+                                                            icon:
+                                                                Icons.password,
+                                                            controller:
+                                                                filterController
+                                                                    .textPaswOldCtrl,
+                                                            hintText:
+                                                                'password_old'
+                                                                    .tr,
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .text,
+                                                            obscure: true,
+                                                          ),
+                                                        MyTextField(
+                                                          backgroundColor:
+                                                              Colors.white,
+                                                          margin: EdgeInsets
+                                                              .symmetric(
+                                                                  vertical:
+                                                                      style.cardMargin /
+                                                                          4),
+                                                          icon: Icons
+                                                              .password_outlined,
+                                                          controller:
+                                                              filterController
+                                                                  .textPaswCtrl,
+                                                          hintText:
+                                                              "${'password_new'.tr}",
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .text,
+                                                          obscure: true,
+                                                        ),
+                                                        MyTextField(
+                                                          backgroundColor:
+                                                              Colors.white,
+                                                          margin: EdgeInsets
+                                                              .symmetric(
+                                                                  vertical:
+                                                                      style.cardMargin /
+                                                                          4),
+                                                          icon: Icons
+                                                              .password_outlined,
+                                                          controller:
+                                                              filterController
+                                                                  .textPaswConfCtrl,
+                                                          hintText:
+                                                              "${'password_rep'.tr}",
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .text,
+                                                          obscure: true,
+                                                        ),
+                                                        SizedBox(
+                                                          height:
+                                                              style.cardMargin,
+                                                        ),
+                                                        TextButton(
+                                                            style: style
+                                                                .buttonStyle(
+                                                              backgroundColor:
+                                                                  style.primaryMaterial[
+                                                                      500],
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      vertical:
+                                                                          style.cardMargin *
+                                                                              2),
+                                                              radius:
+                                                                  BorderRadius
+                                                                      .vertical(
+                                                                bottom: Radius
+                                                                    .circular(
+                                                                        style.cardBorderRadius /
+                                                                            2),
+                                                              ),
+                                                            ),
+                                                            onPressed:
+                                                                () async {
+                                                              edit({},
+                                                                  type:
+                                                                      'password');
+                                                            },
+                                                            child: Center(
+                                                              child: Text(
+                                                                "${'edit'.tr}",
+                                                                style: style
+                                                                    .textMediumLightStyle
+                                                                    .copyWith(
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                              ),
+                                                            )),
+                                                      ],
+                                                    )),
+                                              ),
+                                            ),
+                                          ),
+                                          barrierDismissible: true),
+                                    ),
+                                    //exit
+                                    Container(
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal: style.cardMargin * 3,
+                                        vertical: style.cardMargin * 2,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: TextButton.icon(
+                                                style: style.buttonStyle(
+                                                    backgroundColor: Colors.red
+                                                        .withOpacity(.8),
+                                                    splashColor: Colors.white
+                                                        .withOpacity(.5)),
+                                                onPressed: () => Get.dialog(
+                                                      Center(
+                                                        child: Material(
+                                                          color: Colors
+                                                              .transparent,
+                                                          child: Card(
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          style
+                                                                              .cardBorderRadius),
+                                                            ),
+                                                            shadowColor: style
+                                                                .primaryColor
+                                                                .withOpacity(
+                                                                    .3),
+                                                            color: Colors.white,
+                                                            // colors[100]?.withOpacity(.8),
+                                                            margin: EdgeInsets
+                                                                .all(style
+                                                                    .cardMargin),
+                                                            child: Padding(
+                                                              padding: EdgeInsets
+                                                                  .all(style
+                                                                      .cardMargin),
+                                                              child: Column(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .stretch,
+                                                                children: [
+                                                                  Container(
+                                                                    padding: EdgeInsets.all(
+                                                                        style.cardMargin /
+                                                                            2),
+                                                                    child: Text(
+                                                                      'sure_to_exit?'
+                                                                          .tr,
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .right,
+                                                                      style: style
+                                                                          .textBigStyle,
+                                                                    ),
+                                                                  ),
+                                                                  Row(
                                                                     mainAxisSize:
                                                                         MainAxisSize
                                                                             .min,
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .start,
                                                                     crossAxisAlignment:
                                                                         CrossAxisAlignment
-                                                                            .stretch,
+                                                                            .center,
                                                                     children: [
-                                                                      Container(
-                                                                        padding:
-                                                                            EdgeInsets.all(styleController.cardMargin /
-                                                                                2),
-                                                                        child:
-                                                                            Text(
-                                                                          'sure_to_exit?'
-                                                                              .tr,
-                                                                          textAlign:
-                                                                              TextAlign.right,
-                                                                          style:
-                                                                              styleController.textBigStyle,
-                                                                        ),
+                                                                      Expanded(
+                                                                        child: TextButton(
+                                                                            style: ButtonStyle(
+                                                                                overlayColor: MaterialStateProperty.resolveWith(
+                                                                                  (states) {
+                                                                                    return states.contains(MaterialState.pressed) ? style.secondaryColor : null;
+                                                                                  },
+                                                                                ),
+                                                                                backgroundColor: MaterialStateProperty.all(colors[50]),
+                                                                                shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                                                                                  borderRadius: BorderRadius.horizontal(
+                                                                                    right: Radius.circular(style.cardBorderRadius / 2),
+                                                                                    left: Radius.circular(style.cardBorderRadius / 4),
+                                                                                  ),
+                                                                                ))),
+                                                                            onPressed: () => Get.back(),
+                                                                            child: Text(
+                                                                              'cancel'.tr,
+                                                                              style: style.textMediumStyle,
+                                                                            )),
                                                                       ),
-                                                                      Row(
-                                                                        mainAxisSize:
-                                                                            MainAxisSize.min,
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.start,
-                                                                        crossAxisAlignment:
-                                                                            CrossAxisAlignment.center,
-                                                                        children: [
-                                                                          Expanded(
-                                                                            child: TextButton(
-                                                                                style: ButtonStyle(
-                                                                                    overlayColor: MaterialStateProperty.resolveWith(
-                                                                                      (states) {
-                                                                                        return states.contains(MaterialState.pressed) ? styleController.secondaryColor : null;
-                                                                                      },
-                                                                                    ),
-                                                                                    backgroundColor: MaterialStateProperty.all(colors[50]),
-                                                                                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                                                                                      borderRadius: BorderRadius.horizontal(
-                                                                                        right: Radius.circular(styleController.cardBorderRadius / 2),
-                                                                                        left: Radius.circular(styleController.cardBorderRadius / 4),
-                                                                                      ),
-                                                                                    ))),
-                                                                                onPressed: () => Get.back(),
-                                                                                child: Text(
-                                                                                  'cancel'.tr,
-                                                                                  style: styleController.textMediumStyle,
-                                                                                )),
-                                                                          ),
-                                                                          VerticalDivider(
-                                                                            indent:
-                                                                                styleController.cardMargin / 2,
-                                                                            endIndent:
-                                                                                styleController.cardMargin / 2,
-                                                                          ),
-                                                                          Expanded(
-                                                                            child: TextButton(
-                                                                                style: styleController.buttonStyle(backgroundColor: Colors.red, splashColor: Colors.white.withOpacity(.5)),
-                                                                                onPressed: () {
-                                                                                  Get.back();
-                                                                                  userController.logout();
-                                                                                },
-                                                                                child: Text(
-                                                                                  'verify'.tr,
-                                                                                  style: styleController.textMediumLightStyle,
-                                                                                )),
-                                                                          ),
-                                                                        ],
+                                                                      VerticalDivider(
+                                                                        indent:
+                                                                            style.cardMargin /
+                                                                                2,
+                                                                        endIndent:
+                                                                            style.cardMargin /
+                                                                                2,
+                                                                      ),
+                                                                      Expanded(
+                                                                        child: TextButton(
+                                                                            style: style.buttonStyle(backgroundColor: Colors.red, splashColor: Colors.white.withOpacity(.5)),
+                                                                            onPressed: () {
+                                                                              Get.back();
+                                                                              userController.logout();
+                                                                            },
+                                                                            child: Text(
+                                                                              'verify'.tr,
+                                                                              style: style.textMediumLightStyle,
+                                                                            )),
                                                                       ),
                                                                     ],
                                                                   ),
-                                                                ),
+                                                                ],
                                                               ),
                                                             ),
                                                           ),
-                                                          barrierDismissible:
-                                                              true,
                                                         ),
-                                                    icon: Icon(
-                                                      Icons.exit_to_app,
-                                                      color: Colors.white,
+                                                      ),
+                                                      barrierDismissible: true,
                                                     ),
-                                                    label: Text(
-                                                      'exit'.tr,
-                                                      style: styleController
-                                                          .textMediumLightStyle,
-                                                    )),
-                                              ),
-                                            ],
+                                                icon: Icon(
+                                                  Icons.exit_to_app,
+                                                  color: Colors.white,
+                                                ),
+                                                label: Text(
+                                                  'exit'.tr,
+                                                  style: style
+                                                      .textMediumLightStyle,
+                                                )),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: styleController
-                                                  .bottomNavigationBarHeight /
-                                              2,
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
+                                  ],
+                                )),
+                                SizedBox(
+                                  height: style.bottomNavigationBarHeight / 2,
                                 ),
                               ],
                             ),
@@ -1298,19 +1107,17 @@ class UserProfilePage extends StatelessWidget {
                   Visibility(
                       visible: loading.value,
                       child: Container(
-                        color: styleController.primaryColor.withOpacity(.7),
+                        color: style.primaryColor.withOpacity(.7),
                         child: Center(
                           child: ShakeWidget(
                             child: Card(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.all(
-                                      Radius.circular(
-                                          styleController.cardMargin))),
+                                      Radius.circular(style.cardMargin))),
                               child: Padding(
-                                padding:
-                                    EdgeInsets.all(styleController.cardMargin),
+                                padding: EdgeInsets.all(style.cardMargin),
                                 child: CircularProgressIndicator(
-                                    color: styleController.primaryColor),
+                                    color: style.primaryColor),
                               ),
                             ),
                           ),
@@ -1342,55 +1149,44 @@ class UserProfilePage extends StatelessWidget {
           'password_rep': filterController.textPaswConfCtrl.text,
         };
         break;
-      case 'lawyer':
-        params = {
-          'fullname': filterController.textNameCtrl.text,
-          'email': filterController.textEmailCtrl.text,
-          'tel': filterController.textTelCtrl.text,
-          'address': filterController.textLawyerAddressCtrl.text,
-          'lawyer_number': filterController.textLawyerCodeCtrl.text,
-          'lawyer_melicard': filterController.textMelliCodeCtrl.text,
-          'lawyer_birthday': (filterController.filters['year'] != null &&
-                  filterController.filters['month'] != null &&
-                  filterController.filters['day'] != null)
-              ? "${filterController.filters['year'].padLeft(4, '0')}-${filterController.filters['month'].padLeft(2, '0')}-${filterController.filters['day'].padLeft(2, '0')}"
-              : null,
-          'cv': filterController.textLawyerBioCtrl.text,
-          'city_id': filterController.filters['county'],
-          'lawyer_sex': filterController.filters['sex'] ? 1 : 0,
-          'is_lawyer': !filterController.filters['lawyer/expert'] ? 1 : 0,
-          'is_expert': filterController.filters['lawyer/expert'] ? 1 : 0,
-          'categories': filterController.filters['categories']
-              .where((e) => e['selected'] == true)
-              .map((e) {
-                return e['id'];
-              })
-              .toList()
-              .join(','),
-          'document': params['document'] ?? ''
-        };
 
-        if (params['document'] == '' || params['document'] == null)
-          params.remove('document');
-
-        break;
       case 'user':
         params = {
           'fullname': filterController.textNameCtrl.text,
+          'username': filterController.textUsernameCtrl.text,
           'email': filterController.textEmailCtrl.text,
           'avatar': params['avatar'] ?? ''
         };
-        if (params['avatar'] == '' || params['avatar'] == null)
-          params.remove('avatar');
+
+        break;
+      case 'email':
+        params = {
+          'email': filterController.textEmailCtrl.text,
+        };
+
+        break;
+      case 'avatar':
+        params = {'avatar': params['avatar']};
+        // if (params['avatar'] == '' || params['avatar'] == null)
+        //   params.remove('avatar');
         break;
     }
-    var res = await userController.edit(params: params, type: type);
-    if (res && params['password_old'] != '') {
-      filterController.textPaswOldCtrl.clear();
-      filterController.textPaswCtrl.clear();
-      filterController.textPaswConfCtrl.clear();
+    Map res = await userController.edit(params: params, type: type);
+    if (res['status'] == 'success') {
+      if (params['password_new'] != '') {
+        filterController.textPaswOldCtrl.clear();
+        filterController.textPaswCtrl.clear();
+        filterController.textPaswConfCtrl.clear();
+      }
+      if (res['email_verified'] != null) {
+        user.value.emailVerified = res['email_verified'];
+        user.update((val) {
+          // user.value = val!;
+        });
+      }
     }
     loading.value = false;
+    // if (res) Future.delayed(Duration(seconds: 6),()=>Get.back());
   }
 
   isEditable() {

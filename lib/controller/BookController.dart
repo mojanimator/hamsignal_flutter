@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dabel_adl/controller/APIProvider.dart';
-import 'package:dabel_adl/controller/BookFilterController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/Book.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/BookFilterController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/Book.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -70,7 +70,7 @@ class BookController extends GetxController with StateMixin<List<Book>> {
     if (doc != null)
       return "${Variables.LINK_STORAGE}/${doc['type_id']}/${doc['id']}.jpg";
     else
-      return Variables.NOIMAGE_LINK;
+      return Variables.NO_IMAGE_LINK;
   }
 
   String getProvince(pId) {
@@ -190,7 +190,7 @@ class BookController extends GetxController with StateMixin<List<Book>> {
           msg: parsedJson['message'],
           status: parsedJson['type'] == 'success' ? 'success' : 'danger');
     if (parsedJson['wallet'] != null) {
-      userController.user?.wallet = parsedJson['wallet'];
+      userController.user?.score = parsedJson['wallet'];
       return true;
     }
     return false;

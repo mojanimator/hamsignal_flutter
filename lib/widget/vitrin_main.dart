@@ -1,28 +1,27 @@
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/widget/shakeanimation.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/page/newses.dart';
+import 'package:hamsignal/widget/shakeanimation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../page/Contents.dart';
-
 class MainVitrin extends StatelessWidget {
-  late Style styleController;
+  late Style style;
   late SettingController settingController;
   late MaterialColor colors;
   late EdgeInsets margin;
   late List<dynamic> data;
 
   MainVitrin({EdgeInsets? margin, MaterialColor? colors}) {
-    styleController = Get.find<Style>();
+    style = Get.find<Style>();
     settingController = Get.find<SettingController>();
     this.margin = margin ??
         EdgeInsets.symmetric(
-          vertical: styleController.cardMargin / 8,
-          horizontal: styleController.cardMargin,
+          vertical: style.cardMargin / 8,
+          horizontal: style.cardMargin,
         );
-    this.colors = colors ?? styleController.primaryMaterial;
+    this.colors = colors ?? style.primaryMaterial;
     data = [
       {'title': 'قوانین'},
       {'title': 'دادخواست/لایحه'},
@@ -41,7 +40,7 @@ class MainVitrin extends StatelessWidget {
     //           transition: Transition.circularReveal,
     //           duration: Duration(milliseconds: 500)));
     //   //   var data=await LatestController().find({'id':'20','type':'cl'});
-    //   // Get.to(ClubDetails(data: data, colors: styleController.cardClubColors));
+    //   // Get.to(ClubDetails(data: data, colors: style.cardClubColors));
     // });
   }
 
@@ -50,14 +49,14 @@ class MainVitrin extends StatelessWidget {
     return ShakeWidget(
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(styleController.cardBorderRadius),
+          borderRadius: BorderRadius.circular(style.cardBorderRadius),
         ),
-        shadowColor: styleController.primaryColor.withOpacity(.3),
-        color: styleController.theme3,
+        shadowColor: style.primaryColor.withOpacity(.3),
+        color: style.theme3,
         elevation: 20,
         margin: margin,
         child: Padding(
-          padding: EdgeInsets.all(styleController.cardMargin),
+          padding: EdgeInsets.all(style.cardMargin),
           child: Column(
             children: [
               IntrinsicHeight(
@@ -83,8 +82,8 @@ class MainVitrin extends StatelessWidget {
                           children: [
                             Image.asset(
                               'assets/images/blog.png',
-                              color: styleController.primaryColor,
-                              height: styleController.iconHeight,
+                              color: style.primaryColor,
+                              height: style.iconHeight,
                             ),
                             Text('blogs'.tr),
                           ],
@@ -92,7 +91,7 @@ class MainVitrin extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                         ),
                         onPressed: () {
-                          Get.to(ContentsPage());
+                          Get.to(NewsPage());
                         },
                       ),
                       const VerticalDivider(
@@ -104,8 +103,8 @@ class MainVitrin extends StatelessWidget {
                           children: [
                             Image.asset(
                               'assets/images/conductor.png',
-                              color: styleController.primaryColor,
-                              height: styleController.iconHeight,
+                              color: style.primaryColor,
+                              height: style.iconHeight,
                             ),
                             Text('conductor'.tr),
                           ],

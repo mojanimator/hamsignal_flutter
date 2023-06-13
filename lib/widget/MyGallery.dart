@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/helper/variables.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/variables.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,7 +23,7 @@ class MyGallery extends StatelessWidget {
   int limit;
 
   double? ratio = 1.0;
-  Style styleController;
+  Style style;
   final String infoText;
   final String mode;
   final String? title;
@@ -42,7 +42,7 @@ class MyGallery extends StatelessWidget {
     required this.infoText,
     this.current = 0,
     this.ratio,
-    required this.styleController,
+    required this.style,
     String this.mode = 'view',
     String? this.title,
     int this.limit = 1,
@@ -83,7 +83,7 @@ class MyGallery extends StatelessWidget {
                 // swiperController.move(index);
               },
               // itemWidth: Get.width -
-              //     ((styleController.cardMargin * 2.0).round()),
+              //     ((style.cardMargin * 2.0).round()),
               viewportFraction: 1,
               layout: SwiperLayout.DEFAULT,
               control: SwiperControl(color: Colors.transparent),
@@ -181,11 +181,11 @@ class MyGallery extends StatelessWidget {
                                               borderRadius:
                                                   BorderRadius.vertical(
                                                 top: Radius.circular(
-                                                  styleController
+                                                  style
                                                       .cardBorderRadius,
                                                 ),
                                                 bottom: Radius.circular(
-                                                  styleController
+                                                  style
                                                           .cardBorderRadius /
                                                       4,
                                                 ),
@@ -230,20 +230,20 @@ class MyGallery extends StatelessWidget {
                                                                       topLeft:
                                                                           Radius
                                                                               .circular(
-                                                                        styleController
+                                                                        style
                                                                             .cardBorderRadius,
                                                                       ),
                                                                       topRight:
                                                                           Radius
                                                                               .circular(
-                                                                        styleController
+                                                                        style
                                                                             .cardBorderRadius,
                                                                       ),
                                                                       bottomRight:
-                                                                          Radius.circular(styleController.cardBorderRadius /
+                                                                          Radius.circular(style.cardBorderRadius /
                                                                               4),
                                                                       bottomLeft:
-                                                                          Radius.circular(styleController.cardBorderRadius /
+                                                                          Radius.circular(style.cardBorderRadius /
                                                                               4),
                                                                     ),
                                                                     image: DecorationImage(
@@ -270,11 +270,11 @@ class MyGallery extends StatelessWidget {
                                                                       ClipRRect(
                                                                 borderRadius: BorderRadius.all(
                                                                     Radius.circular(
-                                                                        styleController
+                                                                        style
                                                                             .cardBorderRadius)),
                                                                 child: Image.network(
                                                                     Variables
-                                                                        .NOIMAGE_LINK),
+                                                                        .NO_IMAGE_LINK),
                                                               ),
                                                             )
                                                           : Container(
@@ -285,21 +285,21 @@ class MyGallery extends StatelessWidget {
                                                                         .only(
                                                                   topLeft: Radius
                                                                       .circular(
-                                                                    styleController
+                                                                    style
                                                                         .cardBorderRadius,
                                                                   ),
                                                                   topRight: Radius
                                                                       .circular(
-                                                                    styleController
+                                                                    style
                                                                         .cardBorderRadius,
                                                                   ),
                                                                   bottomRight: Radius
                                                                       .circular(
-                                                                          styleController.cardBorderRadius /
+                                                                          style.cardBorderRadius /
                                                                               4),
                                                                   bottomLeft: Radius
                                                                       .circular(
-                                                                          styleController.cardBorderRadius /
+                                                                          style.cardBorderRadius /
                                                                               4),
                                                                 ),
                                                                 image: DecorationImage(
@@ -320,28 +320,28 @@ class MyGallery extends StatelessWidget {
                                                             ),
                                                       elevation: 10,
                                                       shadowColor:
-                                                          styleController
+                                                          style
                                                               .primaryColor
                                                               .withOpacity(.5),
                                                       shape:
                                                           RoundedRectangleBorder(
                                                         borderRadius:
                                                             BorderRadius.circular(
-                                                                styleController
+                                                                style
                                                                     .cardBorderRadius),
                                                       ),
                                                     ),
                                                     Positioned(
                                                       left: 0,
                                                       right: 0,
-                                                      bottom: styleController
+                                                      bottom: style
                                                               .cardMargin *
                                                           2,
                                                       child: Container(
                                                         color: colors[500]!
                                                             .withOpacity(.5),
                                                         padding: EdgeInsets.all(
-                                                            styleController
+                                                            style
                                                                     .cardMargin /
                                                                 2),
                                                         child: Row(
@@ -428,11 +428,11 @@ class MyGallery extends StatelessWidget {
                                                                               side: BorderSide(color: colors[50]!, width: 1)),
                                                                         ),
                                                                         backgroundColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.pressed)
-                                                                            ? styleController.secondaryColor
+                                                                            ? style.secondaryColor
                                                                             : Colors.transparent)),
                                                                 child: Padding(
                                                                   padding: EdgeInsets.all(
-                                                                      styleController
+                                                                      style
                                                                               .cardMargin /
                                                                           2),
                                                                   child: Icon(
@@ -450,7 +450,7 @@ class MyGallery extends StatelessWidget {
                                                                         .value !=
                                                                     '')
                                                               SizedBox(
-                                                                width: styleController
+                                                                width: style
                                                                         .cardMargin /
                                                                     2,
                                                               ),
@@ -472,29 +472,29 @@ class MyGallery extends StatelessWidget {
                                                                               Card(
                                                                             child:
                                                                                 Padding(
-                                                                              padding: EdgeInsets.all(styleController.cardMargin),
+                                                                              padding: EdgeInsets.all(style.cardMargin),
                                                                               child: Column(
                                                                                 mainAxisSize: MainAxisSize.min,
                                                                                 children: [
                                                                                   Text(
                                                                                     'delete_image?'.tr,
-                                                                                    style: styleController.textMediumStyle.copyWith(color: Colors.red),
+                                                                                    style: style.textMediumStyle.copyWith(color: Colors.red),
                                                                                   ),
                                                                                   Row(
                                                                                     children: [
                                                                                       Expanded(
                                                                                         child: TextButton(
                                                                                           style: ButtonStyle(
-                                                                                              padding: MaterialStateProperty.all(EdgeInsets.all(styleController.cardMargin / 2)),
+                                                                                              padding: MaterialStateProperty.all(EdgeInsets.all(style.cardMargin / 2)),
                                                                                               overlayColor: MaterialStateProperty.resolveWith(
                                                                                                 (states) {
-                                                                                                  return states.contains(MaterialState.pressed) ? styleController.secondaryColor : null;
+                                                                                                  return states.contains(MaterialState.pressed) ? style.secondaryColor : null;
                                                                                                 },
                                                                                               ),
                                                                                               backgroundColor: MaterialStateProperty.all(Colors.red),
                                                                                               shape: MaterialStateProperty.all(RoundedRectangleBorder(
                                                                                                 borderRadius: BorderRadius.all(
-                                                                                                  Radius.circular(styleController.cardBorderRadius / 2),
+                                                                                                  Radius.circular(style.cardBorderRadius / 2),
                                                                                                 ),
                                                                                               ))),
                                                                                           onPressed: () async {
@@ -529,11 +529,11 @@ class MyGallery extends StatelessWidget {
                                                                               side: BorderSide(color: colors[50]!, width: 1)),
                                                                         ),
                                                                         backgroundColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.pressed)
-                                                                            ? styleController.secondaryColor
+                                                                            ? style.secondaryColor
                                                                             : Colors.transparent)),
                                                                 child: Padding(
                                                                   padding: EdgeInsets.all(
-                                                                      styleController
+                                                                      style
                                                                               .cardMargin /
                                                                           2),
                                                                   child: Icon(
@@ -565,11 +565,11 @@ class MyGallery extends StatelessWidget {
                                                                               side: BorderSide(color: colors[50]!, width: 1)),
                                                                         ),
                                                                         backgroundColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.pressed)
-                                                                            ? styleController.secondaryColor
+                                                                            ? style.secondaryColor
                                                                             : Colors.transparent)),
                                                                 child: Padding(
                                                                   padding: EdgeInsets.all(
-                                                                      styleController
+                                                                      style
                                                                               .cardMargin /
                                                                           2),
                                                                   child: Icon(
@@ -581,7 +581,7 @@ class MyGallery extends StatelessWidget {
                                                                 ),
                                                               ),
                                                             SizedBox(
-                                                              width: styleController
+                                                              width: style
                                                                       .cardMargin /
                                                                   2,
                                                             ),
@@ -600,13 +600,13 @@ class MyGallery extends StatelessWidget {
                                                                       ),
                                                                       backgroundColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState
                                                                               .pressed)
-                                                                          ? styleController
+                                                                          ? style
                                                                               .secondaryColor
                                                                           : Colors
                                                                               .transparent)),
                                                               child: Padding(
                                                                 padding: EdgeInsets.all(
-                                                                    styleController
+                                                                    style
                                                                             .cardMargin /
                                                                         2),
                                                                 child: Icon(
@@ -625,11 +625,11 @@ class MyGallery extends StatelessWidget {
                                               ),
                                               Padding(
                                                 padding: EdgeInsets.symmetric(
-                                                    horizontal: styleController
+                                                    horizontal: style
                                                         .cardMargin),
                                                 child: Text(
                                                   "${index + 1}",
-                                                  style: styleController
+                                                  style: style
                                                       .textMediumStyle
                                                       .copyWith(
                                                           color: colors[900]),
@@ -658,10 +658,10 @@ class MyGallery extends StatelessWidget {
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.vertical(
                                 top: Radius.circular(
-                                  styleController.cardBorderRadius,
+                                  style.cardBorderRadius,
                                 ),
                                 bottom: Radius.circular(
-                                  styleController.cardBorderRadius / 4,
+                                  style.cardBorderRadius / 4,
                                 ),
                               ),
                               gradient: LinearGradient(
@@ -692,19 +692,19 @@ class MyGallery extends StatelessWidget {
                                                     borderRadius:
                                                         BorderRadius.only(
                                                       topLeft: Radius.circular(
-                                                        styleController
+                                                        style
                                                             .cardBorderRadius,
                                                       ),
                                                       topRight: Radius.circular(
-                                                        styleController
+                                                        style
                                                             .cardBorderRadius,
                                                       ),
                                                       bottomRight: Radius.circular(
-                                                          styleController
+                                                          style
                                                                   .cardBorderRadius /
                                                               4),
                                                       bottomLeft: Radius.circular(
-                                                          styleController
+                                                          style
                                                                   .cardBorderRadius /
                                                               4),
                                                     ),
@@ -731,29 +731,29 @@ class MyGallery extends StatelessWidget {
                                                       ClipRRect(
                                                 borderRadius: BorderRadius.all(
                                                     Radius.circular(
-                                                        styleController
+                                                        style
                                                             .cardBorderRadius)),
                                                 child: Image.network(
-                                                    Variables.NOIMAGE_LINK),
+                                                    Variables.NO_IMAGE_LINK),
                                               ),
                                             )
                                           : Container(
                                               decoration: BoxDecoration(
                                                 borderRadius: BorderRadius.only(
                                                   topLeft: Radius.circular(
-                                                    styleController
+                                                    style
                                                         .cardBorderRadius,
                                                   ),
                                                   topRight: Radius.circular(
-                                                    styleController
+                                                    style
                                                         .cardBorderRadius,
                                                   ),
                                                   bottomRight: Radius.circular(
-                                                      styleController
+                                                      style
                                                               .cardBorderRadius /
                                                           4),
                                                   bottomLeft: Radius.circular(
-                                                      styleController
+                                                      style
                                                               .cardBorderRadius /
                                                           4),
                                                 ),
@@ -773,16 +773,16 @@ class MyGallery extends StatelessWidget {
                                               ),
                                             ),
                                       elevation: 10,
-                                      shadowColor: styleController.primaryColor
+                                      shadowColor: style.primaryColor
                                           .withOpacity(.5),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
-                                            styleController.cardBorderRadius),
+                                            style.cardBorderRadius),
                                       ),
                                     ),
                                     Positioned.fill(
-                                      bottom: styleController.cardMargin,
-                                      left: styleController.cardMargin,
+                                      bottom: style.cardMargin,
+                                      left: style.cardMargin,
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -795,7 +795,7 @@ class MyGallery extends StatelessWidget {
                                               items[index].value == '')
                                             Text(
                                               title!,
-                                              style: styleController
+                                              style: style
                                                   .textMediumStyle
                                                   .copyWith(
                                                       color: colors[500],
@@ -810,7 +810,7 @@ class MyGallery extends StatelessWidget {
                               ),
                               Padding(
                                 padding: EdgeInsets.all(
-                                    styleController.cardMargin / 2),
+                                    style.cardMargin / 2),
                               ),
                             ],
                           ),

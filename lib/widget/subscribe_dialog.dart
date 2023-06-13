@@ -1,9 +1,10 @@
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/helper/IAPPurchase.dart';
-import 'package:dabel_adl/helper/helpers.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/widget/mini_card.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/IAPPurchase.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/widget/mini_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,7 +14,8 @@ class SubscribeDialog extends StatelessWidget {
   late RxMap<String, dynamic> discounts;
   late Map<String, dynamic> initDiscounts;
   final SettingController settingController = Get.find<SettingController>();
-  final Style styleController = Get.find<Style>();
+  final UserController userController = Get.find<UserController>();
+  final Style style = Get.find<Style>();
   MaterialColor colors;
   RxString renewMonth = RxString('1');
   RxString coupon = RxString('');
@@ -46,7 +48,7 @@ class SubscribeDialog extends StatelessWidget {
             title: "subscribe_type".tr,
             colors: colors,
             desc1: "",
-            styleController: styleController,
+            style: style,
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -114,19 +116,18 @@ class SubscribeDialog extends StatelessWidget {
                             flex: 3,
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                  horizontal: styleController.cardMargin),
+                                  horizontal: style.cardMargin),
                               margin: EdgeInsets.symmetric(
-                                  vertical: styleController.cardMargin / 4),
+                                  vertical: style.cardMargin / 4),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 //background color of dropdown button
                                 border: Border.all(
-                                    color: styleController.primaryColor,
-                                    width: 1),
+                                    color: style.primaryColor, width: 1),
                                 //border of dropdown button
                                 borderRadius: BorderRadius.horizontal(
                                   right: Radius.circular(
-                                      styleController.cardBorderRadius / 2),
+                                      style.cardBorderRadius / 2),
                                   left: Radius.circular(0),
                                 ), //border raiuds of dropdown button
                               ),
@@ -134,7 +135,7 @@ class SubscribeDialog extends StatelessWidget {
                                 autofocus: true,
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
-                                  color: styleController.primaryColor,
+                                  color: style.primaryColor,
                                 ),
                                 onChanged: (str) {
                                   coupon.value = str;
@@ -152,14 +153,13 @@ class SubscribeDialog extends StatelessWidget {
                           child: TextButton(
                               style: ButtonStyle(
                                   padding: MaterialStateProperty.all(
-                                      EdgeInsets.all(
-                                          styleController.cardMargin / 1)),
+                                      EdgeInsets.all(style.cardMargin / 1)),
                                   overlayColor:
                                       MaterialStateProperty.resolveWith(
                                     (states) {
                                       return states
                                               .contains(MaterialState.pressed)
-                                          ? styleController.secondaryColor
+                                          ? style.secondaryColor
                                           : null;
                                     },
                                   ),
@@ -170,14 +170,13 @@ class SubscribeDialog extends StatelessWidget {
                                     borderRadius: BorderRadius.horizontal(
                                       right: Radius.circular(0),
                                       left: Radius.circular(
-                                          styleController.cardBorderRadius / 2),
+                                          style.cardBorderRadius / 2),
                                     ),
                                   ))),
                               onPressed: () async {
                                 couponLoading.value = true;
-                                Map<String, dynamic>? res =
-                                    await settingController
-                                        .calculateCoupon(params: {
+                                Map<String, dynamic>? res = await userController
+                                    .calculateCoupon(params: {
                                   'type': type,
                                   'coupon': coupon.value,
                                   'renew-month': renewMonth.value,
@@ -197,7 +196,7 @@ class SubscribeDialog extends StatelessWidget {
                                 children: [
                                   Text(
                                     "${'append'.tr}",
-                                    style: styleController.textMediumLightStyle,
+                                    style: style.textMediumLightStyle,
                                   ),
                                   couponLoading.value
                                       ? CupertinoActivityIndicator(
@@ -213,7 +212,7 @@ class SubscribeDialog extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(styleController.cardMargin / 2),
+                    padding: EdgeInsets.all(style.cardMargin / 2),
                     child: Visibility(
                         visible: loading.value,
                         child: LinearProgressIndicator(
@@ -226,12 +225,12 @@ class SubscribeDialog extends StatelessWidget {
                         child: TextButton(
                             style: ButtonStyle(
                                 padding: MaterialStateProperty.all(
-                                    EdgeInsets.all(styleController.cardMargin)),
+                                    EdgeInsets.all(style.cardMargin)),
                                 overlayColor: MaterialStateProperty.resolveWith(
                                   (states) {
                                     return states
                                             .contains(MaterialState.pressed)
-                                        ? styleController.secondaryColor
+                                        ? style.secondaryColor
                                         : null;
                                   },
                                 ),
@@ -240,8 +239,7 @@ class SubscribeDialog extends StatelessWidget {
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                   borderRadius: BorderRadius.all(
-                                    Radius.circular(
-                                        styleController.cardBorderRadius / 2),
+                                    Radius.circular(style.cardBorderRadius / 2),
                                   ),
                                 ))),
                             onPressed: () async {
@@ -274,14 +272,14 @@ class SubscribeDialog extends StatelessWidget {
                             },
                             child: Text(
                               "${'pay'.tr}",
-                              style: styleController.textMediumLightStyle
+                              style: style.textMediumLightStyle
                                   .copyWith(fontWeight: FontWeight.bold),
                             )),
                       ),
                     ],
                   ),
                   SizedBox(
-                    height: styleController.cardMargin / 2,
+                    height: style.cardMargin / 2,
                   ),
                   Row(
                     children: [
@@ -289,12 +287,12 @@ class SubscribeDialog extends StatelessWidget {
                         child: TextButton(
                             style: ButtonStyle(
                                 padding: MaterialStateProperty.all(
-                                    EdgeInsets.all(styleController.cardMargin)),
+                                    EdgeInsets.all(style.cardMargin)),
                                 overlayColor: MaterialStateProperty.resolveWith(
                                   (states) {
                                     return states
                                             .contains(MaterialState.pressed)
-                                        ? styleController.secondaryColor
+                                        ? style.secondaryColor
                                         : null;
                                   },
                                 ),
@@ -303,8 +301,7 @@ class SubscribeDialog extends StatelessWidget {
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                   borderRadius: BorderRadius.all(
-                                    Radius.circular(
-                                        styleController.cardBorderRadius / 2),
+                                    Radius.circular(style.cardBorderRadius / 2),
                                   ),
                                 ))),
                             onPressed: () async {
@@ -312,7 +309,7 @@ class SubscribeDialog extends StatelessWidget {
                             },
                             child: Text(
                               "${'cancel'.tr}",
-                              style: styleController.textMediumLightStyle
+                              style: style.textMediumLightStyle
                                   .copyWith(fontWeight: FontWeight.bold),
                             )),
                       ),

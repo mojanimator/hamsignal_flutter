@@ -1,0 +1,648 @@
+import 'dart:async';
+
+import 'package:animations/animations.dart';
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:hamsignal/controller/APIProvider.dart';
+import 'package:hamsignal/controller/AdvController.dart';
+import 'package:hamsignal/controller/AnimationController.dart';
+import 'package:hamsignal/controller/DocumentController.dart';
+import 'package:hamsignal/controller/FinderController.dart';
+import 'package:hamsignal/controller/LegalController.dart';
+import 'package:hamsignal/controller/LinkController.dart';
+import 'package:hamsignal/controller/EventController.dart';
+import 'package:hamsignal/controller/LocationController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/IAPPurchase.dart';
+import 'package:hamsignal/helper/helpers.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/translations.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/page/Contents.dart';
+import 'package:hamsignal/page/books.dart';
+import 'package:hamsignal/page/conductor_page.dart';
+import 'package:hamsignal/page/contracts.dart';
+import 'package:hamsignal/page/documents.dart';
+import 'package:hamsignal/page/finders.dart';
+import 'package:hamsignal/page/legals.dart';
+import 'package:hamsignal/page/locations.dart';
+import 'package:hamsignal/page/menu_drawer.dart';
+import 'package:hamsignal/page/shop.dart';
+import 'package:hamsignal/page/support_page.dart';
+import 'package:hamsignal/page/register_login_screen.dart';
+import 'package:hamsignal/page/splash_screen.dart';
+import 'package:hamsignal/page/user_profile.dart';
+import 'package:hamsignal/widget/AppBar.dart';
+import 'package:hamsignal/widget/banner_card.dart';
+import 'package:hamsignal/widget/loader.dart';
+import 'package:hamsignal/widget/shakeanimation.dart';
+import 'package:hamsignal/widget/slide_menu.dart';
+import 'package:hamsignal/widget/vitrin_advs.dart';
+import 'package:hamsignal/widget/vitrin_content.dart';
+import 'package:hamsignal/widget/vitrin_main.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:uni_links/uni_links.dart';
+
+import 'controller/BookController.dart';
+import 'controller/ContentController.dart';
+import 'controller/ContractController.dart';
+import 'controller/LawyerController.dart';
+import 'controller/LinkController.dart';
+import 'controller/LinkController.dart';
+import 'model/Category.dart';
+import 'page/lawyers.dart';
+import 'widget/vitrin_links.dart';
+
+Uri? deepLink;
+StreamSubscription? _sub;
+
+Future<void> initUniLinks() async {
+  // Platform messages may fail, so we use a try/catch PlatformException.
+  try {
+    deepLink = await getInitialUri(); //first run
+    _sub = uriLinkStream.listen((Uri? link) {
+      //when run app in background
+      // print("deep link resume: $deepLink");
+
+      if (link != null) deepLink = link;
+    }, onError: (err) {
+      // Handle exception by warning the user their action did not succeed
+    });
+    // print("deep link start: $deepLink");
+
+    // Parse the link and warn the user, if it is not correct,
+    // but keep in mind it could be `null`.
+  } on PlatformException {
+    // Handle exception by warning the user their action did not succeed
+    // return?
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
+  await initUniLinks();
+  MobileAds.instance.initialize();
+  runZonedGuarded(() async {
+    runApp(MyApp());
+  }, (error, stackTrace) async {
+    // print(error);
+    Helper.sendError({'message': "$error \n $stackTrace"});
+  });
+}
+
+class MyApp extends StatelessWidget {
+  MyApp({Key? key}) : super(key: key);
+  final style = Get.put(Style());
+
+  // This widget is the root of your application.
+
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      style.setSize(context.size?.width);
+    });
+    // GetStorage box = GetStorage();
+    // final translate = Get.put(MyTranslations());
+    // Get.updateLocale(const Locale('fa', 'IR'));
+
+    return GetMaterialApp(
+        onDispose: () {},
+        title: Variables.LABEL,
+        color: style.primaryColor,
+
+        // title: 'label'.tr,
+        debugShowCheckedModeBanner: false,
+        // defaultTransition: Transition.native,
+        translations: MyTranslations(),
+        locale: const Locale('fa', 'IR'),
+        fallbackLocale: const Locale('fa', 'IR'),
+        theme: style.theme,
+        home: MyHomePage());
+  }
+}
+
+class MyHomePage extends StatelessWidget {
+  final style = Get.find<Style>();
+  final apiProvider = Get.put(ApiProvider());
+  final helper = Get.put(Helper());
+
+  final settingController = Get.put(SettingController());
+  final animationController = Get.put(MyAnimationController());
+
+  MyHomePage({Key? key, title}) : super(key: key) {}
+
+  @override
+  Widget build(BuildContext context) {
+    // Get.updateLocale(const Locale('fa', 'IR'));
+
+    return Container(
+        decoration: BoxDecoration(
+          gradient: style.splashBackground,
+          image: DecorationImage(
+              image: AssetImage("assets/images/texture.jpg"),
+              repeat: ImageRepeat.repeat,
+              fit: BoxFit.scaleDown,
+              filterQuality: FilterQuality.medium,
+              colorFilter: ColorFilter.mode(
+                  style.primaryColor.withOpacity(.1),
+                  BlendMode.saturation),
+              opacity: .05),
+          // LinearGradient(
+          //   begin: Alignment.topCenter,
+          //   end: Alignment.bottomCenter,
+          //   colors: <Color>[
+          //     style.primaryMaterial[50]!,
+          //     style.primaryMaterial[50]!,
+          //     style.primaryMaterial[200]!,
+          //   ],
+          // ),
+        ),
+        child: settingController.obx(
+            (setting) => Get.find<UserController>().obx((user) {
+                  Get.put(LawyerController());
+                  Get.put(ContentController());
+                  Get.put(LinkController());
+                  Get.put(LocationController());
+                  Get.put(LegalController());
+                  Get.put(BookController());
+                  Get.put(DocumentController());
+                  Get.put(ContractController());
+                  Get.put(FinderController());
+
+                  return Scaffold(
+                    resizeToAvoidBottomInset: false,
+                    backgroundColor: Colors.transparent,
+                    extendBody: true,
+                    // appBar: AppBar(title: Text('label'.tr)),
+                    bottomNavigationBar: ConvexAppBar.badge(
+                      {
+                        3: true
+                            ? Center()
+                            : Stack(children: [
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(style
+                                                  .cardBorderRadius))),
+                                      padding: EdgeInsets.all(2),
+                                      child: Text(
+                                        '3+',
+                                        style:
+                                            style.textSmallLightStyle,
+                                      )),
+                                )
+                              ])
+                      },
+
+                      backgroundColor: Colors.white,
+                      color:
+                          style.primaryMaterial[500]!.withOpacity(.9),
+                      activeColor: style.primaryMaterial[800],
+                      height: style.bottomNavigationBarHeight,
+                      // curveSize: 100,
+                      style: TabStyle.flip,
+                      elevation: 5,
+                      // cornerRadius: 64,
+                      items: [
+                        TabItem(icon: Icons.person_sharp, title: 'profile'.tr),
+                        TabItem(icon: Icons.search, title: 'search'.tr),
+                        TabItem(icon: Icons.home, title: 'label'.tr),
+                        TabItem(
+                            icon: Icons.headset_mic_rounded,
+                            title: 'support'.tr),
+                        TabItem(icon: Icons.shopping_cart, title: 'shop'.tr),
+                      ],
+
+                      initialActiveIndex: settingController.currentPageIndex,
+                      controller: settingController.bottomSheetController,
+                      //optional, default as 0
+                      onTap: (int i) {
+                        settingController.currentPageIndex = i;
+                        animationController.closeDrawer();
+                      },
+                    ),
+
+                    body: PageTransitionSwitcher(
+                      child: <Widget>[
+                        UserProfilePage(),
+                        FindersPage(),
+                        MainPage(),
+                        SupportPage(),
+                        ShopPage(),
+                      ][settingController.currentPageIndex],
+                      transitionBuilder: (
+                        Widget child,
+                        Animation<double> primaryAnimation,
+                        Animation<double> secondaryAnimation,
+                      ) {
+                        return FadeScaleTransition(
+                          animation: primaryAnimation,
+
+                          // animation: Tween(begin: 0.0, end: 1.0).animate(
+                          // CurvedAnimation(
+                          //   parent: animationController.bottomNavigationBarController,
+                          //   curve: Curves.ease,
+                          // ),),
+                          // secondaryAnimation: secondaryAnimation,
+                          child: child,
+                        );
+                      },
+                    ),
+                  );
+                },
+                    onLoading: SplashScreen(
+                      isLoading: true,
+                    ),
+                    onEmpty: SplashScreen(),
+                    onError: (msg) => RegisterLoginScreen(error: msg)),
+            onLoading: SplashScreen(
+              isLoading: true,
+            ),
+            onEmpty: SplashScreen()));
+  }
+}
+
+class MainPage extends StatelessWidget {
+  final style = Get.find<Style>();
+
+  final apiProvider = Get.find<ApiProvider>();
+  final animationController = Get.find<MyAnimationController>();
+  final settingController = Get.find<SettingController>();
+  final contentController = Get.find<ContentController>();
+  final lawyerController = Get.find<LawyerController>();
+  final linkController = Get.find<LinkController>();
+
+  GlobalKey<SideMenuState> _sideMenuKey =
+      Get.put(GlobalKey<SideMenuState>(debugLabel: 'sideMenuKey'));
+
+  MainPage() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      settingController.resolveDeepLink(deepLink);
+      deepLink = null;
+      settingController.showUpdateDialogIfRequired();
+      //
+      // Future.delayed(
+      //   Duration(seconds: 3),
+      //   () => Get.to(LawyersPage( )),
+      // );
+    });
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   final _state = _sideMenuKey.currentState;
+    //   if (_state!.isOpened) {
+    //     _state.closeSideMenu();
+    //     animationController.closeDrawer();
+    //   } else {
+    //     _state.openSideMenu();
+    //     animationController.openDrawer();
+    //     // _animationButtonController.reverse();
+    //   }
+    // });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SideMenu(
+      key: _sideMenuKey,
+      inverse: true,
+      closeIcon: Icon(
+        Icons.close,
+        color: style.primaryColor,
+      ),
+      radius: BorderRadius.circular(style.cardBorderRadius),
+      closeDrawer: animationController.closeDrawer,
+      menu: DrawerMenu(onTap: () {
+        final _state = _sideMenuKey.currentState;
+        if (_state!.isOpened) {
+          _state.closeSideMenu();
+          animationController.closeDrawer();
+        } else {
+          _state.openSideMenu();
+          animationController.openDrawer();
+          // _animationButtonController.reverse();
+        }
+      }),
+      background: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: style.mainGradientBackground,
+          image: DecorationImage(
+              image: AssetImage("assets/images/texture.jpg"),
+              repeat: ImageRepeat.repeat,
+              fit: BoxFit.scaleDown,
+              filterQuality: FilterQuality.medium,
+              colorFilter: ColorFilter.mode(
+                  style.secondaryColor.withOpacity(.2),
+                  BlendMode.colorBurn),
+              opacity: .05),
+        ),
+        child: MyAppBar(
+          child: RefreshIndicator(
+            onRefresh: refreshAll,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              physics: BouncingScrollPhysics(),
+              children: [
+                //advs vitrin
+                if (settingController.adv.type['native'] == null ||
+                    settingController.adv.advs.length == 0)
+                  VitrinContent(
+                      margin: EdgeInsets.symmetric(
+                    horizontal: style.cardMargin /
+                        (style.isBigSize ? 2 : 1),
+                  )),
+                if (!(settingController.adv.type['native'] == null ||
+                    settingController.adv.advs.length == 0))
+                  // blog vitrin
+                  VitrinAdv(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: style.cardMargin /
+                            (style.isBigSize ? 2 : 1),
+                      ),
+                      failedWidget: VitrinContent(
+                          margin: EdgeInsets.symmetric(
+                        horizontal: style.cardMargin /
+                            (style.isBigSize ? 2 : 1),
+                      ))),
+                LinkVitrin(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: style.cardMargin /
+                        (style.isBigSize ? 2 : 1),
+                    vertical: style.cardMargin / 2,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: BannerCard(
+                          margin: EdgeInsets.symmetric(
+                            horizontal: style.cardMargin,
+                            vertical: style.cardMargin / 2,
+                          ).copyWith(
+                              right:
+                                  style.cardMargin / (true ? 2 : 1)),
+                          background: 'back7.png',
+                          title: 'news'.tr,
+                          // titleColor: style.primaryColor,
+                          icon: 'news.gif',
+                          onClick: () => Get.to(ContentsPage())),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: BannerCard(
+                          borderRadius: BorderRadius.horizontal(
+                            left: Radius.circular(
+                                style.cardBorderRadius / 4),
+                            right: Radius.circular(
+                                style.cardBorderRadius),
+                          ),
+                          margin: EdgeInsets.symmetric(
+                            horizontal: style.cardMargin,
+                            vertical: style.cardMargin / 2,
+                          ).copyWith(
+                              left:
+                                  style.cardMargin / (true ? 2 : 1)),
+                          background: 'back5.png',
+                          title:
+                              "${'lawyer'.tr}${true ? '\n' : '/'}${'expert'.tr}",
+                          icon: 'lawyer.gif',
+                          onClick: () => Get.to(LawyersPage())),
+                    ),
+                    if (true)
+                      Expanded(
+                        child: BannerCard(
+                            borderRadius: BorderRadius.horizontal(
+                              right: Radius.circular(
+                                  style.cardBorderRadius / 4),
+                              left: Radius.circular(
+                                  style.cardBorderRadius),
+                            ),
+                            margin: EdgeInsets.symmetric(
+                              horizontal: style.cardMargin,
+                              vertical: style.cardMargin / 2,
+                            ).copyWith(
+                                right: style.cardMargin /
+                                    (true ? 2 : 1)),
+                            background: 'back3.png',
+                            title: 'search_legal_locations'.tr,
+                            icon: 'location.gif',
+                            onClick: () => Get.to(LocationsPage())),
+                      ),
+                  ],
+                ),
+                if (!true)
+                  BannerCard(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: style.cardMargin,
+                        vertical: style.cardMargin / 2,
+                      ),
+                      background: 'back3.png',
+                      title: 'search_legal_locations'.tr,
+                      icon: 'location.gif',
+                      onClick: () => Get.to(LocationsPage())),
+                Row(
+                  children: [
+                    Expanded(
+                      child: BannerCard(
+                          borderRadius: BorderRadius.horizontal(
+                            left: Radius.circular(
+                                style.cardBorderRadius / 4),
+                            right: Radius.circular(
+                                style.cardBorderRadius),
+                          ),
+                          margin: EdgeInsets.symmetric(
+                            horizontal: style.cardMargin,
+                            vertical: style.cardMargin / 2,
+                          ).copyWith(
+                              left:
+                                  style.cardMargin / (true ? 2 : 1)),
+                          background: 'back2.png',
+                          title:
+                              '${"dadkhast".tr}${true ? '\n' : '/'}${"layehe".tr}',
+                          icon: 'hammer.gif',
+                          onClick: () => Get.to(LegalsPage())),
+                    ),
+                    if (true)
+                      Expanded(
+                        child: BannerCard(
+                            borderRadius: BorderRadius.horizontal(
+                              right: Radius.circular(
+                                  style.cardBorderRadius / 4),
+                              left: Radius.circular(
+                                  style.cardBorderRadius),
+                            ),
+                            margin: EdgeInsets.symmetric(
+                              horizontal: style.cardMargin,
+                              vertical: style.cardMargin / 2,
+                            ).copyWith(
+                                right: style.cardMargin /
+                                    (true ? 2 : 1)),
+                            background: 'back4.png',
+                            title: 'rules'.tr,
+                            icon: 'justice.gif',
+                            onClick: () => Get.to(BooksPage())),
+                      ),
+                  ],
+                ),
+                if (!true)
+                  BannerCard(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: style.cardMargin,
+                        vertical: style.cardMargin / 2,
+                      ),
+                      background: 'back4.png',
+                      title: 'rules'.tr,
+                      icon: 'justice.gif',
+                      onClick: () => Get.to(BooksPage())),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: BannerCard(
+                          borderRadius: BorderRadius.horizontal(
+                            left: Radius.circular(
+                                style.cardBorderRadius / 4),
+                            right: Radius.circular(
+                                style.cardBorderRadius),
+                          ),
+                          margin: EdgeInsets.symmetric(
+                            horizontal: style.cardMargin,
+                            vertical: style.cardMargin / 2,
+                          ).copyWith(
+                              left:
+                                  style.cardMargin / (true ? 2 : 1)),
+                          background: 'back5.png',
+                          title: '${"votes".tr}',
+                          icon: 'vote.gif',
+                          onClick: () => Get.to(DocumentsPage(
+                              colors: style.cardVotesColors,
+                              categoryType: CategoryRelate.Votes))),
+                    ),
+                    if (true)
+                      Expanded(
+                        child: BannerCard(
+                            borderRadius: BorderRadius.horizontal(
+                              right: Radius.circular(
+                                  style.cardBorderRadius / 4),
+                              left: Radius.circular(
+                                  style.cardBorderRadius),
+                            ),
+                            margin: EdgeInsets.symmetric(
+                              horizontal: style.cardMargin,
+                              vertical: style.cardMargin / 2,
+                            ).copyWith(
+                                right: style.cardMargin /
+                                    (true ? 2 : 1)),
+                            background: 'back3.png',
+                            title: 'opinions'.tr,
+                            icon: 'vote.gif',
+                            onClick: () => Get.to(DocumentsPage(
+                                colors: style.cardOpinionsColors,
+                                categoryType: CategoryRelate.Opinions))),
+                      ),
+                  ],
+                ),
+                if (!true)
+                  BannerCard(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: style.cardMargin,
+                        vertical: style.cardMargin / 2,
+                      ),
+                      background: 'back3.png',
+                      title: 'opinions'.tr,
+                      icon: 'vote.gif',
+                      onClick: () => Get.to(DocumentsPage(
+                          colors: style.cardOpinionsColors,
+                          categoryType: CategoryRelate.Opinions))),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: BannerCard(
+                          borderRadius: BorderRadius.horizontal(
+                            left: Radius.circular(
+                                style.cardBorderRadius / 4),
+                            right: Radius.circular(
+                                style.cardBorderRadius),
+                          ),
+                          margin: EdgeInsets.symmetric(
+                            horizontal: style.cardMargin,
+                            vertical: style.cardMargin / 2,
+                          ).copyWith(
+                              left:
+                                  style.cardMargin / (true ? 2 : 1)),
+                          background: 'back2.png',
+                          title: '${"conventions".tr}',
+                          icon: 'convention.gif',
+                          onClick: () => Get.to(DocumentsPage(
+                              colors: style.cardConventionsColors,
+                              categoryType: CategoryRelate.Conventions))),
+                    ),
+                    if (true)
+                      Expanded(
+                        child: BannerCard(
+                            borderRadius: BorderRadius.horizontal(
+                              right: Radius.circular(
+                                  style.cardBorderRadius / 4),
+                              left: Radius.circular(
+                                  style.cardBorderRadius),
+                            ),
+                            margin: EdgeInsets.symmetric(
+                              horizontal: style.cardMargin,
+                              vertical: style.cardMargin / 2,
+                            ).copyWith(
+                                right: style.cardMargin /
+                                    (true ? 2 : 1)),
+                            background: 'back4.png',
+                            title: 'contracts'.tr,
+                            icon: 'contract.gif',
+                            onClick: () => Get.to(ContractsPage())),
+                      ),
+                  ],
+                ),
+                if (!true)
+                  BannerCard(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: style.cardMargin /
+                            (style.isBigSize ? 2 : 1),
+                        vertical: style.cardMargin / 2,
+                      ),
+                      background: 'back4.png',
+                      title: 'contracts'.tr,
+                      icon: 'contract.gif',
+                      onClick: () => Get.to(ContractsPage())),
+
+                //blogs vitrin
+
+                SizedBox(
+                  height: style.cardVitrinHeight / 2,
+                )
+              ],
+            ),
+          ),
+          sideMenuKey: _sideMenuKey,
+        ),
+      ),
+    );
+  }
+
+  Future<void> refreshAll() {
+    settingController.refresh();
+    // blogController.getData();
+
+    return Future.value(null);
+  }
+}

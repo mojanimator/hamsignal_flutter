@@ -1,5 +1,5 @@
-import 'package:dabel_adl/controller/APIController.dart';
-import 'package:dabel_adl/controller/LocationController.dart';
+import 'package:hamsignal/controller/APIController.dart';
+import 'package:hamsignal/controller/LocationController.dart';
 import 'package:get/get.dart';
 
 class LocationFilterController extends APIController<bool> {

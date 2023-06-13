@@ -9,13 +9,13 @@ class ShakeWidget extends StatefulWidget {
   ShakeWidget({
     Key? key,
     required this.child,
-    this.shakeOffset = 3,
+    this.shakeOffset = 5,
     this.shakeCount = 1,
-    bool this.shakeOnRebuild = false,
-    this.shakeDuration = const Duration(milliseconds: 300),
+    bool this.shakeOnRebuild = true,
+    this.shakeDuration = const Duration(milliseconds: 500),
     bool this.repeat = false,
   }) {
-    this.shakeDuration = Duration(milliseconds: Random().nextInt(400) + 100);
+    this.shakeDuration = Duration(milliseconds: Random().nextInt(500) + 200);
   }
 
   final Widget child;
@@ -52,7 +52,8 @@ class ShakeWidgetState extends AnimationControllerState<ShakeWidget> {
 
   void shake() {
     if (animationController.value == 0 && widget.shakeOnRebuild) {
-      animationController.forward();
+
+      animationController.forward( from: .2 );
     }
   }
 
@@ -68,10 +69,9 @@ class ShakeWidgetState extends AnimationControllerState<ShakeWidget> {
       builder: (context, child) {
         final sineValue =
             sin(widget.shakeCount * pi * (animationController.value));
-
         return Transform.translate(
           // 4. apply a translation as a function of the animation value
-          offset: Offset(0, sineValue * widget.shakeOffset),
+          offset: Offset( 0, sineValue * widget.shakeOffset),
           // 5. use the child widget
           child: child,
         );

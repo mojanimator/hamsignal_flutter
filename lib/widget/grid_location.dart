@@ -1,13 +1,13 @@
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dabel_adl/controller/LocationController.dart';
-import 'package:dabel_adl/controller/SettingController.dart';
-import 'package:dabel_adl/controller/UserController.dart';
-import 'package:dabel_adl/helper/styles.dart';
-import 'package:dabel_adl/helper/variables.dart';
-import 'package:dabel_adl/model/Location.dart';
-import 'package:dabel_adl/widget/shakeanimation.dart';
+import 'package:hamsignal/controller/LocationController.dart';
+import 'package:hamsignal/controller/SettingController.dart';
+import 'package:hamsignal/controller/UserController.dart';
+import 'package:hamsignal/helper/styles.dart';
+import 'package:hamsignal/helper/variables.dart';
+import 'package:hamsignal/model/Location.dart';
+import 'package:hamsignal/widget/shakeanimation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,7 +16,7 @@ import '../page/lawyer_details.dart';
 
 class GridLocation extends StatelessWidget {
   final LocationController controller;
-  final Style styleController;
+  final Style style;
   final SettingController settingController;
   final UserController userController;
   late Rx<Location> data;
@@ -30,13 +30,13 @@ class GridLocation extends StatelessWidget {
     required data,
     required this.controller,
     required this.settingController,
-    required this.styleController,
+    required this.style,
     required this.userController,
     MaterialColor? colors,
   }) {
     this.data = Rx<Location>(data);
-    this.colors = colors ?? styleController.cardLocationColors;
-    titleStyle = styleController.textMediumStyle.copyWith(color: this.colors[900]);
+    this.colors = colors ?? style.cardLocationColors;
+    titleStyle = style.textMediumStyle.copyWith(color: this.colors[900]);
   }
 
   @override
@@ -44,35 +44,35 @@ class GridLocation extends StatelessWidget {
     return Obx(
       () => ShakeWidget(
         child: Container(
-          // height: styleController.gridHeight,
+          // height: style.gridHeight,
           child: Card(
               elevation: 20,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(styleController.cardBorderRadius),
+                    top: Radius.circular(style.cardBorderRadius),
                     bottom:
-                        Radius.circular(styleController.cardBorderRadius / 4)),
+                        Radius.circular(style.cardBorderRadius / 4)),
               ),
               shadowColor: colors[500]?.withOpacity(.7),
               margin: EdgeInsets.symmetric(
-                  horizontal: styleController.cardMargin,
-                  vertical: styleController.cardMargin / 4),
+                  horizontal: style.cardMargin,
+                  vertical: style.cardMargin / 4),
               color: colors[50]?.withOpacity(1),
               child: ClipRRect(
                 borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(styleController.cardBorderRadius),
+                    top: Radius.circular(style.cardBorderRadius),
                     bottom:
-                        Radius.circular(styleController.cardBorderRadius / 4)),
+                        Radius.circular(style.cardBorderRadius / 4)),
                 child: Container(
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage("assets/images/back1.png"),
+                          image: AssetImage("assets/images/back.png"),
                           fit: BoxFit.cover)),
                   child: InkWell(
                     borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(styleController.cardBorderRadius),
+                        top: Radius.circular(style.cardBorderRadius),
                         bottom: Radius.circular(
-                            styleController.cardBorderRadius / 4)),
+                            style.cardBorderRadius / 4)),
                     splashColor: Colors.white,
                     onTap: () => controller.openMap(
                         latitude: data.value.lat,
@@ -81,7 +81,7 @@ class GridLocation extends StatelessWidget {
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
                       child: Padding(
-                        padding: EdgeInsets.all(styleController.cardMargin / 4),
+                        padding: EdgeInsets.all(style.cardMargin / 4),
                         child: IntrinsicHeight(
                           child: Row(
                             children: [
@@ -92,8 +92,8 @@ class GridLocation extends StatelessWidget {
                                   child: Center(
                                       child: Icon(
                                     Icons.location_on_rounded,
-                                    color: colors[50],
-                                    size: styleController.imageHeight / 3,
+                                    color: colors[200],
+                                    size: style.imageHeight / 3,
                                   )),
                                 ),
                               ),
@@ -103,22 +103,21 @@ class GridLocation extends StatelessWidget {
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
                                         horizontal:
-                                            styleController.cardMargin / 2),
-                                    child: Card(
+                                            style.cardMargin / 2),
+                                    child: Container(
                                       margin: EdgeInsets.symmetric(
                                           vertical:
-                                              styleController.cardMargin / 4),
-                                      color: colors[50],
-                                      elevation: 10,
-                                      shadowColor: colors[500]?.withOpacity(.5),
-                                      shape: RoundedRectangleBorder(
+                                              style.cardMargin / 4),
+
+
+                                      decoration:   BoxDecoration(color:Colors.white,
                                         borderRadius: BorderRadius.all(
                                           Radius.circular(
-                                            styleController.cardBorderRadius,
+                                            style.cardBorderRadius,
                                           ),
                                         ).copyWith(
                                             topLeft: Radius.circular(
-                                          styleController.cardBorderRadius,
+                                          style.cardBorderRadius,
                                         )),
                                       ),
                                       child: Column(
@@ -127,42 +126,42 @@ class GridLocation extends StatelessWidget {
                                         children: [
                                           Container(
                                             padding: EdgeInsets.all(
-                                                styleController.cardMargin),
+                                                style.cardMargin),
                                             decoration: BoxDecoration(
                                               borderRadius: BorderRadius.only(
                                                 topLeft: Radius.circular(
-                                                  styleController
+                                                  style
                                                       .cardBorderRadius,
                                                 ),
                                                 topRight: Radius.circular(
-                                                  styleController
+                                                  style
                                                           .cardBorderRadius /
                                                       2,
                                                 ),
                                               ),
-                                              color: colors[500],
+                                              color: colors[50],
                                             ),
                                             child: Text(
                                               "${data.value.title}",
                                               textAlign: TextAlign.center,
-                                              style: styleController
+                                              style: style
                                                   .textMediumLightStyle
                                                   .copyWith(
-                                                      color: colors[50],
+                                                      color: colors[500],
                                                       fontWeight:
                                                           FontWeight.bold),
                                             ),
                                           ),
                                           Container(
                                             padding: EdgeInsets.all(
-                                                styleController.cardMargin),
+                                                style.cardMargin*2),
                                             decoration: BoxDecoration(
                                               borderRadius: BorderRadius.vertical(
                                                   bottom: Radius.circular(
-                                                      styleController
+                                                      style
                                                               .cardBorderRadius /
                                                           4)),
-                                              color: colors[50],
+                                              color: Colors.white,
                                             ),
                                             width: double.infinity,
                                             child: Center(

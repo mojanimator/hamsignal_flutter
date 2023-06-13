@@ -78,8 +78,8 @@ class ApiProvider extends GetConnect {
     // if (url.startsWith('https:'))
     //   url = url.replaceFirst('https:', 'http:');
     //
-    // print(url);
-    // print(response.bodyString);
+    print(url);
+    print(response.bodyString);
     // //
     // print(response.status.code);
     //{"message":"Unauthenticated."}
@@ -89,7 +89,15 @@ class ApiProvider extends GetConnect {
       return Future.value({
         'user': null,
         'error': (response.body is List ? response.body[0] : null) ??
-            response.body['errors'] ??
+            (response.body['errors'] != null
+                ? response.body['errors'] is Map
+                    ? (response.body['errors'].values.first is List
+                        ? response.body['errors'].values.first[0]
+                        : response.body['errors'].values.first)
+                    : (response.body['errors'] is List
+                        ? response.body['errors'][0]
+                        : null)
+                : null) ??
             response.body['message']
       });
     } else if (response.status.hasError) {

@@ -1,5 +1,5 @@
-import 'package:dabel_adl/controller/APIController.dart';
-import 'package:dabel_adl/controller/LegalController.dart';
+import 'package:hamsignal/controller/APIController.dart';
+import 'package:hamsignal/controller/LegalController.dart';
 import 'package:get/get.dart';
 
 class LegalFilterController extends APIController<bool> {
